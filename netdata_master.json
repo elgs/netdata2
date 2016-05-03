@@ -1,0 +1,11 @@
+{
+	"data_nodes":[],
+	"api_nodes":[],
+	"apps":[],
+
+	"queries":[],
+	"jobs":[],
+	"local_interceptors":[],
+	"remote_interceptors":[],
+	"tokens":[]
+}

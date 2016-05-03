@@ -1,0 +1,11 @@
+{
+  "enable_http": true,
+  "host_http": "[::]",
+  "port_http": 1103,
+  "enable_https": true,
+  "host_https": "[::]",
+  "port_https": 2015,
+  "cert_file": "/Users/elgs/ownCloud/certs/netdata.io/star.netdata.io/star.netdata.io.all.crt",
+  "key_file": "/Users/elgs/ownCloud/certs/netdata.io/star.netdata.io/star.netdata.io.key",
+  "slave_of": ""
+}
