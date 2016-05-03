@@ -15,6 +15,7 @@ import (
 	"github.com/elgs/gojq"
 	"github.com/elgs/gorest2"
 	"github.com/gorilla/websocket"
+	"github.com/satori/go.uuid"
 )
 
 type WsCommand struct {
@@ -23,6 +24,7 @@ type WsCommand struct {
 	Meta map[string]interface{}
 }
 
+var id string
 var slaveOf string
 var enableHttp bool = true
 var portHttp int
@@ -34,7 +36,7 @@ var certFile string
 var keyFile string
 var confFile string
 var dataFile string
-var wsConns = make(map[*websocket.Conn]bool)
+var wsConns = make(map[string]*websocket.Conn)
 
 func loadConfigs(c *cli.Context) {
 	// read config file
@@ -46,6 +48,9 @@ func loadConfigs(c *cli.Context) {
 	loadConfig("/etc/netdata/netdata.json", c)
 	loadConfig(usr.HomeDir+"/.netdata/netdata.json", c)
 	loadConfig(confFile, c)
+	if strings.TrimSpace(id) == "" {
+		id = strings.Replace(uuid.NewV4().String(), "-", "", -1)
+	}
 }
 
 func loadConfig(file string, c *cli.Context) {
@@ -53,6 +58,12 @@ func loadConfig(file string, c *cli.Context) {
 	if err != nil {
 		//ignore
 		return
+	}
+	if !c.IsSet("id") {
+		v, err := jqConf.QueryToString("id")
+		if err == nil {
+			id = v
+		}
 	}
 	if !c.IsSet("slaveof") {
 		v, err := jqConf.QueryToString("slaveof")
@@ -147,6 +158,11 @@ func main() {
 	}
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
+			Name:        "id, i",
+			Usage:       "unique node id, a random hash will be generated if not specified",
+			Destination: &id,
+		},
+		cli.StringFlag{
 			Name:        "slaveof, m",
 			Usage:       "master node url, format: host:port. master if empty",
 			Destination: &slaveOf,
@@ -230,7 +246,7 @@ func main() {
 
 							regCommand := WsCommand{
 								Type: "Register",
-								Data: "Me",
+								Data: id,
 							}
 
 							// Register
@@ -246,7 +262,6 @@ func main() {
 									http.Error(w, err.Error(), http.StatusInternalServerError)
 									return
 								}
-								wsConns[conn] = true
 
 								go func(c *websocket.Conn) {
 									defer conn.Close()
@@ -255,11 +270,19 @@ func main() {
 										if err != nil {
 											fmt.Println(err)
 											c.Close()
-											delete(wsConns, conn)
+											for k, v := range wsConns {
+												if v == conn {
+													delete(wsConns, k)
+													break
+												}
+											}
 											break
 										}
 										wsCommand := &WsCommand{}
 										json.Unmarshal(message, wsCommand)
+										if wsCommand.Type == "Register" {
+											wsConns[wsCommand.Data] = conn
+										}
 										fmt.Println(wsCommand)
 									}
 								}(conn)
