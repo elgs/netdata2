@@ -13,6 +13,7 @@ import (
 	"github.com/codegangsta/cli"
 	"github.com/elgs/gojq"
 	"github.com/elgs/gorest2"
+	"github.com/gorilla/websocket"
 )
 
 var slaveOf string
@@ -26,7 +27,7 @@ var certFile string
 var keyFile string
 var confFile string
 var dataFile string
-var shutdownPort int
+var wsConns = make(map[*websocket.Conn]bool)
 
 func loadConfigs(c *cli.Context) {
 	// read config file
@@ -52,10 +53,58 @@ func loadConfig(file string, c *cli.Context) {
 			slaveOf = v
 		}
 	}
+	if !c.IsSet("port_http") {
+		v, err := jqConf.QueryToInt64("port_http")
+		if err == nil {
+			portHttp = int(v)
+		}
+	}
 	if !c.IsSet("enable_http") {
 		v, err := jqConf.QueryToBool("enable_http")
 		if err == nil {
 			enableHttp = v
+		}
+	}
+	if !c.IsSet("enable_https") {
+		v, err := jqConf.QueryToBool("enable_https")
+		if err == nil {
+			enableHttps = v
+		}
+	}
+	if !c.IsSet("port_https") {
+		v, err := jqConf.QueryToInt64("port_https")
+		if err == nil {
+			portHttps = int(v)
+		}
+	}
+	if !c.IsSet("host_https") {
+		v, err := jqConf.QueryToString("host_https")
+		if err == nil {
+			hostHttps = v
+		}
+	}
+	if !c.IsSet("cert_file") {
+		v, err := jqConf.QueryToString("cert_file")
+		if err == nil {
+			certFile = v
+		}
+	}
+	if !c.IsSet("key_file") {
+		v, err := jqConf.QueryToString("key_file")
+		if err == nil {
+			keyFile = v
+		}
+	}
+	if !c.IsSet("conf_file") {
+		v, err := jqConf.QueryToString("conf_file")
+		if err == nil {
+			confFile = v
+		}
+	}
+	if !c.IsSet("data_file") {
+		v, err := jqConf.QueryToString("data_file")
+		if err == nil {
+			dataFile = v
 		}
 	}
 }
@@ -65,14 +114,21 @@ func loadMasterData(file string) {}
 func main() {
 
 	sigs := make(chan os.Signal, 1)
+	wsDrop := make(chan bool, 1)
 	done := make(chan bool, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
-		sig := <-sigs
-		fmt.Println()
-		fmt.Println(sig)
-		// cleanup code here
-		done <- true
+		for {
+			select {
+			case sig := <-sigs:
+				fmt.Println()
+				fmt.Println(sig)
+				// cleanup code here
+				done <- true
+			case <-wsDrop:
+				fmt.Println("ws dropped.")
+			}
+		}
 	}()
 
 	app := cli.NewApp()
@@ -85,7 +141,7 @@ func main() {
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name:        "slaveof, m",
-			Usage:       "master node url, format: https://host:port. master if empty",
+			Usage:       "master node url, format: host:port. master if empty",
 			Destination: &slaveOf,
 		},
 		cli.IntFlag{
@@ -131,12 +187,6 @@ func main() {
 			Usage:       "master data file path, ignored by slave nodes, search path: ~/.netdata/netdata_master.json, /etc/netdata/netdata_master.json",
 			Destination: &dataFile,
 		},
-		cli.IntFlag{
-			Name:        "shutdown_port, x",
-			Value:       2014,
-			Usage:       "port listening shutdown command",
-			Destination: &shutdownPort,
-		},
 	}
 
 	app.Commands = []cli.Command{
@@ -148,14 +198,58 @@ func main() {
 				{
 					Name:  "start",
 					Usage: "start serviec",
+					Flags: app.Flags,
 					Action: func(c *cli.Context) {
 						loadConfigs(c)
 						if len(strings.TrimSpace(slaveOf)) > 0 {
 							// load data from master if slave
-							fmt.Println("slaveOf:", slaveOf)
+							c, _, err := websocket.DefaultDialer.Dial("wss://"+slaveOf+"/sys/ws", nil)
+							if err != nil {
+								fmt.Println(err)
+								wsDrop <- true
+							}
+							go func() {
+								defer c.Close()
+								defer func() { wsDrop <- true }()
+								for {
+									_, message, err := c.ReadMessage()
+									if err != nil {
+										log.Println("read:", err)
+										return
+									}
+									log.Printf("recv: %s", message)
+								}
+							}()
+
+							// Register
+							if err := c.WriteJSON("hello"); err != nil {
+								fmt.Println(err)
+								wsDrop <- true
+							}
 						} else {
 							// load data from data file if master
-							fmt.Println("master")
+							gorest2.RegisterHandler("/sys/ws", func(w http.ResponseWriter, r *http.Request) {
+								conn, err := websocket.Upgrade(w, r, nil, 1024, 1024)
+								if err != nil {
+									http.Error(w, err.Error(), http.StatusInternalServerError)
+									return
+								}
+								wsConns[conn] = true
+
+								go func(c *websocket.Conn) {
+									defer conn.Close()
+									for {
+										_, message, err := c.ReadMessage()
+										if err != nil {
+											fmt.Println(err)
+											c.Close()
+											delete(wsConns, conn)
+											break
+										}
+										log.Printf("recv: %s", message)
+									}
+								}(conn)
+							})
 						}
 						// serve
 						gorest2.RegisterHandler("/sys/shutdown", func(w http.ResponseWriter, r *http.Request) {
