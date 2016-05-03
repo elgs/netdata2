@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -15,6 +16,12 @@ import (
 	"github.com/elgs/gorest2"
 	"github.com/gorilla/websocket"
 )
+
+type WsCommand struct {
+	Type string
+	Data string
+	Meta map[string]interface{}
+}
 
 var slaveOf string
 var enableHttp bool = true
@@ -221,8 +228,13 @@ func main() {
 								}
 							}()
 
+							regCommand := WsCommand{
+								Type: "Register",
+								Data: "Me",
+							}
+
 							// Register
-							if err := c.WriteJSON("hello"); err != nil {
+							if err := c.WriteJSON(regCommand); err != nil {
 								fmt.Println(err)
 								wsDrop <- true
 							}
@@ -246,7 +258,9 @@ func main() {
 											delete(wsConns, conn)
 											break
 										}
-										log.Printf("recv: %s", message)
+										wsCommand := &WsCommand{}
+										json.Unmarshal(message, wsCommand)
+										fmt.Println(wsCommand)
 									}
 								}(conn)
 							})
