@@ -282,6 +282,11 @@ func main() {
 										json.Unmarshal(message, wsCommand)
 										if wsCommand.Type == "Register" {
 											wsConns[wsCommand.Data] = conn
+
+											masterData := MasterData{}
+											if err := conn.WriteJSON(masterData); err != nil {
+												fmt.Println(err)
+											}
 										}
 										fmt.Println(wsCommand)
 									}
