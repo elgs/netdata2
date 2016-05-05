@@ -44,9 +44,14 @@ func loadConfigs(c *cli.Context) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	pwd, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	loadConfig("/etc/netdata/netdata.json", c)
 	loadConfig(usr.HomeDir+"/.netdata/netdata.json", c)
+	loadConfig(pwd+"/netdata.json", c)
 	loadConfig(confFile, c)
 	if strings.TrimSpace(id) == "" {
 		id = strings.Replace(uuid.NewV4().String(), "-", "", -1)
