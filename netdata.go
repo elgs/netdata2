@@ -18,12 +18,6 @@ import (
 	"github.com/satori/go.uuid"
 )
 
-type WsCommand struct {
-	Type string
-	Data string
-	Meta map[string]interface{}
-}
-
 var id string
 var slaveOf string
 var enableHttp bool = true
@@ -37,6 +31,8 @@ var keyFile string
 var confFile string
 var dataFile string
 var wsConns = make(map[string]*websocket.Conn)
+
+var masterData MasterData
 
 func loadConfigs(c *cli.Context) {
 	// read config file
@@ -288,7 +284,6 @@ func main() {
 										if wsCommand.Type == "Register" {
 											wsConns[wsCommand.Data] = conn
 
-											masterData := MasterData{}
 											if err := conn.WriteJSON(masterData); err != nil {
 												fmt.Println(err)
 											}

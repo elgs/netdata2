@@ -1,7 +1,14 @@
 // master_data
 package main
 
+type WsCommand struct {
+	Type string
+	Data string
+	Meta map[string]interface{}
+}
+
 type MasterData struct {
+	Version            int64
 	DataNodes          []DataNode
 	ApiNodes           []ApiNode
 	Apps               []App
