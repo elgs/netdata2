@@ -9,7 +9,7 @@ import (
 	"github.com/elgs/gorest2"
 )
 
-func serve() {
+func serve(service *CliNetDataService) {
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
@@ -65,19 +65,19 @@ func serve() {
 	//	_ = handler
 	http.HandleFunc("/", handler)
 
-	if enableHttp {
+	if service.EnableHttp {
 		go func() {
-			fmt.Println(fmt.Sprint("Listening on http://", hostHttp, ":", portHttp, "/"))
-			err := http.ListenAndServe(fmt.Sprint(hostHttp, ":", portHttp), nil)
+			fmt.Println(fmt.Sprint("Listening on http://", service.HostHttp, ":", service.PortHttp, "/"))
+			err := http.ListenAndServe(fmt.Sprint(service.HostHttp, ":", service.PortHttp), nil)
 			if err != nil {
 				fmt.Println(err)
 			}
 		}()
 	}
-	if enableHttps {
+	if service.EnableHttps {
 		go func() {
-			fmt.Println(fmt.Sprint("Listening on https://", hostHttps, ":", portHttps, "/"))
-			err := http.ListenAndServeTLS(fmt.Sprint(hostHttps, ":", portHttps), certFile, keyFile, nil)
+			fmt.Println(fmt.Sprint("Listening on https://", service.HostHttps, ":", service.PortHttps, "/"))
+			err := http.ListenAndServeTLS(fmt.Sprint(service.HostHttps, ":", service.PortHttps), service.CertFile, service.KeyFile, nil)
 			if err != nil {
 				fmt.Println(err)
 			}

@@ -7,128 +7,19 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"os/user"
 	"strings"
 	"syscall"
 
 	"github.com/codegangsta/cli"
-	"github.com/elgs/gojq"
 	"github.com/elgs/gorest2"
 	"github.com/gorilla/websocket"
-	"github.com/satori/go.uuid"
 )
 
-var id string
-var slaveOf string
-var enableHttp bool = true
-var portHttp int
-var hostHttp string = "127.0.0.1"
-var enableHttps bool
-var portHttps int
-var hostHttps string
-var certFile string
-var keyFile string
-var confFile string
-var dataFile string
 var wsConns = make(map[string]*websocket.Conn)
-
 var masterData MasterData
 
-func loadConfigs(c *cli.Context) {
-	// read config file
-	usr, err := user.Current()
-	if err != nil {
-		log.Fatal(err)
-	}
-	pwd, err := os.Getwd()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	loadConfig("/etc/netdata/netdata.json", c)
-	loadConfig(usr.HomeDir+"/.netdata/netdata.json", c)
-	loadConfig(pwd+"/netdata.json", c)
-	loadConfig(confFile, c)
-	if strings.TrimSpace(id) == "" {
-		id = strings.Replace(uuid.NewV4().String(), "-", "", -1)
-	}
-}
-
-func loadConfig(file string, c *cli.Context) {
-	jqConf, err := gojq.NewFileQuery(file)
-	if err != nil {
-		//ignore
-		return
-	}
-	if !c.IsSet("id") {
-		v, err := jqConf.QueryToString("id")
-		if err == nil {
-			id = v
-		}
-	}
-	if !c.IsSet("slaveof") {
-		v, err := jqConf.QueryToString("slaveof")
-		if err == nil {
-			slaveOf = v
-		}
-	}
-	if !c.IsSet("port_http") {
-		v, err := jqConf.QueryToInt64("port_http")
-		if err == nil {
-			portHttp = int(v)
-		}
-	}
-	if !c.IsSet("enable_http") {
-		v, err := jqConf.QueryToBool("enable_http")
-		if err == nil {
-			enableHttp = v
-		}
-	}
-	if !c.IsSet("enable_https") {
-		v, err := jqConf.QueryToBool("enable_https")
-		if err == nil {
-			enableHttps = v
-		}
-	}
-	if !c.IsSet("port_https") {
-		v, err := jqConf.QueryToInt64("port_https")
-		if err == nil {
-			portHttps = int(v)
-		}
-	}
-	if !c.IsSet("host_https") {
-		v, err := jqConf.QueryToString("host_https")
-		if err == nil {
-			hostHttps = v
-		}
-	}
-	if !c.IsSet("cert_file") {
-		v, err := jqConf.QueryToString("cert_file")
-		if err == nil {
-			certFile = v
-		}
-	}
-	if !c.IsSet("key_file") {
-		v, err := jqConf.QueryToString("key_file")
-		if err == nil {
-			keyFile = v
-		}
-	}
-	if !c.IsSet("conf_file") {
-		v, err := jqConf.QueryToString("conf_file")
-		if err == nil {
-			confFile = v
-		}
-	}
-	if !c.IsSet("data_file") {
-		v, err := jqConf.QueryToString("data_file")
-		if err == nil {
-			dataFile = v
-		}
-	}
-}
-
-func loadMasterData(file string) {}
+func loadMasterData(file string)             {}
+func storeMasterData(masterData *MasterData) {}
 
 func main() {
 
@@ -155,7 +46,11 @@ func main() {
 	app.Usage = "An SQL backend for the web."
 	app.Version = "0.0.1"
 	app.Action = func(c *cli.Context) {
-		loadConfigs(c)
+	}
+
+	service := &CliNetDataService{
+		EnableHttp: true,
+		HostHttp:   "127.0.0.1",
 	}
 
 	app.Commands = []cli.Command{
@@ -167,12 +62,12 @@ func main() {
 				{
 					Name:  "start",
 					Usage: "start service",
-					Flags: serviceFlags,
+					Flags: service.Flags(),
 					Action: func(c *cli.Context) {
-						loadConfigs(c)
-						if len(strings.TrimSpace(slaveOf)) > 0 {
+						service.LoadConfigs(c)
+						if len(strings.TrimSpace(service.SlaveOf)) > 0 {
 							// load data from master if slave
-							c, _, err := websocket.DefaultDialer.Dial("wss://"+slaveOf+"/sys/ws", nil)
+							c, _, err := websocket.DefaultDialer.Dial("wss://"+service.SlaveOf+"/sys/ws", nil)
 							if err != nil {
 								fmt.Println(err)
 								wsDrop <- true
@@ -192,7 +87,7 @@ func main() {
 
 							regCommand := WsCommand{
 								Type: "Register",
-								Data: id,
+								Data: service.Id,
 							}
 
 							// Register
@@ -246,7 +141,7 @@ func main() {
 								fmt.Fprintln(w, "Attack!!!")
 							}
 						})
-						serve()
+						serve(service)
 						<-done
 					},
 				},
@@ -274,16 +169,19 @@ func main() {
 				{
 					Name:  "list",
 					Usage: "list all data nodes",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:        "full, f",
+							Usage:       "show a full list of data nodes",
+							Destination: &service.Id,
+						}},
 					Action: func(c *cli.Context) {
-						loadConfigs(c)
-						println(slaveOf)
 					},
 				},
 				{
 					Name:  "add",
 					Usage: "add a new data node",
 					Action: func(c *cli.Context) {
-						loadConfigs(c)
 						println("new task template: ", c.Args().First())
 					},
 				},
@@ -291,7 +189,6 @@ func main() {
 					Name:  "update",
 					Usage: "add an existing data node",
 					Action: func(c *cli.Context) {
-						loadConfigs(c)
 						println("new task template: ", c.Args().First())
 					},
 				},
@@ -299,7 +196,6 @@ func main() {
 					Name:  "remove",
 					Usage: "remove an existing data node",
 					Action: func(c *cli.Context) {
-						loadConfigs(c)
 						println("removed task template: ", c.Args().First())
 					},
 				},
@@ -314,7 +210,6 @@ func main() {
 					Name:  "list",
 					Usage: "list all api nodes",
 					Action: func(c *cli.Context) {
-						loadConfigs(c)
 						println("new task template: ", c.Args().First())
 					},
 				},
@@ -322,7 +217,6 @@ func main() {
 					Name:  "add",
 					Usage: "add a new api node",
 					Action: func(c *cli.Context) {
-						loadConfigs(c)
 						println("new task template: ", c.Args().First())
 					},
 				},
@@ -330,7 +224,6 @@ func main() {
 					Name:  "update",
 					Usage: "add an existing api node",
 					Action: func(c *cli.Context) {
-						loadConfigs(c)
 						println("new task template: ", c.Args().First())
 					},
 				},
@@ -338,7 +231,6 @@ func main() {
 					Name:  "remove",
 					Usage: "remove an existing api node",
 					Action: func(c *cli.Context) {
-						loadConfigs(c)
 						println("removed task template: ", c.Args().First())
 					},
 				},
@@ -353,7 +245,6 @@ func main() {
 					Name:  "list",
 					Usage: "list all apps",
 					Action: func(c *cli.Context) {
-						loadConfigs(c)
 						println("new task template: ", c.Args().First())
 					},
 				},
@@ -361,7 +252,6 @@ func main() {
 					Name:  "add",
 					Usage: "add a new app",
 					Action: func(c *cli.Context) {
-						loadConfigs(c)
 						println("new task template: ", c.Args().First())
 					},
 				},
@@ -369,7 +259,6 @@ func main() {
 					Name:  "update",
 					Usage: "add an existing app",
 					Action: func(c *cli.Context) {
-						loadConfigs(c)
 						println("new task template: ", c.Args().First())
 					},
 				},
@@ -377,7 +266,6 @@ func main() {
 					Name:  "remove",
 					Usage: "remove an existing app",
 					Action: func(c *cli.Context) {
-						loadConfigs(c)
 						println("removed task template: ", c.Args().First())
 					},
 				},
