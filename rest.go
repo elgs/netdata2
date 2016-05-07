@@ -9,7 +9,7 @@ import (
 	"github.com/elgs/gorest2"
 )
 
-func serve(service *CliNetDataService) {
+func serve(service *CliService) {
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
 		w.Header().Set("Access-Control-Allow-Credentials", "true")

@@ -12,7 +12,7 @@ import (
 	"github.com/satori/go.uuid"
 )
 
-type CliNetDataService struct {
+type CliService struct {
 	Id          string
 	SlaveOf     string
 	EnableHttp  bool // true
@@ -27,7 +27,7 @@ type CliNetDataService struct {
 	DataFile    string
 }
 
-func (this *CliNetDataService) Flags() []cli.Flag {
+func (this *CliService) Flags() []cli.Flag {
 	return []cli.Flag{
 		cli.StringFlag{
 			Name:        "id, i",
@@ -85,7 +85,7 @@ func (this *CliNetDataService) Flags() []cli.Flag {
 	}
 }
 
-func (this *CliNetDataService) LoadConfigs(c *cli.Context) {
+func (this *CliService) LoadConfigs(c *cli.Context) {
 	// read config file
 	usr, err := user.Current()
 	if err != nil {
@@ -105,7 +105,7 @@ func (this *CliNetDataService) LoadConfigs(c *cli.Context) {
 	}
 }
 
-func (this *CliNetDataService) LoadConfig(file string, c *cli.Context) {
+func (this *CliService) LoadConfig(file string, c *cli.Context) {
 	jqConf, err := gojq.NewFileQuery(file)
 	if err != nil {
 		//ignore

@@ -48,7 +48,7 @@ func main() {
 	app.Action = func(c *cli.Context) {
 	}
 
-	service := &CliNetDataService{
+	service := &CliService{
 		EnableHttp: true,
 		HostHttp:   "127.0.0.1",
 	}
@@ -155,7 +155,7 @@ func main() {
 								fmt.Println(err)
 							}
 						} else {
-							fmt.Println("Usage:netdata service stop <shutdown_port>")
+							fmt.Println("Usage: netdata service stop <shutdown_port>")
 						}
 					},
 				},
@@ -170,17 +170,38 @@ func main() {
 					Name:  "list",
 					Usage: "list all data nodes",
 					Flags: []cli.Flag{
-						cli.StringFlag{
-							Name:        "full, f",
-							Usage:       "show a full list of data nodes",
-							Destination: &service.Id,
+						cli.BoolTFlag{
+							Name:  "full, f",
+							Usage: "show a full list of data nodes",
+						},
+						cli.BoolTFlag{
+							Name:  "compact, c",
+							Usage: "show a compact list of data nodes",
 						}},
 					Action: func(c *cli.Context) {
+						full := c.IsSet("full")
+						compact := c.IsSet("compact")
+						fmt.Println(full, compact)
+						for _, dataNode := range masterData.DataNodes {
+							if compact {
+								fmt.Print(dataNode.Name)
+							} else if full {
+								fmt.Println(dataNode.Name, dataNode.Host)
+							} else {
+								fmt.Println(dataNode.Name)
+							}
+						}
 					},
 				},
 				{
 					Name:  "add",
 					Usage: "add a new data node",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "name, n",
+							Usage: "",
+						},
+					},
 					Action: func(c *cli.Context) {
 						println("new task template: ", c.Args().First())
 					},
