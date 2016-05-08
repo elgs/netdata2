@@ -1,6 +1,10 @@
 // master_data
 package main
 
+import (
+	"errors"
+)
+
 type WsCommand struct {
 	Type string
 	Data string
@@ -95,4 +99,42 @@ type RemoteInterceptor struct {
 	Callback   string
 	Note       string
 	Status     string
+}
+
+func (this *MasterData) AddDataNode(dataNode *DataNode) {
+	this.DataNodes = append(this.DataNodes, *dataNode)
+	this.Version++
+}
+func (this *MasterData) RemoveDataNode(name string) error {
+	index := -1
+	for i, v := range this.DataNodes {
+		if v.Name == name {
+			index = i
+			break
+		}
+	}
+	if index == -1 {
+		return errors.New("Data node not found: " + name)
+	}
+	this.DataNodes = append(this.DataNodes[:index], this.DataNodes[index+1:]...)
+	return nil
+}
+func (this *MasterData) UpdateDataNode(dataNode *DataNode) error {
+	index := -1
+	for i, v := range this.DataNodes {
+		if v.Name == dataNode.Name {
+			index = i
+			break
+		}
+	}
+	if index == -1 {
+		return errors.New("Data node not found: " + dataNode.Name)
+	}
+	this.DataNodes = append(this.DataNodes[:index], *dataNode)
+	this.DataNodes = append(this.DataNodes, this.DataNodes[index+1:]...)
+	return nil
+}
+func (this *MasterData) ListDataNode(mode int) {
+	// 0 normal, 1 full, 2 compact
+
 }
