@@ -181,16 +181,13 @@ func main() {
 					Action: func(c *cli.Context) {
 						full := c.IsSet("full")
 						compact := c.IsSet("compact")
-						fmt.Println(full, compact)
-						for _, dataNode := range masterData.DataNodes {
-							if compact {
-								fmt.Print(dataNode.Name)
-							} else if full {
-								fmt.Println(dataNode.Name, dataNode.Host)
-							} else {
-								fmt.Println(dataNode.Name)
-							}
+						mode := 2
+						if compact {
+							mode = 0
+						} else if full {
+							mode = 1
 						}
+						masterData.ListDataNode(mode)
 					},
 				},
 				{
@@ -203,7 +200,10 @@ func main() {
 						},
 					},
 					Action: func(c *cli.Context) {
-						println("new task template: ", c.Args().First())
+						dataNode := &DataNode{
+							Name: "x",
+						}
+						masterData.AddDataNode(dataNode)
 					},
 				},
 				{

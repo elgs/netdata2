@@ -3,6 +3,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 )
 
 type WsCommand struct {
@@ -135,6 +136,14 @@ func (this *MasterData) UpdateDataNode(dataNode *DataNode) error {
 	return nil
 }
 func (this *MasterData) ListDataNode(mode int) {
-	// 0 normal, 1 full, 2 compact
-
+	// 0 compact, 1 full, 2 normal
+	for _, dataNode := range masterData.DataNodes {
+		if mode == 0 {
+			fmt.Print(dataNode.Name)
+		} else if mode == 1 {
+			fmt.Println(dataNode.Name, dataNode.Host)
+		} else {
+			fmt.Println(dataNode.Name)
+		}
+	}
 }
