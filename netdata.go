@@ -81,7 +81,8 @@ func main() {
 										log.Println("read:", err)
 										return
 									}
-									log.Printf("recv: %s", message)
+									wsCommand := &WsCommand{}
+									json.Unmarshal(message, wsCommand)
 								}
 							}()
 
@@ -170,6 +171,16 @@ func main() {
 					Name:  "list",
 					Usage: "list all data nodes",
 					Flags: []cli.Flag{
+						cli.IntFlag{
+							Name:  "port_https, p",
+							Value: 2015,
+							Usage: "https port",
+						},
+						cli.StringFlag{
+							Name:  "host_https, l",
+							Value: "127.0.0.1",
+							Usage: "https host name",
+						},
 						cli.BoolTFlag{
 							Name:  "full, f",
 							Usage: "show a full list of data nodes",
@@ -194,14 +205,50 @@ func main() {
 					Name:  "add",
 					Usage: "add a new data node",
 					Flags: []cli.Flag{
+						cli.IntFlag{
+							Name:  "port_https, p",
+							Value: 2015,
+							Usage: "https port",
+						},
+						cli.StringFlag{
+							Name:  "host_https, l",
+							Value: "127.0.0.1",
+							Usage: "https host name",
+						},
 						cli.StringFlag{
 							Name:  "name, n",
-							Usage: "",
+							Usage: "name of the data node",
+						},
+						cli.StringFlag{
+							Name:  "host, H",
+							Usage: "hostname of the data node",
+						},
+						cli.IntFlag{
+							Name:  "port, P",
+							Value: 3306,
+							Usage: "port number of the data node",
+						},
+						cli.StringFlag{
+							Name:  "user, u",
+							Usage: "username of the data node",
+						},
+						cli.StringFlag{
+							Name:  "pass, x",
+							Usage: "password of the node",
+						},
+						cli.StringFlag{
+							Name:  "note, m",
+							Usage: "a note for the data node",
 						},
 					},
 					Action: func(c *cli.Context) {
 						dataNode := &DataNode{
-							Name: "x",
+							Name:     c.String("name"),
+							Host:     c.String("host"),
+							Port:     c.Int("port"),
+							Username: c.String("user"),
+							Password: c.String("pass"),
+							Note:     c.String("note"),
 						}
 						masterData.AddDataNode(dataNode)
 					},

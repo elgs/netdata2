@@ -29,7 +29,7 @@ type DataNode struct {
 	Username string
 	Password string
 	Host     string
-	Port     int64
+	Port     int
 	Type     string
 	Note     string
 	Status   string
