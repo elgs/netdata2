@@ -14,7 +14,7 @@ import (
 
 type CliService struct {
 	Id          string
-	SlaveOf     string
+	Master      string
 	EnableHttp  bool // true
 	PortHttp    int
 	HostHttp    string // "127.0.0.1"
@@ -35,9 +35,9 @@ func (this *CliService) Flags() []cli.Flag {
 			Destination: &this.Id,
 		},
 		cli.StringFlag{
-			Name:        "slaveof, m",
+			Name:        "master, m",
 			Usage:       "master node url, format: host:port. master if empty",
-			Destination: &this.SlaveOf,
+			Destination: &this.Master,
 		},
 		cli.IntFlag{
 			Name:        "port_http, P",
@@ -120,7 +120,7 @@ func (this *CliService) LoadConfig(file string, c *cli.Context) {
 	if !c.IsSet("slaveof") {
 		v, err := jqConf.QueryToString("slaveof")
 		if err == nil {
-			this.SlaveOf = v
+			this.Master = v
 		}
 	}
 	if !c.IsSet("port_http") {

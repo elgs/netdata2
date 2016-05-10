@@ -1,8 +1,10 @@
 package main
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -20,6 +22,47 @@ var masterData MasterData
 
 func loadMasterData(file string)             {}
 func storeMasterData(masterData *MasterData) {}
+
+func processWsCommand(conn *websocket.Conn, message []byte) error {
+	wsCommand := &Command{}
+	json.Unmarshal(message, wsCommand)
+	if wsCommand.Type == "WS_REGISTER" {
+		wsConns[wsCommand.Data] = conn
+		//		if err := conn.WriteJSON(masterData); err != nil {
+		//			fmt.Println(err)
+		//		}
+	}
+	return nil
+}
+
+func processCliCommand(message []byte) error {
+	return nil
+}
+
+func sendCliCommand(master string, command *Command) ([]byte, error) {
+	message, err := json.Marshal(command)
+	if err != nil {
+		return nil, err
+	}
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
+	req, err := http.NewRequest("POST", "https://"+master+"/sys/cli", strings.NewReader(string(message)))
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	result, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+	return result, err
+}
 
 func main() {
 
@@ -65,9 +108,9 @@ func main() {
 					Flags: service.Flags(),
 					Action: func(c *cli.Context) {
 						service.LoadConfigs(c)
-						if len(strings.TrimSpace(service.SlaveOf)) > 0 {
+						if len(strings.TrimSpace(service.Master)) > 0 {
 							// load data from master if slave
-							c, _, err := websocket.DefaultDialer.Dial("wss://"+service.SlaveOf+"/sys/ws", nil)
+							c, _, err := websocket.DefaultDialer.Dial("wss://"+service.Master+"/sys/ws", nil)
 							if err != nil {
 								fmt.Println(err)
 								wsDrop <- true
@@ -81,13 +124,13 @@ func main() {
 										log.Println("read:", err)
 										return
 									}
-									wsCommand := &WsCommand{}
+									wsCommand := &Command{}
 									json.Unmarshal(message, wsCommand)
 								}
 							}()
 
-							regCommand := WsCommand{
-								Type: "Register",
+							regCommand := Command{
+								Type: "WS_REGISTER",
 								Data: service.Id,
 							}
 
@@ -120,16 +163,7 @@ func main() {
 											}
 											break
 										}
-										wsCommand := &WsCommand{}
-										json.Unmarshal(message, wsCommand)
-										if wsCommand.Type == "Register" {
-											wsConns[wsCommand.Data] = conn
-
-											if err := conn.WriteJSON(masterData); err != nil {
-												fmt.Println(err)
-											}
-										}
-										fmt.Println(wsCommand)
+										processWsCommand(conn, message)
 									}
 								}(conn)
 							})
@@ -141,6 +175,9 @@ func main() {
 							} else {
 								fmt.Fprintln(w, "Attack!!!")
 							}
+						})
+						// cli
+						gorest2.RegisterHandler("/sys/cli", func(w http.ResponseWriter, r *http.Request) {
 						})
 						serve(service)
 						<-done
@@ -171,15 +208,10 @@ func main() {
 					Name:  "list",
 					Usage: "list all data nodes",
 					Flags: []cli.Flag{
-						cli.IntFlag{
-							Name:  "port_https, p",
-							Value: 2015,
-							Usage: "https port",
-						},
 						cli.StringFlag{
-							Name:  "host_https, l",
-							Value: "127.0.0.1",
-							Usage: "https host name",
+							Name:  "master, m",
+							Value: "127.0.0.1:2015",
+							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.BoolTFlag{
 							Name:  "full, f",
@@ -190,30 +222,30 @@ func main() {
 							Usage: "show a compact list of data nodes",
 						}},
 					Action: func(c *cli.Context) {
+						master := c.String("master")
 						full := c.IsSet("full")
 						compact := c.IsSet("compact")
-						mode := 2
+						mode := "normal"
 						if compact {
-							mode = 0
+							mode = "compact"
 						} else if full {
-							mode = 1
+							mode = "full"
 						}
-						masterData.ListDataNode(mode)
+						cliDnListCommand := &Command{
+							Type: "CLI_DN_LIST",
+							Data: mode,
+						}
+						sendCliCommand(master, cliDnListCommand)
 					},
 				},
 				{
 					Name:  "add",
 					Usage: "add a new data node",
 					Flags: []cli.Flag{
-						cli.IntFlag{
-							Name:  "port_https, p",
-							Value: 2015,
-							Usage: "https port",
-						},
 						cli.StringFlag{
-							Name:  "host_https, l",
-							Value: "127.0.0.1",
-							Usage: "https host name",
+							Name:  "master, m",
+							Value: "127.0.0.1:2015",
+							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
 							Name:  "name, n",
@@ -233,11 +265,11 @@ func main() {
 							Usage: "username of the data node",
 						},
 						cli.StringFlag{
-							Name:  "pass, x",
+							Name:  "pass, p",
 							Usage: "password of the node",
 						},
 						cli.StringFlag{
-							Name:  "note, m",
+							Name:  "note, t",
 							Usage: "a note for the data node",
 						},
 					},

@@ -1,6 +1,6 @@
 {
   "id": "wooohooo",	
-  "slaveof": "local.netdata.io:2015",
+  "master": "local.netdata.io:2015",
   "port_http": 1234,
   "enable_https": true,
   "port_https": 2016,

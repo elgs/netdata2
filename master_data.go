@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-type WsCommand struct {
+type Command struct {
 	Type string
 	Data string
 	Meta map[string]interface{}
@@ -135,12 +135,11 @@ func (this *MasterData) UpdateDataNode(dataNode *DataNode) error {
 	this.DataNodes = append(this.DataNodes, this.DataNodes[index+1:]...)
 	return nil
 }
-func (this *MasterData) ListDataNode(mode int) {
-	// 0 compact, 1 full, 2 normal
+func (this *MasterData) ListDataNode(mode string) {
 	for _, dataNode := range masterData.DataNodes {
-		if mode == 0 {
+		if mode == "compact" {
 			fmt.Print(dataNode.Name)
-		} else if mode == 1 {
+		} else if mode == "full" {
 			fmt.Println(dataNode.Name, dataNode.Host)
 		} else {
 			fmt.Println(dataNode.Name)
