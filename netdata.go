@@ -47,6 +47,21 @@ func processCliCommand(message []byte) (string, error) {
 		if err != nil {
 			return "", err
 		}
+	} else if cliCommand.Type == "CLI_DN_UPDATE" {
+		dataNode := &DataNode{}
+		err := json.Unmarshal([]byte(cliCommand.Data), dataNode)
+		if err != nil {
+			return "", err
+		}
+		err = masterData.UpdateDataNode(dataNode)
+		if err != nil {
+			return "", err
+		}
+	} else if cliCommand.Type == "CLI_DN_REMOVE" {
+		err := masterData.RemoveDataNode(cliCommand.Data)
+		if err != nil {
+			return "", err
+		}
 	}
 	return "", nil
 }
@@ -193,10 +208,12 @@ func main() {
 							res, err := ioutil.ReadAll(r.Body)
 							if err != nil {
 								fmt.Fprint(w, err.Error())
+								return
 							}
 							result, err := processCliCommand(res)
 							if err != nil {
 								fmt.Fprint(w, err.Error())
+								return
 							}
 							fmt.Fprint(w, result)
 						})
@@ -331,16 +348,96 @@ func main() {
 				},
 				{
 					Name:  "update",
-					Usage: "add an existing data node",
+					Usage: "update an existing data node",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "master, m",
+							Value: "127.0.0.1:2015",
+							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+						},
+						cli.StringFlag{
+							Name:  "name, n",
+							Usage: "name of the data node",
+						},
+						cli.StringFlag{
+							Name:  "host, H",
+							Usage: "hostname of the data node",
+						},
+						cli.IntFlag{
+							Name:  "port, P",
+							Value: 3306,
+							Usage: "port number of the data node",
+						},
+						cli.StringFlag{
+							Name:  "user, u",
+							Usage: "username of the data node",
+						},
+						cli.StringFlag{
+							Name:  "pass, p",
+							Usage: "password of the node",
+						},
+						cli.StringFlag{
+							Name:  "note, t",
+							Usage: "a note for the data node",
+						},
+					},
 					Action: func(c *cli.Context) {
-						println("new task template: ", c.Args().First())
+						master := c.String("master")
+						dataNode := &DataNode{
+							Name:     c.String("name"),
+							Host:     c.String("host"),
+							Port:     c.Int("port"),
+							Username: c.String("user"),
+							Password: c.String("pass"),
+							Note:     c.String("note"),
+						}
+						dataNodeJSONBytes, err := json.Marshal(dataNode)
+						if err != nil {
+							fmt.Println(err)
+						}
+						cliDnUpdateCommand := &Command{
+							Type: "CLI_DN_UPDATE",
+							Data: string(dataNodeJSONBytes),
+						}
+						response, err := sendCliCommand(master, cliDnUpdateCommand)
+						if err != nil {
+							fmt.Println(err)
+						}
+						output := string(response)
+						if output != "" {
+							fmt.Println(strings.TrimSpace(output))
+						}
 					},
 				},
 				{
 					Name:  "remove",
 					Usage: "remove an existing data node",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "master, m",
+							Value: "127.0.0.1:2015",
+							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+						},
+						cli.StringFlag{
+							Name:  "name, n",
+							Usage: "name of the data node",
+						},
+					},
 					Action: func(c *cli.Context) {
-						println("removed task template: ", c.Args().First())
+						master := c.String("master")
+						name := c.String("name")
+						cliDnRemoveCommand := &Command{
+							Type: "CLI_DN_REMOVE",
+							Data: name,
+						}
+						response, err := sendCliCommand(master, cliDnRemoveCommand)
+						if err != nil {
+							fmt.Println(err)
+						}
+						output := string(response)
+						if output != "" {
+							fmt.Println(strings.TrimSpace(output))
+						}
 					},
 				},
 			},

@@ -125,6 +125,7 @@ func (this *MasterData) RemoveDataNode(name string) error {
 		return errors.New("Data node not found: " + name)
 	}
 	this.DataNodes = append(this.DataNodes[:index], this.DataNodes[index+1:]...)
+	this.Version++
 	return nil
 }
 func (this *MasterData) UpdateDataNode(dataNode *DataNode) error {
@@ -140,6 +141,7 @@ func (this *MasterData) UpdateDataNode(dataNode *DataNode) error {
 	}
 	this.DataNodes = append(this.DataNodes[:index], *dataNode)
 	this.DataNodes = append(this.DataNodes, this.DataNodes[index+1:]...)
+	this.Version++
 	return nil
 }
 func (this *MasterData) ListDataNode(mode string) string {
