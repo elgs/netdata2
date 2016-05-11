@@ -140,11 +140,11 @@ func (this *MasterData) ListDataNode(mode string) string {
 	var buffer bytes.Buffer
 	for _, dataNode := range masterData.DataNodes {
 		if mode == "compact" {
-			buffer.WriteString(dataNode.Name)
+			buffer.WriteString(dataNode.Name + " ")
 		} else if mode == "full" {
 			buffer.WriteString(fmt.Sprintln(dataNode.Name, dataNode.Host))
 		} else {
-			buffer.WriteString(dataNode.Name)
+			buffer.WriteString(dataNode.Name + "\n")
 		}
 	}
 	return buffer.String()

@@ -40,7 +40,9 @@ func processCliCommand(message []byte) (string, error) {
 	} else if cliCommand.Type == "CLI_DN_ADD" {
 		dataNode := &DataNode{}
 		err := json.Unmarshal([]byte(cliCommand.Data), dataNode)
-		fmt.Println(err)
+		if err != nil {
+			fmt.Println(err)
+		}
 		masterData.AddDataNode(dataNode)
 	}
 	return "", nil
@@ -189,12 +191,10 @@ func main() {
 							if err != nil {
 								fmt.Println(err)
 							}
-							//							fmt.Println(string(res))
 							result, err := processCliCommand(res)
 							if err != nil {
 								fmt.Println(err)
 							}
-							fmt.Println(string(result))
 							fmt.Fprint(w, result)
 						})
 						serve(service)
@@ -257,7 +257,10 @@ func main() {
 						if err != nil {
 							fmt.Println(err)
 						}
-						fmt.Println(string(response))
+						output := string(response)
+						if output != "" {
+							fmt.Println(strings.TrimSpace(output))
+						}
 					},
 				},
 				{
@@ -317,7 +320,10 @@ func main() {
 						if err != nil {
 							fmt.Println(err)
 						}
-						fmt.Println(string(response))
+						output := string(response)
+						if output != "" {
+							fmt.Println(strings.TrimSpace(output))
+						}
 					},
 				},
 				{
