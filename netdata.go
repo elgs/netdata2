@@ -41,9 +41,12 @@ func processCliCommand(message []byte) (string, error) {
 		dataNode := &DataNode{}
 		err := json.Unmarshal([]byte(cliCommand.Data), dataNode)
 		if err != nil {
-			fmt.Println(err)
+			return "", err
 		}
-		masterData.AddDataNode(dataNode)
+		err = masterData.AddDataNode(dataNode)
+		if err != nil {
+			return "", err
+		}
 	}
 	return "", nil
 }
@@ -189,11 +192,11 @@ func main() {
 						gorest2.RegisterHandler("/sys/cli", func(w http.ResponseWriter, r *http.Request) {
 							res, err := ioutil.ReadAll(r.Body)
 							if err != nil {
-								fmt.Println(err)
+								fmt.Fprint(w, err.Error())
 							}
 							result, err := processCliCommand(res)
 							if err != nil {
-								fmt.Println(err)
+								fmt.Fprint(w, err.Error())
 							}
 							fmt.Fprint(w, result)
 						})

@@ -103,9 +103,15 @@ type RemoteInterceptor struct {
 	Status     string
 }
 
-func (this *MasterData) AddDataNode(dataNode *DataNode) {
+func (this *MasterData) AddDataNode(dataNode *DataNode) error {
+	for _, v := range this.DataNodes {
+		if v.Name == dataNode.Name {
+			return errors.New("Data node existed: " + dataNode.Name)
+		}
+	}
 	this.DataNodes = append(this.DataNodes, *dataNode)
 	this.Version++
+	return nil
 }
 func (this *MasterData) RemoveDataNode(name string) error {
 	index := -1
