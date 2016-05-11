@@ -142,7 +142,8 @@ func main() {
 	app.Name = "netdata"
 	app.Usage = "An SQL backend for the web."
 	app.Version = "0.0.1"
-	app.Action = func(c *cli.Context) {
+	app.Action = func(c *cli.Context) error {
+		return nil
 	}
 
 	service := &CliService{
@@ -160,7 +161,7 @@ func main() {
 					Name:  "start",
 					Usage: "start service",
 					Flags: service.Flags(),
-					Action: func(c *cli.Context) {
+					Action: func(c *cli.Context) error {
 						service.LoadConfigs(c)
 						if len(strings.TrimSpace(service.Master)) > 0 {
 							// load data from master if slave
@@ -246,20 +247,23 @@ func main() {
 						})
 						serve(service)
 						<-done
+						return nil
 					},
 				},
 				{
 					Name:  "stop",
 					Usage: "stop service",
-					Action: func(c *cli.Context) {
+					Action: func(c *cli.Context) error {
 						if len(c.Args()) > 0 {
 							_, err := http.Post(fmt.Sprint("http://127.0.0.1:", c.Args()[0], "/sys/shutdown"), "text/plain", nil)
 							if err != nil {
 								fmt.Println(err)
+								return err
 							}
 						} else {
 							fmt.Println("Usage: netdata service stop <shutdown_port>")
 						}
+						return nil
 					},
 				},
 			},
@@ -286,7 +290,7 @@ func main() {
 							Name:  "compact, c",
 							Usage: "show a compact list of data nodes",
 						}},
-					Action: func(c *cli.Context) {
+					Action: func(c *cli.Context) error {
 						master := c.String("master")
 						full := c.IsSet("full")
 						compact := c.IsSet("compact")
@@ -303,11 +307,13 @@ func main() {
 						response, err := sendCliCommand(master, cliDnListCommand)
 						if err != nil {
 							fmt.Println(err)
+							return err
 						}
 						output := string(response)
 						if output != "" {
 							fmt.Println(strings.TrimSpace(output))
 						}
+						return nil
 					},
 				},
 				{
@@ -345,7 +351,7 @@ func main() {
 							Usage: "a note for the data node",
 						},
 					},
-					Action: func(c *cli.Context) {
+					Action: func(c *cli.Context) error {
 						master := c.String("master")
 						dataNode := &DataNode{
 							Name:     c.String("name"),
@@ -358,6 +364,7 @@ func main() {
 						dataNodeJSONBytes, err := json.Marshal(dataNode)
 						if err != nil {
 							fmt.Println(err)
+							return err
 						}
 						cliDnAddCommand := &Command{
 							Type: "CLI_DN_ADD",
@@ -366,11 +373,13 @@ func main() {
 						response, err := sendCliCommand(master, cliDnAddCommand)
 						if err != nil {
 							fmt.Println(err)
+							return err
 						}
 						output := string(response)
 						if output != "" {
 							fmt.Println(strings.TrimSpace(output))
 						}
+						return nil
 					},
 				},
 				{
@@ -408,7 +417,7 @@ func main() {
 							Usage: "a note for the data node",
 						},
 					},
-					Action: func(c *cli.Context) {
+					Action: func(c *cli.Context) error {
 						master := c.String("master")
 						dataNode := &DataNode{
 							Name:     c.String("name"),
@@ -421,6 +430,7 @@ func main() {
 						dataNodeJSONBytes, err := json.Marshal(dataNode)
 						if err != nil {
 							fmt.Println(err)
+							return err
 						}
 						cliDnUpdateCommand := &Command{
 							Type: "CLI_DN_UPDATE",
@@ -429,11 +439,13 @@ func main() {
 						response, err := sendCliCommand(master, cliDnUpdateCommand)
 						if err != nil {
 							fmt.Println(err)
+							return err
 						}
 						output := string(response)
 						if output != "" {
 							fmt.Println(strings.TrimSpace(output))
 						}
+						return nil
 					},
 				},
 				{
@@ -450,7 +462,7 @@ func main() {
 							Usage: "name of the data node",
 						},
 					},
-					Action: func(c *cli.Context) {
+					Action: func(c *cli.Context) error {
 						master := c.String("master")
 						name := c.String("name")
 						cliDnRemoveCommand := &Command{
@@ -460,11 +472,13 @@ func main() {
 						response, err := sendCliCommand(master, cliDnRemoveCommand)
 						if err != nil {
 							fmt.Println(err)
+							return err
 						}
 						output := string(response)
 						if output != "" {
 							fmt.Println(strings.TrimSpace(output))
 						}
+						return nil
 					},
 				},
 			},
@@ -477,8 +491,8 @@ func main() {
 				{
 					Name:  "list",
 					Usage: "list all api nodes",
-					Action: func(c *cli.Context) {
-						println("new task template: ", c.Args().First())
+					Action: func(c *cli.Context) error {
+						return nil
 					},
 				},
 			},
@@ -505,7 +519,7 @@ func main() {
 							Name:  "compact, c",
 							Usage: "show a compact list of apps",
 						}},
-					Action: func(c *cli.Context) {
+					Action: func(c *cli.Context) error {
 						master := c.String("master")
 						full := c.IsSet("full")
 						compact := c.IsSet("compact")
@@ -522,11 +536,13 @@ func main() {
 						response, err := sendCliCommand(master, cliAppListCommand)
 						if err != nil {
 							fmt.Println(err)
+							return err
 						}
 						output := string(response)
 						if output != "" {
 							fmt.Println(strings.TrimSpace(output))
 						}
+						return nil
 					},
 				},
 				{
@@ -551,7 +567,7 @@ func main() {
 							Usage: "a note for the app",
 						},
 					},
-					Action: func(c *cli.Context) {
+					Action: func(c *cli.Context) error {
 						master := c.String("master")
 						app := &App{
 							Name:         c.String("name"),
@@ -561,6 +577,7 @@ func main() {
 						appJSONBytes, err := json.Marshal(app)
 						if err != nil {
 							fmt.Println(err)
+							return err
 						}
 						cliAppAddCommand := &Command{
 							Type: "CLI_APP_ADD",
@@ -569,11 +586,13 @@ func main() {
 						response, err := sendCliCommand(master, cliAppAddCommand)
 						if err != nil {
 							fmt.Println(err)
+							return err
 						}
 						output := string(response)
 						if output != "" {
 							fmt.Println(strings.TrimSpace(output))
 						}
+						return nil
 					},
 				},
 				{
@@ -598,7 +617,7 @@ func main() {
 							Usage: "a note for the app",
 						},
 					},
-					Action: func(c *cli.Context) {
+					Action: func(c *cli.Context) error {
 						master := c.String("master")
 						app := &App{
 							Name:         c.String("name"),
@@ -608,6 +627,7 @@ func main() {
 						appJSONBytes, err := json.Marshal(app)
 						if err != nil {
 							fmt.Println(err)
+							return err
 						}
 						cliAppUpdateCommand := &Command{
 							Type: "CLI_APP_UPDATE",
@@ -616,11 +636,13 @@ func main() {
 						response, err := sendCliCommand(master, cliAppUpdateCommand)
 						if err != nil {
 							fmt.Println(err)
+							return err
 						}
 						output := string(response)
 						if output != "" {
 							fmt.Println(strings.TrimSpace(output))
 						}
+						return nil
 					},
 				},
 				{
@@ -637,7 +659,7 @@ func main() {
 							Usage: "name of the app",
 						},
 					},
-					Action: func(c *cli.Context) {
+					Action: func(c *cli.Context) error {
 						master := c.String("master")
 						name := c.String("name")
 						cliAppRemoveCommand := &Command{
@@ -647,11 +669,13 @@ func main() {
 						response, err := sendCliCommand(master, cliAppRemoveCommand)
 						if err != nil {
 							fmt.Println(err)
+							return err
 						}
 						output := string(response)
 						if output != "" {
 							fmt.Println(strings.TrimSpace(output))
 						}
+						return nil
 					},
 				},
 			},
