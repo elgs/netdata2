@@ -144,7 +144,7 @@ func (this *MasterData) UpdateDataNode(dataNode *DataNode) error {
 	this.Version++
 	return nil
 }
-func (this *MasterData) ListDataNode(mode string) string {
+func (this *MasterData) ListDataNodes(mode string) string {
 	var buffer bytes.Buffer
 	for _, dataNode := range masterData.DataNodes {
 		if mode == "compact" {
@@ -153,6 +153,61 @@ func (this *MasterData) ListDataNode(mode string) string {
 			buffer.WriteString(fmt.Sprintln(dataNode.Name, dataNode.Host))
 		} else {
 			buffer.WriteString(dataNode.Name + "\n")
+		}
+	}
+	return buffer.String()
+}
+
+func (this *MasterData) AddApp(app *App) error {
+	for _, v := range this.Apps {
+		if v.Name == app.Name {
+			return errors.New("App existed: " + app.Name)
+		}
+	}
+	this.Apps = append(this.Apps, *app)
+	this.Version++
+	return nil
+}
+func (this *MasterData) RemoveApp(name string) error {
+	index := -1
+	for i, v := range this.Apps {
+		if v.Name == name {
+			index = i
+			break
+		}
+	}
+	if index == -1 {
+		return errors.New("App not found: " + name)
+	}
+	this.Apps = append(this.Apps[:index], this.Apps[index+1:]...)
+	this.Version++
+	return nil
+}
+func (this *MasterData) UpdateApp(app *App) error {
+	index := -1
+	for i, v := range this.Apps {
+		if v.Name == app.Name {
+			index = i
+			break
+		}
+	}
+	if index == -1 {
+		return errors.New("App not found: " + app.Name)
+	}
+	this.Apps = append(this.Apps[:index], *app)
+	this.Apps = append(this.Apps, this.Apps[index+1:]...)
+	this.Version++
+	return nil
+}
+func (this *MasterData) ListApps(mode string) string {
+	var buffer bytes.Buffer
+	for _, app := range masterData.Apps {
+		if mode == "compact" {
+			buffer.WriteString(app.Name + " ")
+		} else if mode == "full" {
+			buffer.WriteString(fmt.Sprintln(app.Name, app.DataNodeName))
+		} else {
+			buffer.WriteString(app.Name + "\n")
 		}
 	}
 	return buffer.String()

@@ -36,7 +36,7 @@ func processCliCommand(message []byte) (string, error) {
 	cliCommand := &Command{}
 	json.Unmarshal(message, cliCommand)
 	if cliCommand.Type == "CLI_DN_LIST" {
-		return masterData.ListDataNode(cliCommand.Data), nil
+		return masterData.ListDataNodes(cliCommand.Data), nil
 	} else if cliCommand.Type == "CLI_DN_ADD" {
 		dataNode := &DataNode{}
 		err := json.Unmarshal([]byte(cliCommand.Data), dataNode)
@@ -59,6 +59,33 @@ func processCliCommand(message []byte) (string, error) {
 		}
 	} else if cliCommand.Type == "CLI_DN_REMOVE" {
 		err := masterData.RemoveDataNode(cliCommand.Data)
+		if err != nil {
+			return "", err
+		}
+	} else if cliCommand.Type == "CLI_APP_LIST" {
+		return masterData.ListApps(cliCommand.Data), nil
+	} else if cliCommand.Type == "CLI_APP_ADD" {
+		app := &App{}
+		err := json.Unmarshal([]byte(cliCommand.Data), app)
+		if err != nil {
+			return "", err
+		}
+		err = masterData.AddApp(app)
+		if err != nil {
+			return "", err
+		}
+	} else if cliCommand.Type == "CLI_APP_UPDATE" {
+		app := &App{}
+		err := json.Unmarshal([]byte(cliCommand.Data), app)
+		if err != nil {
+			return "", err
+		}
+		err = masterData.UpdateApp(app)
+		if err != nil {
+			return "", err
+		}
+	} else if cliCommand.Type == "CLI_APP_REMOVE" {
+		err := masterData.RemoveApp(cliCommand.Data)
 		if err != nil {
 			return "", err
 		}
@@ -454,27 +481,6 @@ func main() {
 						println("new task template: ", c.Args().First())
 					},
 				},
-				{
-					Name:  "add",
-					Usage: "add a new api node",
-					Action: func(c *cli.Context) {
-						println("new task template: ", c.Args().First())
-					},
-				},
-				{
-					Name:  "update",
-					Usage: "add an existing api node",
-					Action: func(c *cli.Context) {
-						println("new task template: ", c.Args().First())
-					},
-				},
-				{
-					Name:  "remove",
-					Usage: "remove an existing api node",
-					Action: func(c *cli.Context) {
-						println("removed task template: ", c.Args().First())
-					},
-				},
 			},
 		},
 		{
@@ -485,29 +491,167 @@ func main() {
 				{
 					Name:  "list",
 					Usage: "list all apps",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "master, m",
+							Value: "127.0.0.1:2015",
+							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+						},
+						cli.BoolTFlag{
+							Name:  "full, f",
+							Usage: "show a full list of apps",
+						},
+						cli.BoolTFlag{
+							Name:  "compact, c",
+							Usage: "show a compact list of apps",
+						}},
 					Action: func(c *cli.Context) {
-						println("new task template: ", c.Args().First())
+						master := c.String("master")
+						full := c.IsSet("full")
+						compact := c.IsSet("compact")
+						mode := "normal"
+						if compact {
+							mode = "compact"
+						} else if full {
+							mode = "full"
+						}
+						cliAppListCommand := &Command{
+							Type: "CLI_APP_LIST",
+							Data: mode,
+						}
+						response, err := sendCliCommand(master, cliAppListCommand)
+						if err != nil {
+							fmt.Println(err)
+						}
+						output := string(response)
+						if output != "" {
+							fmt.Println(strings.TrimSpace(output))
+						}
 					},
 				},
 				{
 					Name:  "add",
 					Usage: "add a new app",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "master, m",
+							Value: "127.0.0.1:2015",
+							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+						},
+						cli.StringFlag{
+							Name:  "name, n",
+							Usage: "name of the app",
+						},
+						cli.StringFlag{
+							Name:  "datanode, d",
+							Usage: "data node name",
+						},
+						cli.StringFlag{
+							Name:  "note, t",
+							Usage: "a note for the app",
+						},
+					},
 					Action: func(c *cli.Context) {
-						println("new task template: ", c.Args().First())
+						master := c.String("master")
+						app := &App{
+							Name:         c.String("name"),
+							DataNodeName: c.String("datanode"),
+							Note:         c.String("note"),
+						}
+						appJSONBytes, err := json.Marshal(app)
+						if err != nil {
+							fmt.Println(err)
+						}
+						cliAppAddCommand := &Command{
+							Type: "CLI_APP_ADD",
+							Data: string(appJSONBytes),
+						}
+						response, err := sendCliCommand(master, cliAppAddCommand)
+						if err != nil {
+							fmt.Println(err)
+						}
+						output := string(response)
+						if output != "" {
+							fmt.Println(strings.TrimSpace(output))
+						}
 					},
 				},
 				{
 					Name:  "update",
-					Usage: "add an existing app",
+					Usage: "update an existing app",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "master, m",
+							Value: "127.0.0.1:2015",
+							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+						},
+						cli.StringFlag{
+							Name:  "name, n",
+							Usage: "name of the app",
+						},
+						cli.StringFlag{
+							Name:  "datanode, d",
+							Usage: "data node name",
+						},
+						cli.StringFlag{
+							Name:  "note, t",
+							Usage: "a note for the app",
+						},
+					},
 					Action: func(c *cli.Context) {
-						println("new task template: ", c.Args().First())
+						master := c.String("master")
+						app := &App{
+							Name:         c.String("name"),
+							DataNodeName: c.String("datanode"),
+							Note:         c.String("note"),
+						}
+						appJSONBytes, err := json.Marshal(app)
+						if err != nil {
+							fmt.Println(err)
+						}
+						cliAppUpdateCommand := &Command{
+							Type: "CLI_APP_UPDATE",
+							Data: string(appJSONBytes),
+						}
+						response, err := sendCliCommand(master, cliAppUpdateCommand)
+						if err != nil {
+							fmt.Println(err)
+						}
+						output := string(response)
+						if output != "" {
+							fmt.Println(strings.TrimSpace(output))
+						}
 					},
 				},
 				{
 					Name:  "remove",
 					Usage: "remove an existing app",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "master, m",
+							Value: "127.0.0.1:2015",
+							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+						},
+						cli.StringFlag{
+							Name:  "name, n",
+							Usage: "name of the app",
+						},
+					},
 					Action: func(c *cli.Context) {
-						println("removed task template: ", c.Args().First())
+						master := c.String("master")
+						name := c.String("name")
+						cliAppRemoveCommand := &Command{
+							Type: "CLI_APP_REMOVE",
+							Data: name,
+						}
+						response, err := sendCliCommand(master, cliAppRemoveCommand)
+						if err != nil {
+							fmt.Println(err)
+						}
+						output := string(response)
+						if output != "" {
+							fmt.Println(strings.TrimSpace(output))
+						}
 					},
 				},
 			},
