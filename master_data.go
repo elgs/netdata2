@@ -2,6 +2,7 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 )
@@ -135,14 +136,16 @@ func (this *MasterData) UpdateDataNode(dataNode *DataNode) error {
 	this.DataNodes = append(this.DataNodes, this.DataNodes[index+1:]...)
 	return nil
 }
-func (this *MasterData) ListDataNode(mode string) {
+func (this *MasterData) ListDataNode(mode string) string {
+	var buffer bytes.Buffer
 	for _, dataNode := range masterData.DataNodes {
 		if mode == "compact" {
-			fmt.Print(dataNode.Name)
+			buffer.WriteString(dataNode.Name)
 		} else if mode == "full" {
-			fmt.Println(dataNode.Name, dataNode.Host)
+			buffer.WriteString(fmt.Sprintln(dataNode.Name, dataNode.Host))
 		} else {
-			fmt.Println(dataNode.Name)
+			buffer.WriteString(dataNode.Name)
 		}
 	}
+	return buffer.String()
 }

@@ -28,15 +28,22 @@ func processWsCommand(conn *websocket.Conn, message []byte) error {
 	json.Unmarshal(message, wsCommand)
 	if wsCommand.Type == "WS_REGISTER" {
 		wsConns[wsCommand.Data] = conn
-		//		if err := conn.WriteJSON(masterData); err != nil {
-		//			fmt.Println(err)
-		//		}
 	}
 	return nil
 }
 
-func processCliCommand(message []byte) error {
-	return nil
+func processCliCommand(message []byte) (string, error) {
+	cliCommand := &Command{}
+	json.Unmarshal(message, cliCommand)
+	if cliCommand.Type == "CLI_DN_LIST" {
+		return masterData.ListDataNode(cliCommand.Data), nil
+	} else if cliCommand.Type == "CLI_DN_ADD" {
+		dataNode := &DataNode{}
+		err := json.Unmarshal([]byte(cliCommand.Data), dataNode)
+		fmt.Println(err)
+		masterData.AddDataNode(dataNode)
+	}
+	return "", nil
 }
 
 func sendCliCommand(master string, command *Command) ([]byte, error) {
@@ -178,6 +185,17 @@ func main() {
 						})
 						// cli
 						gorest2.RegisterHandler("/sys/cli", func(w http.ResponseWriter, r *http.Request) {
+							res, err := ioutil.ReadAll(r.Body)
+							if err != nil {
+								fmt.Println(err)
+							}
+							//							fmt.Println(string(res))
+							result, err := processCliCommand(res)
+							if err != nil {
+								fmt.Println(err)
+							}
+							fmt.Println(string(result))
+							fmt.Fprint(w, result)
 						})
 						serve(service)
 						<-done
@@ -235,7 +253,11 @@ func main() {
 							Type: "CLI_DN_LIST",
 							Data: mode,
 						}
-						sendCliCommand(master, cliDnListCommand)
+						response, err := sendCliCommand(master, cliDnListCommand)
+						if err != nil {
+							fmt.Println(err)
+						}
+						fmt.Println(string(response))
 					},
 				},
 				{
@@ -274,6 +296,7 @@ func main() {
 						},
 					},
 					Action: func(c *cli.Context) {
+						master := c.String("master")
 						dataNode := &DataNode{
 							Name:     c.String("name"),
 							Host:     c.String("host"),
@@ -282,7 +305,19 @@ func main() {
 							Password: c.String("pass"),
 							Note:     c.String("note"),
 						}
-						masterData.AddDataNode(dataNode)
+						dataNodeJSONBytes, err := json.Marshal(dataNode)
+						if err != nil {
+							fmt.Println(err)
+						}
+						cliDnAddCommand := &Command{
+							Type: "CLI_DN_ADD",
+							Data: string(dataNodeJSONBytes),
+						}
+						response, err := sendCliCommand(master, cliDnAddCommand)
+						if err != nil {
+							fmt.Println(err)
+						}
+						fmt.Println(string(response))
 					},
 				},
 				{
