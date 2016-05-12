@@ -70,12 +70,22 @@ func processCliCommand(message []byte) (string, error) {
 	return "", nil
 }
 
-func processWsCommand(conn *websocket.Conn, message []byte) error {
+func processWsCommandMaster(conn *websocket.Conn, message []byte) error {
 	wsCommand := &Command{}
 	json.Unmarshal(message, wsCommand)
-	if wsCommand.Type == "WS_REGISTER" {
+	switch wsCommand.Type {
+	case "WS_REGISTER":
 		wsConns[wsCommand.Data] = conn
 		log.Println(conn.RemoteAddr(), "connected.")
+		masterDataBytes, err := json.Marshal(masterData)
+		if err != nil {
+			return err
+		}
+		masterDataCommand := &Command{
+			Type: "WS_MASTER_DATA",
+			Data: string(masterDataBytes),
+		}
+		conn.WriteJSON(masterDataCommand)
 	}
 	return nil
 }

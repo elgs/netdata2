@@ -95,7 +95,7 @@ func main() {
 											}
 											break
 										}
-										err = processWsCommand(conn, message)
+										err = processWsCommandMaster(conn, message)
 										if err != nil {
 											log.Println(err)
 										}

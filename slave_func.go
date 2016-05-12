@@ -4,6 +4,7 @@ package main
 import (
 	"crypto/tls"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -57,8 +58,10 @@ func RegisterToMaster(service *CliService, wsDrop chan bool) error {
 				// Reconnect
 				return
 			}
-			wsCommand := &Command{}
-			json.Unmarshal(message, wsCommand)
+			err = processWsCommandSlave(c, message)
+			if err != nil {
+				log.Println(err)
+			}
 		}
 	}()
 
@@ -75,5 +78,15 @@ func RegisterToMaster(service *CliService, wsDrop chan bool) error {
 		return err
 	}
 	log.Println("Connected to master:", service.Master)
+	return nil
+}
+
+func processWsCommandSlave(conn *websocket.Conn, message []byte) error {
+	wsCommand := &Command{}
+	json.Unmarshal(message, wsCommand)
+	switch wsCommand.Type {
+	case "WS_MASTER_DATA":
+		fmt.Println(wsCommand.Data)
+	}
 	return nil
 }
