@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -85,7 +86,7 @@ func main() {
 										_, message, err := c.ReadMessage()
 										if err != nil {
 											c.Close()
-											fmt.Println(c.RemoteAddr(), " dropped. ")
+											log.Println(c.RemoteAddr(), "dropped.")
 											for k, v := range wsConns {
 												if v == conn {
 													delete(wsConns, k)
@@ -94,7 +95,10 @@ func main() {
 											}
 											break
 										}
-										processWsCommand(conn, message)
+										err = processWsCommand(conn, message)
+										if err != nil {
+											log.Println(err)
+										}
 									}
 								}(conn)
 							})

@@ -3,6 +3,7 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 
 	"github.com/gorilla/websocket"
 )
@@ -74,6 +75,7 @@ func processWsCommand(conn *websocket.Conn, message []byte) error {
 	json.Unmarshal(message, wsCommand)
 	if wsCommand.Type == "WS_REGISTER" {
 		wsConns[wsCommand.Data] = conn
+		log.Println(conn.RemoteAddr(), "connected.")
 	}
 	return nil
 }
