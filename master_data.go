@@ -164,6 +164,16 @@ func (this *MasterData) AddApp(app *App) error {
 			return errors.New("App existed: " + app.Name)
 		}
 	}
+	dataNodeFound := false
+	for _, v := range this.DataNodes {
+		if v.Name == app.DataNodeName {
+			dataNodeFound = true
+			break
+		}
+	}
+	if !dataNodeFound {
+		return errors.New("Data node does not exist: " + app.DataNodeName)
+	}
 	this.Apps = append(this.Apps, *app)
 	this.Version++
 	return nil
@@ -194,6 +204,18 @@ func (this *MasterData) UpdateApp(app *App) error {
 	if index == -1 {
 		return errors.New("App not found: " + app.Name)
 	}
+
+	dataNodeFound := false
+	for _, v := range this.DataNodes {
+		if v.Name == app.DataNodeName {
+			dataNodeFound = true
+			break
+		}
+	}
+	if !dataNodeFound {
+		return errors.New("Data node does not exist: " + app.DataNodeName)
+	}
+
 	this.Apps = append(this.Apps[:index], *app)
 	this.Apps = append(this.Apps, this.Apps[index+1:]...)
 	this.Version++

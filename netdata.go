@@ -1,11 +1,9 @@
 package main
 
 import (
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -23,107 +21,18 @@ var masterData MasterData
 func loadMasterData(file string)             {}
 func storeMasterData(masterData *MasterData) {}
 
-func processWsCommand(conn *websocket.Conn, message []byte) error {
-	wsCommand := &Command{}
-	json.Unmarshal(message, wsCommand)
-	if wsCommand.Type == "WS_REGISTER" {
-		wsConns[wsCommand.Data] = conn
-	}
-	return nil
-}
-
-func processCliCommand(message []byte) (string, error) {
-	cliCommand := &Command{}
-	json.Unmarshal(message, cliCommand)
-	if cliCommand.Type == "CLI_DN_LIST" {
-		return masterData.ListDataNodes(cliCommand.Data), nil
-	} else if cliCommand.Type == "CLI_DN_ADD" {
-		dataNode := &DataNode{}
-		err := json.Unmarshal([]byte(cliCommand.Data), dataNode)
-		if err != nil {
-			return "", err
-		}
-		err = masterData.AddDataNode(dataNode)
-		if err != nil {
-			return "", err
-		}
-	} else if cliCommand.Type == "CLI_DN_UPDATE" {
-		dataNode := &DataNode{}
-		err := json.Unmarshal([]byte(cliCommand.Data), dataNode)
-		if err != nil {
-			return "", err
-		}
-		err = masterData.UpdateDataNode(dataNode)
-		if err != nil {
-			return "", err
-		}
-	} else if cliCommand.Type == "CLI_DN_REMOVE" {
-		err := masterData.RemoveDataNode(cliCommand.Data)
-		if err != nil {
-			return "", err
-		}
-	} else if cliCommand.Type == "CLI_APP_LIST" {
-		return masterData.ListApps(cliCommand.Data), nil
-	} else if cliCommand.Type == "CLI_APP_ADD" {
-		app := &App{}
-		err := json.Unmarshal([]byte(cliCommand.Data), app)
-		if err != nil {
-			return "", err
-		}
-		err = masterData.AddApp(app)
-		if err != nil {
-			return "", err
-		}
-	} else if cliCommand.Type == "CLI_APP_UPDATE" {
-		app := &App{}
-		err := json.Unmarshal([]byte(cliCommand.Data), app)
-		if err != nil {
-			return "", err
-		}
-		err = masterData.UpdateApp(app)
-		if err != nil {
-			return "", err
-		}
-	} else if cliCommand.Type == "CLI_APP_REMOVE" {
-		err := masterData.RemoveApp(cliCommand.Data)
-		if err != nil {
-			return "", err
-		}
-	}
-	return "", nil
-}
-
-func sendCliCommand(master string, command *Command) ([]byte, error) {
-	message, err := json.Marshal(command)
-	if err != nil {
-		return nil, err
-	}
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	client := &http.Client{Transport: tr}
-	req, err := http.NewRequest("POST", "https://"+master+"/sys/cli", strings.NewReader(string(message)))
-	if err != nil {
-		return nil, err
-	}
-
-	res, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	result, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-	return result, err
-}
-
 func main() {
 
 	sigs := make(chan os.Signal, 1)
 	wsDrop := make(chan bool, 1)
 	done := make(chan bool, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+
+	service := &CliService{
+		EnableHttp: true,
+		HostHttp:   "127.0.0.1",
+	}
+
 	go func() {
 		for {
 			select {
@@ -133,7 +42,7 @@ func main() {
 				// cleanup code here
 				done <- true
 			case <-wsDrop:
-				fmt.Println("ws dropped.")
+				RegisterToMaster(service, wsDrop)
 			}
 		}
 	}()
@@ -144,11 +53,6 @@ func main() {
 	app.Version = "0.0.1"
 	app.Action = func(c *cli.Context) error {
 		return nil
-	}
-
-	service := &CliService{
-		EnableHttp: true,
-		HostHttp:   "127.0.0.1",
 	}
 
 	app.Commands = []cli.Command{
@@ -165,35 +69,7 @@ func main() {
 						service.LoadConfigs(c)
 						if len(strings.TrimSpace(service.Master)) > 0 {
 							// load data from master if slave
-							c, _, err := websocket.DefaultDialer.Dial("wss://"+service.Master+"/sys/ws", nil)
-							if err != nil {
-								fmt.Println(err)
-								wsDrop <- true
-							}
-							go func() {
-								defer c.Close()
-								defer func() { wsDrop <- true }()
-								for {
-									_, message, err := c.ReadMessage()
-									if err != nil {
-										log.Println("read:", err)
-										return
-									}
-									wsCommand := &Command{}
-									json.Unmarshal(message, wsCommand)
-								}
-							}()
-
-							regCommand := Command{
-								Type: "WS_REGISTER",
-								Data: service.Id,
-							}
-
-							// Register
-							if err := c.WriteJSON(regCommand); err != nil {
-								fmt.Println(err)
-								wsDrop <- true
-							}
+							RegisterToMaster(service, wsDrop)
 						} else {
 							// load data from data file if master
 							gorest2.RegisterHandler("/sys/ws", func(w http.ResponseWriter, r *http.Request) {
@@ -208,8 +84,8 @@ func main() {
 									for {
 										_, message, err := c.ReadMessage()
 										if err != nil {
-											fmt.Println(err)
 											c.Close()
+											fmt.Println(c.RemoteAddr(), " dropped. ")
 											for k, v := range wsConns {
 												if v == conn {
 													delete(wsConns, k)
