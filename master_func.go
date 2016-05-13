@@ -66,6 +66,12 @@ func processCliCommand(message []byte) (string, error) {
 		if err != nil {
 			return "", err
 		}
+	case "CLI_SHOW_MASTER":
+		masterDataBytes, err := json.Marshal(masterData)
+		if err != nil {
+			return "", err
+		}
+		return string(masterDataBytes), nil
 	}
 	return "", nil
 }

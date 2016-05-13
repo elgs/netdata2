@@ -560,6 +560,39 @@ func main() {
 				},
 			},
 		},
+		{
+			Name:  "show",
+			Usage: "show commands",
+			Subcommands: []cli.Command{
+				{
+					Name:  "master",
+					Usage: "show master data",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "master, m",
+							Value: "127.0.0.1:2015",
+							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+						},
+					},
+					Action: func(c *cli.Context) error {
+						master := c.String("master")
+						cliShowMasterCommand := &Command{
+							Type: "CLI_SHOW_MASTER",
+						}
+						response, err := sendCliCommand(master, cliShowMasterCommand)
+						if err != nil {
+							fmt.Println(err)
+							return err
+						}
+						output := string(response)
+						if output != "" {
+							fmt.Println(strings.TrimSpace(output))
+						}
+						return nil
+					},
+				},
+			},
+		},
 	}
 	app.Run(os.Args)
 }
