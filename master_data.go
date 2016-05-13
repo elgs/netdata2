@@ -111,7 +111,7 @@ func (this *MasterData) AddDataNode(dataNode *DataNode) error {
 	}
 	this.DataNodes = append(this.DataNodes, *dataNode)
 	this.Version++
-	return nil
+	return propagateMasterData()
 }
 func (this *MasterData) RemoveDataNode(name string) error {
 	index := -1
@@ -126,7 +126,7 @@ func (this *MasterData) RemoveDataNode(name string) error {
 	}
 	this.DataNodes = append(this.DataNodes[:index], this.DataNodes[index+1:]...)
 	this.Version++
-	return nil
+	return propagateMasterData()
 }
 func (this *MasterData) UpdateDataNode(dataNode *DataNode) error {
 	index := -1
@@ -142,7 +142,7 @@ func (this *MasterData) UpdateDataNode(dataNode *DataNode) error {
 	this.DataNodes = append(this.DataNodes[:index], *dataNode)
 	this.DataNodes = append(this.DataNodes, this.DataNodes[index+1:]...)
 	this.Version++
-	return nil
+	return propagateMasterData()
 }
 func (this *MasterData) ListDataNodes(mode string) string {
 	var buffer bytes.Buffer
@@ -176,7 +176,7 @@ func (this *MasterData) AddApp(app *App) error {
 	}
 	this.Apps = append(this.Apps, *app)
 	this.Version++
-	return nil
+	return propagateMasterData()
 }
 func (this *MasterData) RemoveApp(name string) error {
 	index := -1
@@ -191,7 +191,7 @@ func (this *MasterData) RemoveApp(name string) error {
 	}
 	this.Apps = append(this.Apps[:index], this.Apps[index+1:]...)
 	this.Version++
-	return nil
+	return propagateMasterData()
 }
 func (this *MasterData) UpdateApp(app *App) error {
 	index := -1
@@ -219,7 +219,7 @@ func (this *MasterData) UpdateApp(app *App) error {
 	this.Apps = append(this.Apps[:index], *app)
 	this.Apps = append(this.Apps, this.Apps[index+1:]...)
 	this.Version++
-	return nil
+	return propagateMasterData()
 }
 func (this *MasterData) ListApps(mode string) string {
 	var buffer bytes.Buffer

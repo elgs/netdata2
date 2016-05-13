@@ -83,6 +83,7 @@ func processWsCommandMaster(conn *websocket.Conn, message []byte) error {
 	case "WS_REGISTER":
 		wsConns[wsCommand.Data] = conn
 		log.Println(conn.RemoteAddr(), "connected.")
+
 		masterDataBytes, err := json.Marshal(masterData)
 		if err != nil {
 			return err
@@ -94,4 +95,20 @@ func processWsCommandMaster(conn *websocket.Conn, message []byte) error {
 		conn.WriteJSON(masterDataCommand)
 	}
 	return nil
+}
+
+func propagateMasterData() error {
+	var err error
+	masterDataBytes, err := json.Marshal(masterData)
+	if err != nil {
+		return err
+	}
+	masterDataCommand := &Command{
+		Type: "WS_MASTER_DATA",
+		Data: string(masterDataBytes),
+	}
+	for _, conn := range wsConns {
+		err = conn.WriteJSON(masterDataCommand)
+	}
+	return err
 }
