@@ -23,7 +23,6 @@ func loadMasterData(file string)             {}
 func storeMasterData(masterData *MasterData) {}
 
 func main() {
-
 	sigs := make(chan os.Signal, 1)
 	wsDrop := make(chan bool, 1)
 	done := make(chan bool, 1)

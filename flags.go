@@ -117,8 +117,8 @@ func (this *CliService) LoadConfig(file string, c *cli.Context) {
 			this.Id = v
 		}
 	}
-	if !c.IsSet("slaveof") {
-		v, err := jqConf.QueryToString("slaveof")
+	if !c.IsSet("master") {
+		v, err := jqConf.QueryToString("master")
 		if err == nil {
 			this.Master = v
 		}
