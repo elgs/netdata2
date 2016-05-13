@@ -4,7 +4,6 @@ package main
 import (
 	"crypto/tls"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -86,7 +85,12 @@ func processWsCommandSlave(conn *websocket.Conn, message []byte) error {
 	json.Unmarshal(message, wsCommand)
 	switch wsCommand.Type {
 	case "WS_MASTER_DATA":
-		fmt.Println(wsCommand.Data)
+		masterCommand := &Command{}
+		err := json.Unmarshal(message, &masterCommand)
+		if err != nil {
+			return err
+		}
+		return json.Unmarshal([]byte(masterCommand.Data), &masterData)
 	}
 	return nil
 }
