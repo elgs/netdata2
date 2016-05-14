@@ -16,6 +16,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+var slaveConn *websocket.Conn
 var wsConns = make(map[string]*websocket.Conn)
 var masterData MasterData
 
@@ -117,12 +118,24 @@ func main() {
 								fmt.Fprint(w, err.Error())
 								return
 							}
-							result, err := processCliCommand(res, service.Master)
-							if err != nil {
-								fmt.Fprint(w, err.Error())
-								return
+							if service.Master == "" {
+								result, err := processCliCommand(res)
+								if err != nil {
+									fmt.Fprint(w, err.Error())
+									return
+								}
+								fmt.Fprint(w, result)
+							} else {
+								cliCommand := &Command{}
+								json.Unmarshal(res, cliCommand)
+								response, err := sendCliCommand(service.Master, cliCommand)
+								if err != nil {
+									fmt.Fprint(w, err.Error())
+									return
+								}
+								output := string(response)
+								fmt.Fprint(w, output)
 							}
-							fmt.Fprint(w, result)
 						})
 						serve(service)
 						<-done

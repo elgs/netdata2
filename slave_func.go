@@ -76,6 +76,7 @@ func RegisterToMaster(service *CliService, wsDrop chan bool) error {
 		wsDrop <- true
 		return err
 	}
+	slaveConn = c
 	log.Println("Connected to master:", service.Master)
 	return nil
 }

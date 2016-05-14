@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 )
 
-func processCliCommand(message []byte, master string) (string, error) {
+func processCliCommand(message []byte) (string, error) {
 	cliCommand := &Command{}
 	json.Unmarshal(message, cliCommand)
 	switch cliCommand.Type {
@@ -17,7 +17,7 @@ func processCliCommand(message []byte, master string) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		err = masterData.AddDataNode(dataNode, master)
+		err = masterData.AddDataNode(dataNode)
 		if err != nil {
 			return "", err
 		}
@@ -27,12 +27,12 @@ func processCliCommand(message []byte, master string) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		err = masterData.UpdateDataNode(dataNode, master)
+		err = masterData.UpdateDataNode(dataNode)
 		if err != nil {
 			return "", err
 		}
 	case "CLI_DN_REMOVE":
-		err := masterData.RemoveDataNode(cliCommand.Data, master)
+		err := masterData.RemoveDataNode(cliCommand.Data)
 		if err != nil {
 			return "", err
 		}
@@ -44,7 +44,7 @@ func processCliCommand(message []byte, master string) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		err = masterData.AddApp(app, master)
+		err = masterData.AddApp(app)
 		if err != nil {
 			return "", err
 		}
@@ -54,12 +54,12 @@ func processCliCommand(message []byte, master string) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		err = masterData.UpdateApp(app, master)
+		err = masterData.UpdateApp(app)
 		if err != nil {
 			return "", err
 		}
 	case "CLI_APP_REMOVE":
-		err := masterData.RemoveApp(cliCommand.Data, master)
+		err := masterData.RemoveApp(cliCommand.Data)
 		if err != nil {
 			return "", err
 		}

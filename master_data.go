@@ -103,7 +103,7 @@ type RemoteInterceptor struct {
 	Status     string
 }
 
-func (this *MasterData) AddDataNode(dataNode *DataNode, master string) error {
+func (this *MasterData) AddDataNode(dataNode *DataNode) error {
 	for _, v := range this.DataNodes {
 		if v.Name == dataNode.Name {
 			return errors.New("Data node existed: " + dataNode.Name)
@@ -113,7 +113,7 @@ func (this *MasterData) AddDataNode(dataNode *DataNode, master string) error {
 	this.Version++
 	return propagateMasterData()
 }
-func (this *MasterData) RemoveDataNode(name string, master string) error {
+func (this *MasterData) RemoveDataNode(name string) error {
 	index := -1
 	for i, v := range this.DataNodes {
 		if v.Name == name {
@@ -128,7 +128,7 @@ func (this *MasterData) RemoveDataNode(name string, master string) error {
 	this.Version++
 	return propagateMasterData()
 }
-func (this *MasterData) UpdateDataNode(dataNode *DataNode, master string) error {
+func (this *MasterData) UpdateDataNode(dataNode *DataNode) error {
 	index := -1
 	for i, v := range this.DataNodes {
 		if v.Name == dataNode.Name {
@@ -158,7 +158,7 @@ func (this *MasterData) ListDataNodes(mode string) string {
 	return buffer.String()
 }
 
-func (this *MasterData) AddApp(app *App, master string) error {
+func (this *MasterData) AddApp(app *App) error {
 	for _, v := range this.Apps {
 		if v.Name == app.Name {
 			return errors.New("App existed: " + app.Name)
@@ -178,7 +178,7 @@ func (this *MasterData) AddApp(app *App, master string) error {
 	this.Version++
 	return propagateMasterData()
 }
-func (this *MasterData) RemoveApp(name string, master string) error {
+func (this *MasterData) RemoveApp(name string) error {
 	index := -1
 	for i, v := range this.Apps {
 		if v.Name == name {
@@ -193,7 +193,7 @@ func (this *MasterData) RemoveApp(name string, master string) error {
 	this.Version++
 	return propagateMasterData()
 }
-func (this *MasterData) UpdateApp(app *App, master string) error {
+func (this *MasterData) UpdateApp(app *App) error {
 	index := -1
 	for i, v := range this.Apps {
 		if v.Name == app.Name {
