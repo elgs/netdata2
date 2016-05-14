@@ -117,7 +117,7 @@ func main() {
 								fmt.Fprint(w, err.Error())
 								return
 							}
-							result, err := processCliCommand(res)
+							result, err := processCliCommand(res, service.Master)
 							if err != nil {
 								fmt.Fprint(w, err.Error())
 								return
