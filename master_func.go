@@ -41,6 +41,9 @@ func propagateMasterData() error {
 	}
 	for _, conn := range wsConns {
 		err = conn.WriteJSON(masterDataCommand)
+		if err != nil {
+			log.Println(err)
+		}
 	}
 	return err
 }
