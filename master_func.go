@@ -13,7 +13,12 @@ func processWsCommandMaster(conn *websocket.Conn, message []byte) error {
 	json.Unmarshal(message, wsCommand)
 	switch wsCommand.Type {
 	case "WS_REGISTER":
-		wsConns[wsCommand.Data] = conn
+		service := &CliService{}
+		err := json.Unmarshal([]byte(wsCommand.Data), service)
+		if err != nil {
+			return err
+		}
+		wsConns[service.Id] = conn
 		log.Println(conn.RemoteAddr(), "connected.")
 
 		masterDataBytes, err := json.Marshal(masterData)

@@ -65,9 +65,16 @@ func RegisterToMaster(service *CliService, wsDrop chan bool) error {
 		}
 	}()
 
+	serviceBytes, err := json.Marshal(service)
+	if err != nil {
+		log.Println(err)
+		time.Sleep(time.Second * 5)
+		wsDrop <- true
+		return err
+	}
 	regCommand := Command{
 		Type: "WS_REGISTER",
-		Data: service.Id,
+		Data: string(serviceBytes),
 	}
 
 	// Register
