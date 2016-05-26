@@ -234,3 +234,30 @@ func (this *MasterData) ListApps(mode string) string {
 	}
 	return buffer.String()
 }
+
+func (this *MasterData) AddApiNode(apiNode *ApiNode) error {
+	for _, v := range this.ApiNodes {
+		if v.Name == apiNode.Name {
+			return errors.New("API node existed: " + apiNode.Name)
+		}
+	}
+	this.ApiNodes = append(this.ApiNodes, *apiNode)
+	this.Version++
+	return propagateMasterData()
+}
+
+func (this *MasterData) RemoveApiNode(name string) error {
+	index := -1
+	for i, v := range this.ApiNodes {
+		if v.Name == name {
+			index = i
+			break
+		}
+	}
+	if index == -1 {
+		return errors.New("API node not found: " + name)
+	}
+	this.ApiNodes = append(this.ApiNodes[:index], this.ApiNodes[index+1:]...)
+	this.Version++
+	return propagateMasterData()
+}

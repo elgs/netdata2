@@ -85,6 +85,7 @@ func main() {
 									for {
 										_, message, err := c.ReadMessage()
 										if err != nil {
+											masterData.RemoveApiNode(c.RemoteAddr().String())
 											c.Close()
 											log.Println(c.RemoteAddr(), "dropped.")
 											for k, v := range wsConns {
@@ -95,6 +96,7 @@ func main() {
 											}
 											break
 										}
+										// Master to process command from client web socket channels.
 										err = processWsCommandMaster(c, message)
 										if err != nil {
 											log.Println(err)
@@ -119,6 +121,7 @@ func main() {
 								return
 							}
 							if service.Master == "" {
+								// Master to process commands from cli interface.
 								result, err := processCliCommand(res)
 								if err != nil {
 									fmt.Fprint(w, err.Error())
@@ -128,6 +131,7 @@ func main() {
 							} else {
 								cliCommand := &Command{}
 								json.Unmarshal(res, cliCommand)
+								// Slave to forward cli command to master.
 								response, err := sendCliCommand(service.Master, cliCommand)
 								if err != nil {
 									fmt.Fprint(w, err.Error())

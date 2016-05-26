@@ -3,6 +3,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 
 	"github.com/gorilla/websocket"
@@ -18,18 +19,19 @@ func processWsCommandMaster(conn *websocket.Conn, message []byte) error {
 		if err != nil {
 			return err
 		}
-		wsConns[service.Id] = conn
-		log.Println(conn.RemoteAddr(), "connected.")
 
-		masterDataBytes, err := json.Marshal(masterData)
+		apiNode := &ApiNode{
+			Name:       conn.RemoteAddr().String(),
+			ServerName: fmt.Sprint(service.HostHttps, ":", service.PortHttps),
+		}
+		err = masterData.AddApiNode(apiNode)
 		if err != nil {
+			conn.Close()
 			return err
 		}
-		masterDataCommand := &Command{
-			Type: "WS_MASTER_DATA",
-			Data: string(masterDataBytes),
-		}
-		conn.WriteJSON(masterDataCommand)
+
+		wsConns[service.Id] = conn
+		log.Println(conn.RemoteAddr(), "connected.")
 	}
 	return nil
 }
