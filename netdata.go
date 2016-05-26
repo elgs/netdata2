@@ -81,21 +81,21 @@ func main() {
 								}
 
 								go func(c *websocket.Conn) {
-									defer conn.Close()
+									defer c.Close()
 									for {
 										_, message, err := c.ReadMessage()
 										if err != nil {
 											c.Close()
 											log.Println(c.RemoteAddr(), "dropped.")
 											for k, v := range wsConns {
-												if v == conn {
+												if v == c {
 													delete(wsConns, k)
 													break
 												}
 											}
 											break
 										}
-										err = processWsCommandMaster(conn, message)
+										err = processWsCommandMaster(c, message)
 										if err != nil {
 											log.Println(err)
 										}
