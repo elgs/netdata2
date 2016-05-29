@@ -3,6 +3,8 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	//	"fmt"
 	"log"
 
@@ -39,6 +41,10 @@ func processWsCommandMaster(conn *websocket.Conn, message []byte) error {
 func propagateMasterData() error {
 	var err error
 	masterDataBytes, err := json.Marshal(masterData)
+	if err != nil {
+		return err
+	}
+	err = ioutil.WriteFile(service.DataFile, masterDataBytes, 0644)
 	if err != nil {
 		return err
 	}

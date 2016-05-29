@@ -2,9 +2,6 @@
 package main
 
 import (
-	"log"
-	"os"
-	"os/user"
 	"strings"
 
 	"github.com/codegangsta/cli"
@@ -79,25 +76,17 @@ func (this *CliService) Flags() []cli.Flag {
 		},
 		cli.StringFlag{
 			Name:        "data_file, d",
-			Usage:       "master data file path, ignored by slave nodes, search path: ~/.netdata/netdata_master.json, /etc/netdata/netdata_master.json",
+			Value:       pwd + "/.netdata/netdata_master.json",
+			Usage:       "master data file path, ignored by slave nodes, search path: ~/.netdata/netdata_master.json",
 			Destination: &this.DataFile,
 		},
 	}
 }
 
 func (this *CliService) LoadConfigs(c *cli.Context) {
-	// read config file
-	usr, err := user.Current()
-	if err != nil {
-		log.Fatal(err)
-	}
-	pwd, err := os.Getwd()
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	this.LoadConfig("/etc/netdata/netdata.json", c)
-	this.LoadConfig(usr.HomeDir+"/.netdata/netdata.json", c)
+	this.LoadConfig(homeDir+"/.netdata/netdata.json", c)
 	this.LoadConfig(pwd+"/netdata.json", c)
 	this.LoadConfig(this.ConfFile, c)
 	if strings.TrimSpace(this.Id) == "" {

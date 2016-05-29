@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"os/user"
 	"strings"
 	"syscall"
 
@@ -19,6 +20,8 @@ import (
 var slaveConn *websocket.Conn
 var wsConns = make(map[string]*websocket.Conn)
 var masterData MasterData
+var pwd string
+var homeDir string
 
 func loadMasterData(file string)             {}
 func storeMasterData(masterData *MasterData) {}
@@ -29,6 +32,16 @@ var service = &CliService{
 }
 
 func main() {
+	// read config file
+	usr, err := user.Current()
+	if err != nil {
+		log.Fatal(err)
+	}
+	homeDir = usr.HomeDir
+	pwd, err = os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
 	sigs := make(chan os.Signal, 1)
 	wsDrop := make(chan bool, 1)
 	done := make(chan bool, 1)
