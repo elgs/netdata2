@@ -23,16 +23,16 @@ var masterData MasterData
 func loadMasterData(file string)             {}
 func storeMasterData(masterData *MasterData) {}
 
+var service = &CliService{
+	EnableHttp: true,
+	HostHttp:   "127.0.0.1",
+}
+
 func main() {
 	sigs := make(chan os.Signal, 1)
 	wsDrop := make(chan bool, 1)
 	done := make(chan bool, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
-
-	service := &CliService{
-		EnableHttp: true,
-		HostHttp:   "127.0.0.1",
-	}
 
 	go func() {
 		for {
@@ -43,7 +43,7 @@ func main() {
 				// cleanup code here
 				done <- true
 			case <-wsDrop:
-				RegisterToMaster(service, wsDrop)
+				RegisterToMaster(wsDrop)
 			}
 		}
 	}()
@@ -70,7 +70,7 @@ func main() {
 						service.LoadConfigs(c)
 						if len(strings.TrimSpace(service.Master)) > 0 {
 							// load data from master if slave
-							RegisterToMaster(service, wsDrop)
+							RegisterToMaster(wsDrop)
 						} else {
 							// load data from data file if master
 							gorest2.RegisterHandler("/sys/ws", func(w http.ResponseWriter, r *http.Request) {

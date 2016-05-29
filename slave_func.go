@@ -38,7 +38,7 @@ func sendCliCommand(master string, command *Command) ([]byte, error) {
 	return result, err
 }
 
-func RegisterToMaster(service *CliService, wsDrop chan bool) error {
+func RegisterToMaster(wsDrop chan bool) error {
 	c, _, err := websocket.DefaultDialer.Dial("wss://"+service.Master+"/sys/ws", nil)
 	if err != nil {
 		log.Println(err)
