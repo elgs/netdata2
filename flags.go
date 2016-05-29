@@ -84,7 +84,6 @@ func (this *CliService) Flags() []cli.Flag {
 }
 
 func (this *CliService) LoadConfigs(c *cli.Context) {
-
 	this.LoadConfig("/etc/netdata/netdata.json", c)
 	this.LoadConfig(homeDir+"/.netdata/netdata.json", c)
 	this.LoadConfig(pwd+"/netdata.json", c)

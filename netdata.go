@@ -81,6 +81,12 @@ func main() {
 					Flags: service.Flags(),
 					Action: func(c *cli.Context) error {
 						service.LoadConfigs(c)
+						masterDataBytes, err := ioutil.ReadFile(service.DataFile)
+						if err != nil {
+							return nil
+						}
+						json.Unmarshal(masterDataBytes, &masterData)
+						masterData.ApiNodes = nil
 						if len(strings.TrimSpace(service.Master)) > 0 {
 							// load data from master if slave
 							RegisterToMaster(wsDrop)
