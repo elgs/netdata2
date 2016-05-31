@@ -146,7 +146,7 @@ func (this *MasterData) UpdateDataNode(dataNode *DataNode) error {
 }
 func (this *MasterData) ListDataNodes(mode string) string {
 	var buffer bytes.Buffer
-	for _, dataNode := range masterData.DataNodes {
+	for _, dataNode := range this.DataNodes {
 		if mode == "compact" {
 			buffer.WriteString(dataNode.Name + " ")
 		} else if mode == "full" {
@@ -223,7 +223,7 @@ func (this *MasterData) UpdateApp(app *App) error {
 }
 func (this *MasterData) ListApps(mode string) string {
 	var buffer bytes.Buffer
-	for _, app := range masterData.Apps {
+	for _, app := range this.Apps {
 		if mode == "compact" {
 			buffer.WriteString(app.Name + " ")
 		} else if mode == "full" {
@@ -258,6 +258,70 @@ func (this *MasterData) RemoveApiNode(name string) error {
 		return errors.New("API node not found: " + name)
 	}
 	this.ApiNodes = append(this.ApiNodes[:index], this.ApiNodes[index+1:]...)
+	this.Version++
+	return propagateMasterData()
+}
+
+func (this *MasterData) AddQuery(query *Query) error {
+	for _, v := range this.Queries {
+		if v.Name == query.Name {
+			return errors.New("Query existed: " + query.Name)
+		}
+	}
+	appFound := false
+	for _, v := range this.Apps {
+		if v.Name == query.AppName {
+			appFound = true
+			break
+		}
+	}
+	if !appFound {
+		return errors.New("App does not exist: " + query.AppName)
+	}
+	this.Queries = append(this.Queries, *query)
+	this.Version++
+	return propagateMasterData()
+}
+func (this *MasterData) RemoveQuery(name string, appName string) error {
+	index := -1
+	for i, v := range this.Queries {
+		if v.Name == name && v.AppName == appName {
+			index = i
+			break
+		}
+	}
+	if index == -1 {
+		return errors.New("Query not found: " + name)
+	}
+	this.Queries = append(this.Queries[:index], this.Queries[index+1:]...)
+	this.Version++
+	return propagateMasterData()
+}
+func (this *MasterData) UpdateQuery(query *Query) error {
+	index := -1
+	for i, v := range this.Queries {
+		if v.Name == query.Name && v.AppName == query.AppName {
+			index = i
+			break
+		}
+	}
+	if index == -1 {
+		return errors.New("Query not found: " + query.Name)
+	}
+
+	appFound := false
+	for _, v := range this.Apps {
+		if v.Name == query.AppName {
+			appFound = true
+			break
+		}
+	}
+	if !appFound {
+		return errors.New("App does not exist: " + query.AppName)
+	}
+
+	this.Queries = append(this.Queries[:index], *query)
+	this.Queries = append(this.Queries, this.Queries[index+1:]...)
 	this.Version++
 	return propagateMasterData()
 }
