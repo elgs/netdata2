@@ -63,6 +63,36 @@ func processCliCommand(message []byte) (string, error) {
 		if err != nil {
 			return "", err
 		}
+	case "CLI_QUERY_ADD":
+		query := &Query{}
+		err := json.Unmarshal([]byte(cliCommand.Data), query)
+		if err != nil {
+			return "", err
+		}
+		err = masterData.AddQuery(query)
+		if err != nil {
+			return "", err
+		}
+	case "CLI_QUERY_UPDATE":
+		query := &Query{}
+		err := json.Unmarshal([]byte(cliCommand.Data), query)
+		if err != nil {
+			return "", err
+		}
+		err = masterData.UpdateQuery(query)
+		if err != nil {
+			return "", err
+		}
+	case "CLI_QUERY_REMOVE":
+		query := &Query{}
+		err := json.Unmarshal([]byte(cliCommand.Data), query)
+		if err != nil {
+			return "", err
+		}
+		err = masterData.RemoveQuery(query.Name, query.AppName)
+		if err != nil {
+			return "", err
+		}
 	case "CLI_SHOW_MASTER":
 		masterDataBytes, err := json.Marshal(masterData)
 		if err != nil {

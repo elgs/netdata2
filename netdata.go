@@ -596,6 +596,168 @@ func main() {
 			},
 		},
 		{
+			Name:    "query",
+			Aliases: []string{"q"},
+			Usage:   "query commands",
+			Subcommands: []cli.Command{
+				{
+					Name:  "add",
+					Usage: "add a new query",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "master, m",
+							Value: "127.0.0.1:2015",
+							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+						},
+						cli.StringFlag{
+							Name:  "name, n",
+							Usage: "name of the query",
+						},
+						cli.StringFlag{
+							Name:  "app, a",
+							Usage: "app name",
+						},
+						cli.StringFlag{
+							Name:  "script, s",
+							Usage: "script of the query",
+						},
+						cli.StringFlag{
+							Name:  "note, t",
+							Usage: "a note for the query",
+						},
+					},
+					Action: func(c *cli.Context) error {
+						master := c.String("master")
+						query := &Query{
+							Name:    c.String("name"),
+							AppName: c.String("app"),
+							Script:  c.String("script"),
+							Note:    c.String("note"),
+						}
+						queryJSONBytes, err := json.Marshal(query)
+						if err != nil {
+							fmt.Println(err)
+							return err
+						}
+						cliQueryAddCommand := &Command{
+							Type: "CLI_QUERY_ADD",
+							Data: string(queryJSONBytes),
+						}
+						response, err := sendCliCommand(master, cliQueryAddCommand)
+						if err != nil {
+							fmt.Println(err)
+							return err
+						}
+						output := string(response)
+						if output != "" {
+							fmt.Println(strings.TrimSpace(output))
+						}
+						return nil
+					},
+				},
+				{
+					Name:  "update",
+					Usage: "update an existing query",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "master, m",
+							Value: "127.0.0.1:2015",
+							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+						},
+						cli.StringFlag{
+							Name:  "name, n",
+							Usage: "name of the query",
+						},
+						cli.StringFlag{
+							Name:  "app, a",
+							Usage: "app name",
+						},
+						cli.StringFlag{
+							Name:  "script, s",
+							Usage: "script of the query",
+						},
+						cli.StringFlag{
+							Name:  "note, t",
+							Usage: "a note for the query",
+						},
+					},
+					Action: func(c *cli.Context) error {
+						master := c.String("master")
+						query := &Query{
+							Name:    c.String("name"),
+							AppName: c.String("app"),
+							Script:  c.String("script"),
+							Note:    c.String("note"),
+						}
+						queryJSONBytes, err := json.Marshal(query)
+						if err != nil {
+							fmt.Println(err)
+							return err
+						}
+						cliQueryUpdateCommand := &Command{
+							Type: "CLI_QUERY_UPDATE",
+							Data: string(queryJSONBytes),
+						}
+						response, err := sendCliCommand(master, cliQueryUpdateCommand)
+						if err != nil {
+							fmt.Println(err)
+							return err
+						}
+						output := string(response)
+						if output != "" {
+							fmt.Println(strings.TrimSpace(output))
+						}
+						return nil
+					},
+				},
+				{
+					Name:  "remove",
+					Usage: "remove an existing app",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "master, m",
+							Value: "127.0.0.1:2015",
+							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+						},
+						cli.StringFlag{
+							Name:  "name, n",
+							Usage: "name of the app",
+						},
+						cli.StringFlag{
+							Name:  "app, a",
+							Usage: "app name",
+						},
+					},
+					Action: func(c *cli.Context) error {
+						master := c.String("master")
+						query := &Query{
+							Name:    c.String("name"),
+							AppName: c.String("app"),
+						}
+						queryJSONBytes, err := json.Marshal(query)
+						if err != nil {
+							fmt.Println(err)
+							return err
+						}
+						cliQueryRemoveCommand := &Command{
+							Type: "CLI_QUERY_REMOVE",
+							Data: string(queryJSONBytes),
+						}
+						response, err := sendCliCommand(master, cliQueryRemoveCommand)
+						if err != nil {
+							fmt.Println(err)
+							return err
+						}
+						output := string(response)
+						if output != "" {
+							fmt.Println(strings.TrimSpace(output))
+						}
+						return nil
+					},
+				},
+			},
+		},
+		{
 			Name:  "show",
 			Usage: "show commands",
 			Subcommands: []cli.Command{
