@@ -93,6 +93,36 @@ func processCliCommand(message []byte) (string, error) {
 		if err != nil {
 			return "", err
 		}
+	case "CLI_JOB_ADD":
+		job := &Job{}
+		err := json.Unmarshal([]byte(cliCommand.Data), job)
+		if err != nil {
+			return "", err
+		}
+		err = masterData.AddJob(job)
+		if err != nil {
+			return "", err
+		}
+	case "CLI_JOB_UPDATE":
+		job := &Job{}
+		err := json.Unmarshal([]byte(cliCommand.Data), job)
+		if err != nil {
+			return "", err
+		}
+		err = masterData.UpdateJob(job)
+		if err != nil {
+			return "", err
+		}
+	case "CLI_JOB_REMOVE":
+		job := &Job{}
+		err := json.Unmarshal([]byte(cliCommand.Data), job)
+		if err != nil {
+			return "", err
+		}
+		err = masterData.RemoveJob(job.Name, job.AppName)
+		if err != nil {
+			return "", err
+		}
 	case "CLI_SHOW_MASTER":
 		masterDataBytes, err := json.Marshal(masterData)
 		if err != nil {

@@ -62,9 +62,9 @@ type Query struct {
 	Status  string
 }
 type Job struct {
-	Name       string
-	Cron       string
-	Mode       string
+	Name string
+	Cron string
+	//	Mode       string
 	Script     string
 	LoopScript string
 	AppName    string

@@ -712,7 +712,7 @@ func main() {
 				},
 				{
 					Name:  "remove",
-					Usage: "remove an existing app",
+					Usage: "remove an existing query",
 					Flags: []cli.Flag{
 						cli.StringFlag{
 							Name:  "master, m",
@@ -744,6 +744,188 @@ func main() {
 							Data: string(queryJSONBytes),
 						}
 						response, err := sendCliCommand(master, cliQueryRemoveCommand)
+						if err != nil {
+							fmt.Println(err)
+							return err
+						}
+						output := string(response)
+						if output != "" {
+							fmt.Println(strings.TrimSpace(output))
+						}
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:    "job",
+			Aliases: []string{"j"},
+			Usage:   "job commands",
+			Subcommands: []cli.Command{
+				{
+					Name:  "add",
+					Usage: "add a new job",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "master, m",
+							Value: "127.0.0.1:2015",
+							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+						},
+						cli.StringFlag{
+							Name:  "name, n",
+							Usage: "name of the job",
+						},
+						cli.StringFlag{
+							Name:  "app, a",
+							Usage: "app name",
+						},
+						cli.StringFlag{
+							Name:  "cron, c",
+							Usage: "cron expression of the job",
+						},
+						cli.StringFlag{
+							Name:  "script, s",
+							Usage: "script of the job",
+						},
+						cli.StringFlag{
+							Name:  "loopscript, l",
+							Usage: "loop script of the job",
+						},
+						cli.StringFlag{
+							Name:  "note, t",
+							Usage: "a note for the job",
+						},
+					},
+					Action: func(c *cli.Context) error {
+						master := c.String("master")
+						job := &Job{
+							Name:       c.String("name"),
+							AppName:    c.String("app"),
+							Script:     c.String("script"),
+							LoopScript: c.String("loopscript"),
+							Cron:       c.String("cron"),
+							Note:       c.String("note"),
+						}
+						jobJSONBytes, err := json.Marshal(job)
+						if err != nil {
+							fmt.Println(err)
+							return err
+						}
+						cliJobAddCommand := &Command{
+							Type: "CLI_JOB_ADD",
+							Data: string(jobJSONBytes),
+						}
+						response, err := sendCliCommand(master, cliJobAddCommand)
+						if err != nil {
+							fmt.Println(err)
+							return err
+						}
+						output := string(response)
+						if output != "" {
+							fmt.Println(strings.TrimSpace(output))
+						}
+						return nil
+					},
+				},
+				{
+					Name:  "update",
+					Usage: "update an existing job",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "master, m",
+							Value: "127.0.0.1:2015",
+							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+						},
+						cli.StringFlag{
+							Name:  "name, n",
+							Usage: "name of the job",
+						},
+						cli.StringFlag{
+							Name:  "app, a",
+							Usage: "app name",
+						},
+						cli.StringFlag{
+							Name:  "cron, c",
+							Usage: "cron expression of the job",
+						},
+						cli.StringFlag{
+							Name:  "script, s",
+							Usage: "script of the job",
+						},
+						cli.StringFlag{
+							Name:  "loopscript, l",
+							Usage: "loop script of the job",
+						},
+						cli.StringFlag{
+							Name:  "note, t",
+							Usage: "a note for the job",
+						},
+					},
+					Action: func(c *cli.Context) error {
+						master := c.String("master")
+						job := &Job{
+							Name:       c.String("name"),
+							AppName:    c.String("app"),
+							Script:     c.String("script"),
+							LoopScript: c.String("loopscript"),
+							Cron:       c.String("cron"),
+							Note:       c.String("note"),
+						}
+						jobJSONBytes, err := json.Marshal(job)
+						if err != nil {
+							fmt.Println(err)
+							return err
+						}
+						cliJobUpdateCommand := &Command{
+							Type: "CLI_JOB_UPDATE",
+							Data: string(jobJSONBytes),
+						}
+						response, err := sendCliCommand(master, cliJobUpdateCommand)
+						if err != nil {
+							fmt.Println(err)
+							return err
+						}
+						output := string(response)
+						if output != "" {
+							fmt.Println(strings.TrimSpace(output))
+						}
+						return nil
+					},
+				},
+				{
+					Name:  "remove",
+					Usage: "remove an existing job",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "master, m",
+							Value: "127.0.0.1:2015",
+							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+						},
+						cli.StringFlag{
+							Name:  "name, n",
+							Usage: "name of the app",
+						},
+						cli.StringFlag{
+							Name:  "app, a",
+							Usage: "app name",
+						},
+					},
+					Action: func(c *cli.Context) error {
+						master := c.String("master")
+						job := &Job{
+							Name:    c.String("name"),
+							AppName: c.String("app"),
+						}
+						jobJSONBytes, err := json.Marshal(job)
+						if err != nil {
+							fmt.Println(err)
+							return err
+						}
+						cliJobRemoveCommand := &Command{
+							Type: "CLI_JOB_REMOVE",
+							Data: string(jobJSONBytes),
+						}
+						response, err := sendCliCommand(master, cliJobRemoveCommand)
 						if err != nil {
 							fmt.Println(err)
 							return err
