@@ -15,6 +15,7 @@ import (
 	"github.com/codegangsta/cli"
 	"github.com/elgs/gorest2"
 	"github.com/gorilla/websocket"
+	"github.com/satori/go.uuid"
 )
 
 var slaveConn *websocket.Conn
@@ -881,6 +882,181 @@ func main() {
 							Data: string(jobJSONBytes),
 						}
 						response, err := sendCliCommand(master, cliJobUpdateCommand)
+						if err != nil {
+							fmt.Println(err)
+							return err
+						}
+						output := string(response)
+						if output != "" {
+							fmt.Println(strings.TrimSpace(output))
+						}
+						return nil
+					},
+				},
+				{
+					Name:  "remove",
+					Usage: "remove an existing job",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "master, m",
+							Value: "127.0.0.1:2015",
+							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+						},
+						cli.StringFlag{
+							Name:  "name, n",
+							Usage: "name of the app",
+						},
+						cli.StringFlag{
+							Name:  "app, a",
+							Usage: "app name",
+						},
+					},
+					Action: func(c *cli.Context) error {
+						master := c.String("master")
+						job := &Job{
+							Name:    c.String("name"),
+							AppName: c.String("app"),
+						}
+						jobJSONBytes, err := json.Marshal(job)
+						if err != nil {
+							fmt.Println(err)
+							return err
+						}
+						cliJobRemoveCommand := &Command{
+							Type: "CLI_JOB_REMOVE",
+							Data: string(jobJSONBytes),
+						}
+						response, err := sendCliCommand(master, cliJobRemoveCommand)
+						if err != nil {
+							fmt.Println(err)
+							return err
+						}
+						output := string(response)
+						if output != "" {
+							fmt.Println(strings.TrimSpace(output))
+						}
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:    "token",
+			Aliases: []string{"t"},
+			Usage:   "token commands",
+			Subcommands: []cli.Command{
+				{
+					Name:  "add",
+					Usage: "add a new token",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "master, m",
+							Value: "127.0.0.1:2015",
+							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+						},
+						cli.StringFlag{
+							Name:  "name, n",
+							Usage: "name of the job",
+						},
+						cli.StringFlag{
+							Name:  "app, a",
+							Usage: "app name",
+						},
+						cli.StringFlag{
+							Name:  "mode, o",
+							Usage: "script of the token",
+						},
+						cli.StringFlag{
+							Name:  "target, g",
+							Usage: "target of the token",
+						},
+						cli.StringFlag{
+							Name:  "note, t",
+							Usage: "a note for the token",
+						},
+					},
+					Action: func(c *cli.Context) error {
+						master := c.String("master")
+						tokenId := uuid.NewV4().String()
+						token := &Token{
+							Name:    c.String("name"),
+							AppName: c.String("app"),
+							Mode:    c.String("mode"),
+							Targets: c.String("target"),
+							Token:   tokenId,
+							Note:    c.String("note"),
+						}
+						tokenJSONBytes, err := json.Marshal(token)
+						if err != nil {
+							fmt.Println(err)
+							return err
+						}
+						cliTokenAddCommand := &Command{
+							Type: "CLI_TOKEN_ADD",
+							Data: string(tokenJSONBytes),
+						}
+						response, err := sendCliCommand(master, cliTokenAddCommand)
+						if err != nil {
+							fmt.Println(err)
+							return err
+						}
+						output := string(response)
+						if output != "" {
+							fmt.Println(strings.TrimSpace(output))
+						}
+						return nil
+					},
+				},
+				{
+					Name:  "update",
+					Usage: "update an existing token",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "master, m",
+							Value: "127.0.0.1:2015",
+							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+						},
+						cli.StringFlag{
+							Name:  "name, n",
+							Usage: "name of the job",
+						},
+						cli.StringFlag{
+							Name:  "app, a",
+							Usage: "app name",
+						},
+						cli.StringFlag{
+							Name:  "mode, o",
+							Usage: "script of the token",
+						},
+						cli.StringFlag{
+							Name:  "target, g",
+							Usage: "target of the token",
+						},
+						cli.StringFlag{
+							Name:  "note, t",
+							Usage: "a note for the token",
+						},
+					},
+					Action: func(c *cli.Context) error {
+						master := c.String("master")
+						token := &Token{
+							Name:    c.String("name"),
+							AppName: c.String("app"),
+							Mode:    c.String("mode"),
+							Targets: c.String("target"),
+							Token:   "",
+							Note:    c.String("note"),
+						}
+						tokenJSONBytes, err := json.Marshal(token)
+						if err != nil {
+							fmt.Println(err)
+							return err
+						}
+						cliTokenAddCommand := &Command{
+							Type: "CLI_TOKEN_ADD",
+							Data: string(tokenJSONBytes),
+						}
+						response, err := sendCliCommand(master, cliTokenAddCommand)
 						if err != nil {
 							fmt.Println(err)
 							return err
