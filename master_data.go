@@ -394,12 +394,12 @@ func (this *MasterData) UpdateJob(job *Job) error {
 
 func (this *MasterData) AddToken(token *Token) error {
 	for _, v := range this.Tokens {
-		if v.Name == token.Name {
+		if v.Name == token.Name || v.Token == token.Token {
 			return errors.New("token existed: " + token.Name)
 		}
 	}
 	appFound := false
-	for _, v := range this.Apps {
+	for _, v := range this.Tokens {
 		if v.Name == token.AppName {
 			appFound = true
 			break
@@ -412,16 +412,16 @@ func (this *MasterData) AddToken(token *Token) error {
 	this.Version++
 	return propagateMasterData()
 }
-func (this *MasterData) RemoveToken(name string, appName string) error {
+func (this *MasterData) RemoveToken(token string, appName string) error {
 	index := -1
-	for i, v := range this.Jobs {
-		if v.Name == name && v.AppName == appName {
+	for i, v := range this.Tokens {
+		if v.Token == token && v.AppName == appName {
 			index = i
 			break
 		}
 	}
 	if index == -1 {
-		return errors.New("Job not found: " + name)
+		return errors.New("Token not found: " + token)
 	}
 	this.Tokens = append(this.Tokens[:index], this.Tokens[index+1:]...)
 	this.Version++
@@ -429,18 +429,18 @@ func (this *MasterData) RemoveToken(name string, appName string) error {
 }
 func (this *MasterData) UpdateToken(token *Token) error {
 	index := -1
-	for i, v := range this.Jobs {
-		if v.Name == token.Name && v.AppName == token.AppName {
+	for i, v := range this.Tokens {
+		if v.Token == token.Token && v.AppName == token.AppName {
 			index = i
 			break
 		}
 	}
 	if index == -1 {
-		return errors.New("Job not found: " + token.Name)
+		return errors.New("Token not found: " + token.Token)
 	}
 
 	appFound := false
-	for _, v := range this.Apps {
+	for _, v := range this.Tokens {
 		if v.Name == token.AppName {
 			appFound = true
 			break

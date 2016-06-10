@@ -904,7 +904,7 @@ func main() {
 						},
 						cli.StringFlag{
 							Name:  "name, n",
-							Usage: "name of the app",
+							Usage: "name of the job",
 						},
 						cli.StringFlag{
 							Name:  "app, a",
@@ -956,7 +956,7 @@ func main() {
 						},
 						cli.StringFlag{
 							Name:  "name, n",
-							Usage: "name of the job",
+							Usage: "name of the token",
 						},
 						cli.StringFlag{
 							Name:  "app, a",
@@ -1018,7 +1018,11 @@ func main() {
 						},
 						cli.StringFlag{
 							Name:  "name, n",
-							Usage: "name of the job",
+							Usage: "name of the token",
+						},
+						cli.StringFlag{
+							Name:  "token, k",
+							Usage: "the token",
 						},
 						cli.StringFlag{
 							Name:  "app, a",
@@ -1044,7 +1048,7 @@ func main() {
 							AppName: c.String("app"),
 							Mode:    c.String("mode"),
 							Targets: c.String("target"),
-							Token:   "",
+							Token:   c.String("token"),
 							Note:    c.String("note"),
 						}
 						tokenJSONBytes, err := json.Marshal(token)
@@ -1070,7 +1074,7 @@ func main() {
 				},
 				{
 					Name:  "remove",
-					Usage: "remove an existing job",
+					Usage: "remove an existing token",
 					Flags: []cli.Flag{
 						cli.StringFlag{
 							Name:  "master, m",
@@ -1078,8 +1082,8 @@ func main() {
 							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
-							Name:  "name, n",
-							Usage: "name of the app",
+							Name:  "token, k",
+							Usage: "the token",
 						},
 						cli.StringFlag{
 							Name:  "app, a",
@@ -1089,7 +1093,7 @@ func main() {
 					Action: func(c *cli.Context) error {
 						master := c.String("master")
 						job := &Job{
-							Name:    c.String("name"),
+							Token:   c.String("token"),
 							AppName: c.String("app"),
 						}
 						jobJSONBytes, err := json.Marshal(job)
