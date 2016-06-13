@@ -395,11 +395,11 @@ func (this *MasterData) UpdateJob(job *Job) error {
 func (this *MasterData) AddToken(token *Token) error {
 	for _, v := range this.Tokens {
 		if v.Name == token.Name || v.Token == token.Token {
-			return errors.New("token existed: " + token.Name)
+			return errors.New("token existed: " + token.Name + " - " + token.Token)
 		}
 	}
 	appFound := false
-	for _, v := range this.Tokens {
+	for _, v := range this.Apps {
 		if v.Name == token.AppName {
 			appFound = true
 			break
@@ -440,7 +440,7 @@ func (this *MasterData) UpdateToken(token *Token) error {
 	}
 
 	appFound := false
-	for _, v := range this.Tokens {
+	for _, v := range this.Apps {
 		if v.Name == token.AppName {
 			appFound = true
 			break

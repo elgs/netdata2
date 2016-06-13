@@ -972,12 +972,12 @@ func main() {
 						},
 						cli.StringFlag{
 							Name:  "note, t",
-							Usage: "a note for the token",
+							Usage: "note for the token",
 						},
 					},
 					Action: func(c *cli.Context) error {
 						master := c.String("master")
-						tokenId := uuid.NewV4().String()
+						tokenId := strings.Replace(uuid.NewV4().String(), "-", "", -1)
 						token := &Token{
 							Name:    c.String("name"),
 							AppName: c.String("app"),
@@ -1092,11 +1092,11 @@ func main() {
 					},
 					Action: func(c *cli.Context) error {
 						master := c.String("master")
-						job := &Job{
+						token := &Token{
 							Token:   c.String("token"),
 							AppName: c.String("app"),
 						}
-						jobJSONBytes, err := json.Marshal(job)
+						jobJSONBytes, err := json.Marshal(token)
 						if err != nil {
 							fmt.Println(err)
 							return err

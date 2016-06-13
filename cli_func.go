@@ -123,6 +123,36 @@ func processCliCommand(message []byte) (string, error) {
 		if err != nil {
 			return "", err
 		}
+	case "CLI_TOKEN_ADD":
+		token := &Token{}
+		err := json.Unmarshal([]byte(cliCommand.Data), token)
+		if err != nil {
+			return "", err
+		}
+		err = masterData.AddToken(token)
+		if err != nil {
+			return "", err
+		}
+	case "CLI_TOKEN_UPDATE":
+		token := &Token{}
+		err := json.Unmarshal([]byte(cliCommand.Data), token)
+		if err != nil {
+			return "", err
+		}
+		err = masterData.UpdateToken(token)
+		if err != nil {
+			return "", err
+		}
+	case "CLI_TOKEN_REMOVE":
+		token := &Token{}
+		err := json.Unmarshal([]byte(cliCommand.Data), token)
+		if err != nil {
+			return "", err
+		}
+		err = masterData.RemoveToken(token.Token, token.AppName)
+		if err != nil {
+			return "", err
+		}
 	case "CLI_SHOW_MASTER":
 		masterDataBytes, err := json.Marshal(masterData)
 		if err != nil {
