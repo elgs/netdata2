@@ -1102,7 +1102,7 @@ func main() {
 							return err
 						}
 						cliJobRemoveCommand := &Command{
-							Type: "CLI_JOB_REMOVE",
+							Type: "CLI_TOKEN_REMOVE",
 							Data: string(jobJSONBytes),
 						}
 						response, err := sendCliCommand(master, cliJobRemoveCommand)
