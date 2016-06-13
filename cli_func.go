@@ -153,6 +153,66 @@ func processCliCommand(message []byte) (string, error) {
 		if err != nil {
 			return "", err
 		}
+	case "CLI_LI_ADD":
+		li := &LocalInterceptor{}
+		err := json.Unmarshal([]byte(cliCommand.Data), li)
+		if err != nil {
+			return "", err
+		}
+		err = masterData.AddLI(li)
+		if err != nil {
+			return "", err
+		}
+	case "CLI_LI_UPDATE":
+		li := &LocalInterceptor{}
+		err := json.Unmarshal([]byte(cliCommand.Data), li)
+		if err != nil {
+			return "", err
+		}
+		err = masterData.UpdateLI(li)
+		if err != nil {
+			return "", err
+		}
+	case "CLI_LI_REMOVE":
+		li := &LocalInterceptor{}
+		err := json.Unmarshal([]byte(cliCommand.Data), li)
+		if err != nil {
+			return "", err
+		}
+		err = masterData.RemoveToken(li.Name, li.AppName)
+		if err != nil {
+			return "", err
+		}
+	case "CLI_RI_ADD":
+		ri := &RemoteInterceptor{}
+		err := json.Unmarshal([]byte(cliCommand.Data), ri)
+		if err != nil {
+			return "", err
+		}
+		err = masterData.AddRI(ri)
+		if err != nil {
+			return "", err
+		}
+	case "CLI_RI_UPDATE":
+		ri := &RemoteInterceptor{}
+		err := json.Unmarshal([]byte(cliCommand.Data), ri)
+		if err != nil {
+			return "", err
+		}
+		err = masterData.UpdateRI(ri)
+		if err != nil {
+			return "", err
+		}
+	case "CLI_RI_REMOVE":
+		ri := &RemoteInterceptor{}
+		err := json.Unmarshal([]byte(cliCommand.Data), ri)
+		if err != nil {
+			return "", err
+		}
+		err = masterData.RemoveRI(ri.Name, ri.AppName)
+		if err != nil {
+			return "", err
+		}
 	case "CLI_SHOW_MASTER":
 		masterDataBytes, err := json.Marshal(masterData)
 		if err != nil {
