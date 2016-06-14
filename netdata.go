@@ -989,7 +989,7 @@ func main() {
 							Name:    c.String("name"),
 							AppName: c.String("app"),
 							Mode:    c.String("mode"),
-							Targets: c.String("target"),
+							Target:  c.String("target"),
 							Token:   tokenId,
 							Note:    c.String("note"),
 						}
@@ -1054,7 +1054,7 @@ func main() {
 							Name:    c.String("name"),
 							AppName: c.String("app"),
 							Mode:    c.String("mode"),
-							Targets: c.String("target"),
+							Target:  c.String("target"),
 							Token:   c.String("token"),
 							Note:    c.String("note"),
 						}
@@ -1105,16 +1105,426 @@ func main() {
 						}
 						jobJSONBytes, err := json.Marshal(token)
 						if err != nil {
-							fmt.Println(err)
 							return err
 						}
-						cliJobRemoveCommand := &Command{
+						cliTokenRemoveCommand := &Command{
 							Type: "CLI_TOKEN_REMOVE",
 							Data: string(jobJSONBytes),
 						}
-						response, err := sendCliCommand(master, cliJobRemoveCommand)
+						response, err := sendCliCommand(master, cliTokenRemoveCommand)
 						if err != nil {
-							fmt.Println(err)
+							return err
+						}
+						output := string(response)
+						if output != "" {
+							fmt.Println(strings.TrimSpace(output))
+						}
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "li",
+			Usage: "local interceptor commands",
+			Subcommands: []cli.Command{
+				{
+					Name:  "add",
+					Usage: "add a new local interceptor",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "master, m",
+							Value: "127.0.0.1:2015",
+							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+						},
+						cli.StringFlag{
+							Name:  "name, n",
+							Usage: "name of the local interceptor",
+						},
+						cli.StringFlag{
+							Name:  "app, a",
+							Usage: "app name",
+						},
+						cli.StringFlag{
+							Name:  "target, g",
+							Usage: "target of the local interceptor",
+						},
+						cli.StringFlag{
+							Name:  "callback, c",
+							Usage: "callback query name for the local interceptor",
+						},
+						cli.StringFlag{
+							Name:  "type, k",
+							Usage: "type of the local interceptor",
+						},
+						cli.StringFlag{
+							Name:  "action, i",
+							Usage: "action type of the local interceptor",
+						},
+						cli.StringFlag{
+							Name:  "criteria, f",
+							Usage: "criteria type of the local interceptor",
+						},
+						cli.StringFlag{
+							Name:  "note, t",
+							Usage: "note for the local interceptor",
+						},
+					},
+					Action: func(c *cli.Context) error {
+						master := c.String("master")
+						li := &LocalInterceptor{
+							Name:       c.String("name"),
+							AppName:    c.String("app"),
+							Target:     c.String("target"),
+							Callback:   c.String("callback"),
+							Type:       c.String("type"),
+							ActionType: c.String("action"),
+							Criteria:   c.String("criteria"),
+							Note:       c.String("note"),
+						}
+						liJSONBytes, err := json.Marshal(li)
+						if err != nil {
+							return err
+						}
+						cliLiAddCommand := &Command{
+							Type: "CLI_LI_ADD",
+							Data: string(liJSONBytes),
+						}
+						response, err := sendCliCommand(master, cliLiAddCommand)
+						if err != nil {
+							return err
+						}
+						output := string(response)
+						if output != "" {
+							fmt.Println(strings.TrimSpace(output))
+						}
+						return nil
+					},
+				},
+				{
+					Name:  "update",
+					Usage: "update an existing local interceptor",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "master, m",
+							Value: "127.0.0.1:2015",
+							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+						},
+						cli.StringFlag{
+							Name:  "name, n",
+							Usage: "name of the local interceptor",
+						},
+						cli.StringFlag{
+							Name:  "app, a",
+							Usage: "app name",
+						},
+						cli.StringFlag{
+							Name:  "target, g",
+							Usage: "target of the local interceptor",
+						},
+						cli.StringFlag{
+							Name:  "callback, c",
+							Usage: "callback query name for the local interceptor",
+						},
+						cli.StringFlag{
+							Name:  "type, k",
+							Usage: "type of the local interceptor",
+						},
+						cli.StringFlag{
+							Name:  "action, i",
+							Usage: "action type of the local interceptor",
+						},
+						cli.StringFlag{
+							Name:  "criteria, f",
+							Usage: "criteria type of the local interceptor",
+						},
+						cli.StringFlag{
+							Name:  "note, t",
+							Usage: "note for the local interceptor",
+						},
+					},
+					Action: func(c *cli.Context) error {
+						master := c.String("master")
+						li := &LocalInterceptor{
+							Name:       c.String("name"),
+							AppName:    c.String("app"),
+							Target:     c.String("target"),
+							Callback:   c.String("callback"),
+							Type:       c.String("type"),
+							ActionType: c.String("action"),
+							Criteria:   c.String("criteria"),
+							Note:       c.String("note"),
+						}
+						liJSONBytes, err := json.Marshal(li)
+						if err != nil {
+							return err
+						}
+						cliLiUpdateCommand := &Command{
+							Type: "CLI_LI_UPDATE",
+							Data: string(liJSONBytes),
+						}
+						response, err := sendCliCommand(master, cliLiUpdateCommand)
+						if err != nil {
+							return err
+						}
+						output := string(response)
+						if output != "" {
+							fmt.Println(strings.TrimSpace(output))
+						}
+						return nil
+					},
+				},
+				{
+					Name:  "remove",
+					Usage: "remove an existing local interceptor",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "master, m",
+							Value: "127.0.0.1:2015",
+							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+						},
+						cli.StringFlag{
+							Name:  "name, n",
+							Usage: "the name of the local interceptor",
+						},
+						cli.StringFlag{
+							Name:  "app, a",
+							Usage: "app name",
+						},
+					},
+					Action: func(c *cli.Context) error {
+						master := c.String("master")
+						li := &LocalInterceptor{
+							Name:    c.String("name"),
+							AppName: c.String("app"),
+						}
+						liJSONBytes, err := json.Marshal(li)
+						if err != nil {
+							return err
+						}
+						cliLiRemoveCommand := &Command{
+							Type: "CLI_LI_REMOVE",
+							Data: string(liJSONBytes),
+						}
+						response, err := sendCliCommand(master, cliLiRemoveCommand)
+						if err != nil {
+							return err
+						}
+						output := string(response)
+						if output != "" {
+							fmt.Println(strings.TrimSpace(output))
+						}
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "ri",
+			Usage: "remote interceptor commands",
+			Subcommands: []cli.Command{
+				{
+					Name:  "add",
+					Usage: "add a new remote interceptor",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "master, m",
+							Value: "127.0.0.1:2015",
+							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+						},
+						cli.StringFlag{
+							Name:  "name, n",
+							Usage: "name of the remote interceptor",
+						},
+						cli.StringFlag{
+							Name:  "app, a",
+							Usage: "app name",
+						},
+						cli.StringFlag{
+							Name:  "target, g",
+							Usage: "target of the remote interceptor",
+						},
+						cli.StringFlag{
+							Name:  "method, e",
+							Value: "POST",
+							Usage: "method for the remote interceptor",
+						},
+						cli.StringFlag{
+							Name:  "url, u",
+							Usage: "url for the remote interceptor",
+						},
+						cli.StringFlag{
+							Name:  "callback, c",
+							Usage: "callback query name for the remote interceptor",
+						},
+						cli.StringFlag{
+							Name:  "type, k",
+							Usage: "type of the remote interceptor",
+						},
+						cli.StringFlag{
+							Name:  "action, i",
+							Usage: "action type of the remote interceptor",
+						},
+						cli.StringFlag{
+							Name:  "criteria, f",
+							Usage: "criteria type of the remote interceptor",
+						},
+						cli.StringFlag{
+							Name:  "note, t",
+							Usage: "note for the remote interceptor",
+						},
+					},
+					Action: func(c *cli.Context) error {
+						master := c.String("master")
+						ri := &RemoteInterceptor{
+							Name:       c.String("name"),
+							AppName:    c.String("app"),
+							Target:     c.String("target"),
+							Method:     c.String("method"),
+							Url:        c.String("url"),
+							Callback:   c.String("callback"),
+							Type:       c.String("type"),
+							ActionType: c.String("action"),
+							Criteria:   c.String("criteria"),
+							Note:       c.String("note"),
+						}
+						riJSONBytes, err := json.Marshal(ri)
+						if err != nil {
+							return err
+						}
+						cliRiAddCommand := &Command{
+							Type: "CLI_RI_ADD",
+							Data: string(riJSONBytes),
+						}
+						response, err := sendCliCommand(master, cliRiAddCommand)
+						if err != nil {
+							return err
+						}
+						output := string(response)
+						if output != "" {
+							fmt.Println(strings.TrimSpace(output))
+						}
+						return nil
+					},
+				},
+				{
+					Name:  "update",
+					Usage: "update an existing remote interceptor",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "master, m",
+							Value: "127.0.0.1:2015",
+							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+						},
+						cli.StringFlag{
+							Name:  "name, n",
+							Usage: "name of the remote interceptor",
+						},
+						cli.StringFlag{
+							Name:  "app, a",
+							Usage: "app name",
+						},
+						cli.StringFlag{
+							Name:  "target, g",
+							Usage: "target of the remote interceptor",
+						},
+						cli.StringFlag{
+							Name:  "method, e",
+							Value: "POST",
+							Usage: "method for the remote interceptor",
+						},
+						cli.StringFlag{
+							Name:  "url, u",
+							Usage: "url for the remote interceptor",
+						},
+						cli.StringFlag{
+							Name:  "callback, c",
+							Usage: "callback query name for the remote interceptor",
+						},
+						cli.StringFlag{
+							Name:  "type, k",
+							Usage: "type of the remote interceptor",
+						},
+						cli.StringFlag{
+							Name:  "action, i",
+							Usage: "action type of the remote interceptor",
+						},
+						cli.StringFlag{
+							Name:  "criteria, f",
+							Usage: "criteria type of the remote interceptor",
+						},
+						cli.StringFlag{
+							Name:  "note, t",
+							Usage: "note for the remote interceptor",
+						},
+					},
+					Action: func(c *cli.Context) error {
+						master := c.String("master")
+						ri := &RemoteInterceptor{
+							Name:       c.String("name"),
+							AppName:    c.String("app"),
+							Target:     c.String("target"),
+							Method:     c.String("method"),
+							Url:        c.String("url"),
+							Callback:   c.String("callback"),
+							Type:       c.String("type"),
+							ActionType: c.String("action"),
+							Criteria:   c.String("criteria"),
+							Note:       c.String("note"),
+						}
+						riJSONBytes, err := json.Marshal(ri)
+						if err != nil {
+							return err
+						}
+						cliRiUpdateCommand := &Command{
+							Type: "CLI_RI_UPDATE",
+							Data: string(riJSONBytes),
+						}
+						response, err := sendCliCommand(master, cliRiUpdateCommand)
+						if err != nil {
+							return err
+						}
+						output := string(response)
+						if output != "" {
+							fmt.Println(strings.TrimSpace(output))
+						}
+						return nil
+					},
+				},
+				{
+					Name:  "remove",
+					Usage: "remove an existing remote interceptor",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "master, m",
+							Value: "127.0.0.1:2015",
+							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+						},
+						cli.StringFlag{
+							Name:  "name, n",
+							Usage: "the name of the remote interceptor",
+						},
+						cli.StringFlag{
+							Name:  "app, a",
+							Usage: "app name",
+						},
+					},
+					Action: func(c *cli.Context) error {
+						master := c.String("master")
+						ri := &RemoteInterceptor{
+							Name:    c.String("name"),
+							AppName: c.String("app"),
+						}
+						riJSONBytes, err := json.Marshal(ri)
+						if err != nil {
+							return err
+						}
+						cliRiRemoveCommand := &Command{
+							Type: "CLI_RI_REMOVE",
+							Data: string(riJSONBytes),
+						}
+						response, err := sendCliCommand(master, cliRiRemoveCommand)
+						if err != nil {
 							return err
 						}
 						output := string(response)

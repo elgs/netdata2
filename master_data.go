@@ -75,7 +75,7 @@ type Token struct {
 	Name    string
 	Token   string
 	Mode    string
-	Targets string
+	Target  string
 	AppName string
 	Note    string
 	Status  string
