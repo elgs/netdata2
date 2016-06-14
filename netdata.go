@@ -82,11 +82,18 @@ func main() {
 					Flags: service.Flags(),
 					Action: func(c *cli.Context) error {
 						service.LoadConfigs(c)
-						masterDataBytes, err := ioutil.ReadFile(service.DataFile)
-						if err != nil {
-							return nil
+						if _, err := os.Stat(service.DataFile); os.IsNotExist(err) {
+							fmt.Println(err)
+						} else {
+							masterDataBytes, err := ioutil.ReadFile(service.DataFile)
+							if err != nil {
+								return err
+							}
+							err = json.Unmarshal(masterDataBytes, &masterData)
+							if err != nil {
+								return err
+							}
 						}
-						json.Unmarshal(masterDataBytes, &masterData)
 						masterData.ApiNodes = nil
 						if len(strings.TrimSpace(service.Master)) > 0 {
 							// load data from master if slave
@@ -1153,5 +1160,8 @@ func main() {
 			},
 		},
 	}
-	app.Run(os.Args)
+	err = app.Run(os.Args)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
