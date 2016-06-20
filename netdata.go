@@ -132,7 +132,7 @@ func main() {
 								}(conn)
 							})
 						}
-						// serve
+						// shutdown
 						gorest2.RegisterHandler("/sys/shutdown", func(w http.ResponseWriter, r *http.Request) {
 							if strings.HasPrefix(r.RemoteAddr, "127.0.0.1:") {
 								done <- true
@@ -168,6 +168,10 @@ func main() {
 								fmt.Fprint(w, output)
 							}
 						})
+
+						gorest2.RegisterHandler("/api", gorest2.RestFunc)
+
+						// serve
 						serve(service)
 						<-done
 						return nil
