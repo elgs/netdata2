@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
+	"strings"
 
 	"github.com/gorilla/websocket"
+	"github.com/satori/go.uuid"
 )
 
 func processWsCommandMaster(conn *websocket.Conn, message []byte) error {
@@ -14,6 +16,7 @@ func processWsCommandMaster(conn *websocket.Conn, message []byte) error {
 	json.Unmarshal(message, wsCommand)
 	switch wsCommand.Type {
 	case "WS_REGISTER":
+		id := strings.Replace(uuid.NewV4().String(), "-", "", -1)
 		service := &CliService{}
 		err := json.Unmarshal([]byte(wsCommand.Data), service)
 		if err != nil {
@@ -21,6 +24,7 @@ func processWsCommandMaster(conn *websocket.Conn, message []byte) error {
 		}
 
 		apiNode := &ApiNode{
+			Id:   id,
 			Name: conn.RemoteAddr().String(),
 			//			ServerName: fmt.Sprint(service.HostHttps, ":", service.PortHttps),
 		}
