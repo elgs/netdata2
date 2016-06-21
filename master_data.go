@@ -122,16 +122,16 @@ func (this *MasterData) AddDataNode(dataNode *DataNode) error {
 	this.Version++
 	return propagateMasterData()
 }
-func (this *MasterData) RemoveDataNode(name string) error {
+func (this *MasterData) RemoveDataNode(id string) error {
 	index := -1
 	for i, v := range this.DataNodes {
-		if v.Name == name {
+		if v.Id == id {
 			index = i
 			break
 		}
 	}
 	if index == -1 {
-		return errors.New("Data node not found: " + name)
+		return errors.New("Data node not found: " + id)
 	}
 	this.DataNodes = append(this.DataNodes[:index], this.DataNodes[index+1:]...)
 	this.Version++
@@ -140,7 +140,7 @@ func (this *MasterData) RemoveDataNode(name string) error {
 func (this *MasterData) UpdateDataNode(dataNode *DataNode) error {
 	index := -1
 	for i, v := range this.DataNodes {
-		if v.Name == dataNode.Name {
+		if v.Id == dataNode.Id {
 			index = i
 			break
 		}
@@ -175,7 +175,7 @@ func (this *MasterData) AddApp(app *App) error {
 	}
 	dataNodeFound := false
 	for _, v := range this.DataNodes {
-		if v.Name == app.DataNodeId {
+		if v.Id == app.DataNodeId {
 			dataNodeFound = true
 			break
 		}
@@ -187,16 +187,16 @@ func (this *MasterData) AddApp(app *App) error {
 	this.Version++
 	return propagateMasterData()
 }
-func (this *MasterData) RemoveApp(name string) error {
+func (this *MasterData) RemoveApp(id string) error {
 	index := -1
 	for i, v := range this.Apps {
-		if v.Name == name {
+		if v.Id == id {
 			index = i
 			break
 		}
 	}
 	if index == -1 {
-		return errors.New("App not found: " + name)
+		return errors.New("App not found: " + id)
 	}
 	this.Apps = append(this.Apps[:index], this.Apps[index+1:]...)
 	this.Version++
@@ -205,7 +205,7 @@ func (this *MasterData) RemoveApp(name string) error {
 func (this *MasterData) UpdateApp(app *App) error {
 	index := -1
 	for i, v := range this.Apps {
-		if v.Name == app.Name {
+		if v.Id == app.Id {
 			index = i
 			break
 		}
@@ -216,7 +216,7 @@ func (this *MasterData) UpdateApp(app *App) error {
 
 	dataNodeFound := false
 	for _, v := range this.DataNodes {
-		if v.Name == app.DataNodeId {
+		if v.Id == app.DataNodeId {
 			dataNodeFound = true
 			break
 		}
@@ -255,16 +255,16 @@ func (this *MasterData) AddApiNode(apiNode *ApiNode) error {
 	return propagateMasterData()
 }
 
-func (this *MasterData) RemoveApiNode(name string) error {
+func (this *MasterData) RemoveApiNode(id string) error {
 	index := -1
 	for i, v := range this.ApiNodes {
-		if v.Name == name {
+		if v.Id == id {
 			index = i
 			break
 		}
 	}
 	if index == -1 {
-		return errors.New("API node not found: " + name)
+		return errors.New("API node not found: " + id)
 	}
 	this.ApiNodes = append(this.ApiNodes[:index], this.ApiNodes[index+1:]...)
 	this.Version++
@@ -273,13 +273,13 @@ func (this *MasterData) RemoveApiNode(name string) error {
 
 func (this *MasterData) AddQuery(query *Query) error {
 	for _, v := range this.Queries {
-		if v.Name == query.Name {
+		if v.Name == query.Name && v.Id == query.AppId {
 			return errors.New("Query existed: " + query.Name)
 		}
 	}
 	appFound := false
 	for _, v := range this.Apps {
-		if v.Name == query.AppId {
+		if v.Id == query.AppId {
 			appFound = true
 			break
 		}
@@ -291,16 +291,16 @@ func (this *MasterData) AddQuery(query *Query) error {
 	this.Version++
 	return propagateMasterData()
 }
-func (this *MasterData) RemoveQuery(name string, appName string) error {
+func (this *MasterData) RemoveQuery(id string, appId string) error {
 	index := -1
 	for i, v := range this.Queries {
-		if v.Name == name && v.AppId == appName {
+		if v.Id == id && v.AppId == appId {
 			index = i
 			break
 		}
 	}
 	if index == -1 {
-		return errors.New("Query not found: " + name)
+		return errors.New("Query not found: " + id)
 	}
 	this.Queries = append(this.Queries[:index], this.Queries[index+1:]...)
 	this.Version++
@@ -309,7 +309,7 @@ func (this *MasterData) RemoveQuery(name string, appName string) error {
 func (this *MasterData) UpdateQuery(query *Query) error {
 	index := -1
 	for i, v := range this.Queries {
-		if v.Name == query.Name && v.AppId == query.AppId {
+		if v.Id == query.Id && v.AppId == query.AppId {
 			index = i
 			break
 		}
@@ -320,7 +320,7 @@ func (this *MasterData) UpdateQuery(query *Query) error {
 
 	appFound := false
 	for _, v := range this.Apps {
-		if v.Name == query.AppId {
+		if v.Id == query.AppId {
 			appFound = true
 			break
 		}
@@ -337,13 +337,13 @@ func (this *MasterData) UpdateQuery(query *Query) error {
 
 func (this *MasterData) AddJob(job *Job) error {
 	for _, v := range this.Jobs {
-		if v.Name == job.Name {
+		if v.Name == job.Name && v.AppId == job.AppId {
 			return errors.New("Job existed: " + job.Name)
 		}
 	}
 	appFound := false
 	for _, v := range this.Apps {
-		if v.Name == job.AppId {
+		if v.Id == job.AppId {
 			appFound = true
 			break
 		}
@@ -355,16 +355,16 @@ func (this *MasterData) AddJob(job *Job) error {
 	this.Version++
 	return propagateMasterData()
 }
-func (this *MasterData) RemoveJob(name string, appName string) error {
+func (this *MasterData) RemoveJob(id string, appId string) error {
 	index := -1
 	for i, v := range this.Jobs {
-		if v.Name == name && v.AppId == appName {
+		if v.Id == id && v.AppId == appId {
 			index = i
 			break
 		}
 	}
 	if index == -1 {
-		return errors.New("Job not found: " + name)
+		return errors.New("Job not found: " + id)
 	}
 	this.Jobs = append(this.Jobs[:index], this.Jobs[index+1:]...)
 	this.Version++
@@ -373,7 +373,7 @@ func (this *MasterData) RemoveJob(name string, appName string) error {
 func (this *MasterData) UpdateJob(job *Job) error {
 	index := -1
 	for i, v := range this.Jobs {
-		if v.Name == job.Name && v.AppId == job.AppId {
+		if v.Id == job.Id && v.AppId == job.AppId {
 			index = i
 			break
 		}
@@ -384,7 +384,7 @@ func (this *MasterData) UpdateJob(job *Job) error {
 
 	appFound := false
 	for _, v := range this.Apps {
-		if v.Name == job.AppId {
+		if v.Id == job.AppId {
 			appFound = true
 			break
 		}
@@ -407,7 +407,7 @@ func (this *MasterData) AddToken(token *Token) error {
 	}
 	appFound := false
 	for _, v := range this.Apps {
-		if v.Name == token.AppId {
+		if v.Id == token.AppId {
 			appFound = true
 			break
 		}
@@ -419,16 +419,16 @@ func (this *MasterData) AddToken(token *Token) error {
 	this.Version++
 	return propagateMasterData()
 }
-func (this *MasterData) RemoveToken(token string, appName string) error {
+func (this *MasterData) RemoveToken(id string, appId string) error {
 	index := -1
 	for i, v := range this.Tokens {
-		if v.Id == token && v.AppId == appName {
+		if v.Id == id && v.AppId == appId {
 			index = i
 			break
 		}
 	}
 	if index == -1 {
-		return errors.New("Token not found: " + token)
+		return errors.New("Token not found: " + id)
 	}
 	this.Tokens = append(this.Tokens[:index], this.Tokens[index+1:]...)
 	this.Version++
@@ -448,7 +448,7 @@ func (this *MasterData) UpdateToken(token *Token) error {
 
 	appFound := false
 	for _, v := range this.Apps {
-		if v.Name == token.AppId {
+		if v.Id == token.AppId {
 			appFound = true
 			break
 		}
@@ -465,13 +465,13 @@ func (this *MasterData) UpdateToken(token *Token) error {
 
 func (this *MasterData) AddLI(li *LocalInterceptor) error {
 	for _, v := range this.LocalInterceptors {
-		if v.Name == li.Name {
+		if v.Name == li.Name && v.AppId == li.AppId {
 			return errors.New("Local interceptor existed: " + li.Name)
 		}
 	}
 	appFound := false
 	for _, v := range this.Apps {
-		if v.Name == li.AppId {
+		if v.Id == li.AppId {
 			appFound = true
 			break
 		}
@@ -483,16 +483,16 @@ func (this *MasterData) AddLI(li *LocalInterceptor) error {
 	this.Version++
 	return propagateMasterData()
 }
-func (this *MasterData) RemoveLI(name string, appName string) error {
+func (this *MasterData) RemoveLI(id string, appId string) error {
 	index := -1
 	for i, v := range this.LocalInterceptors {
-		if v.Name == name && v.AppId == appName {
+		if v.Id == id && v.AppId == appId {
 			index = i
 			break
 		}
 	}
 	if index == -1 {
-		return errors.New("Local interceptor not found: " + name)
+		return errors.New("Local interceptor not found: " + id)
 	}
 	this.LocalInterceptors = append(this.LocalInterceptors[:index], this.LocalInterceptors[index+1:]...)
 	this.Version++
@@ -512,7 +512,7 @@ func (this *MasterData) UpdateLI(li *LocalInterceptor) error {
 
 	appFound := false
 	for _, v := range this.LocalInterceptors {
-		if v.Name == li.AppId {
+		if v.Id == li.AppId {
 			appFound = true
 			break
 		}
@@ -529,13 +529,13 @@ func (this *MasterData) UpdateLI(li *LocalInterceptor) error {
 
 func (this *MasterData) AddRI(ri *RemoteInterceptor) error {
 	for _, v := range this.RemoteInterceptors {
-		if v.Name == ri.Name {
+		if v.Name == ri.Name && v.AppId == ri.AppId {
 			return errors.New("Remote interceptor existed: " + ri.Name)
 		}
 	}
 	appFound := false
 	for _, v := range this.Apps {
-		if v.Name == ri.AppId {
+		if v.Id == ri.AppId {
 			appFound = true
 			break
 		}
@@ -547,16 +547,16 @@ func (this *MasterData) AddRI(ri *RemoteInterceptor) error {
 	this.Version++
 	return propagateMasterData()
 }
-func (this *MasterData) RemoveRI(name string, appName string) error {
+func (this *MasterData) RemoveRI(id string, appId string) error {
 	index := -1
 	for i, v := range this.RemoteInterceptors {
-		if v.Name == name && v.AppId == appName {
+		if v.Id == id && v.AppId == appId {
 			index = i
 			break
 		}
 	}
 	if index == -1 {
-		return errors.New("Remote interceptor not found: " + name)
+		return errors.New("Remote interceptor not found: " + id)
 	}
 	this.RemoteInterceptors = append(this.RemoteInterceptors[:index], this.RemoteInterceptors[index+1:]...)
 	this.Version++
@@ -565,7 +565,7 @@ func (this *MasterData) RemoveRI(name string, appName string) error {
 func (this *MasterData) UpdateRI(ri *RemoteInterceptor) error {
 	index := -1
 	for i, v := range this.RemoteInterceptors {
-		if v.Name == ri.Name && v.AppId == ri.AppId {
+		if v.Id == ri.Id && v.AppId == ri.AppId {
 			index = i
 			break
 		}
@@ -576,7 +576,7 @@ func (this *MasterData) UpdateRI(ri *RemoteInterceptor) error {
 
 	appFound := false
 	for _, v := range this.RemoteInterceptors {
-		if v.Name == ri.AppId {
+		if v.Id == ri.AppId {
 			appFound = true
 			break
 		}
