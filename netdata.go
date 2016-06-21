@@ -281,7 +281,9 @@ func main() {
 					},
 					Action: func(c *cli.Context) error {
 						master := c.String("master")
+						id := strings.Replace(uuid.NewV4().String(), "-", "", -1)
 						dataNode := &DataNode{
+							Id:       id,
 							Name:     c.String("name"),
 							Host:     c.String("host"),
 							Port:     c.Int("port"),
@@ -320,6 +322,10 @@ func main() {
 							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
+							Name:  "id, i",
+							Usage: "id of the data node",
+						},
+						cli.StringFlag{
 							Name:  "name, n",
 							Usage: "name of the data node",
 						},
@@ -348,6 +354,7 @@ func main() {
 					Action: func(c *cli.Context) error {
 						master := c.String("master")
 						dataNode := &DataNode{
+							Id:       c.String("id"),
 							Name:     c.String("name"),
 							Host:     c.String("host"),
 							Port:     c.Int("port"),
@@ -386,16 +393,16 @@ func main() {
 							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
-							Name:  "name, n",
-							Usage: "name of the data node",
+							Name:  "id, i",
+							Usage: "id of the data node",
 						},
 					},
 					Action: func(c *cli.Context) error {
 						master := c.String("master")
-						name := c.String("name")
+						id := c.String("id")
 						cliDnRemoveCommand := &Command{
 							Type: "CLI_DN_REMOVE",
-							Data: name,
+							Data: id,
 						}
 						response, err := sendCliCommand(master, cliDnRemoveCommand)
 						if err != nil {
@@ -497,7 +504,9 @@ func main() {
 					},
 					Action: func(c *cli.Context) error {
 						master := c.String("master")
+						id := strings.Replace(uuid.NewV4().String(), "-", "", -1)
 						app := &App{
+							Id:         id,
 							Name:       c.String("name"),
 							DataNodeId: c.String("datanode"),
 							Note:       c.String("note"),
@@ -533,6 +542,10 @@ func main() {
 							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
+							Name:  "id, i",
+							Usage: "id of the app",
+						},
+						cli.StringFlag{
 							Name:  "name, n",
 							Usage: "name of the app",
 						},
@@ -548,6 +561,7 @@ func main() {
 					Action: func(c *cli.Context) error {
 						master := c.String("master")
 						app := &App{
+							Id:         c.String("id"),
 							Name:       c.String("name"),
 							DataNodeId: c.String("datanode"),
 							Note:       c.String("note"),
@@ -583,16 +597,16 @@ func main() {
 							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
-							Name:  "name, n",
-							Usage: "name of the app",
+							Name:  "id, i",
+							Usage: "id of the app",
 						},
 					},
 					Action: func(c *cli.Context) error {
 						master := c.String("master")
-						name := c.String("name")
+						id := c.String("id")
 						cliAppRemoveCommand := &Command{
 							Type: "CLI_APP_REMOVE",
-							Data: name,
+							Data: id,
 						}
 						response, err := sendCliCommand(master, cliAppRemoveCommand)
 						if err != nil {
@@ -628,7 +642,7 @@ func main() {
 						},
 						cli.StringFlag{
 							Name:  "app, a",
-							Usage: "app name",
+							Usage: "app id",
 						},
 						cli.StringFlag{
 							Name:  "script, s",
@@ -641,7 +655,9 @@ func main() {
 					},
 					Action: func(c *cli.Context) error {
 						master := c.String("master")
+						id := strings.Replace(uuid.NewV4().String(), "-", "", -1)
 						query := &Query{
+							Id:     id,
 							Name:   c.String("name"),
 							AppId:  c.String("app"),
 							Script: c.String("script"),
@@ -678,12 +694,16 @@ func main() {
 							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
+							Name:  "id, i",
+							Usage: "id of the query",
+						},
+						cli.StringFlag{
 							Name:  "name, n",
 							Usage: "name of the query",
 						},
 						cli.StringFlag{
 							Name:  "app, a",
-							Usage: "app name",
+							Usage: "app id",
 						},
 						cli.StringFlag{
 							Name:  "script, s",
@@ -697,6 +717,7 @@ func main() {
 					Action: func(c *cli.Context) error {
 						master := c.String("master")
 						query := &Query{
+							Id:     c.String("id"),
 							Name:   c.String("name"),
 							AppId:  c.String("app"),
 							Script: c.String("script"),
@@ -733,18 +754,18 @@ func main() {
 							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
-							Name:  "name, n",
-							Usage: "name of the app",
+							Name:  "id, id",
+							Usage: "id of the app",
 						},
 						cli.StringFlag{
 							Name:  "app, a",
-							Usage: "app name",
+							Usage: "app id",
 						},
 					},
 					Action: func(c *cli.Context) error {
 						master := c.String("master")
 						query := &Query{
-							Name:  c.String("name"),
+							Id:    c.String("id"),
 							AppId: c.String("app"),
 						}
 						queryJSONBytes, err := json.Marshal(query)
@@ -790,7 +811,7 @@ func main() {
 						},
 						cli.StringFlag{
 							Name:  "app, a",
-							Usage: "app name",
+							Usage: "app id",
 						},
 						cli.StringFlag{
 							Name:  "cron, c",
@@ -811,7 +832,9 @@ func main() {
 					},
 					Action: func(c *cli.Context) error {
 						master := c.String("master")
+						id := strings.Replace(uuid.NewV4().String(), "-", "", -1)
 						job := &Job{
+							Id:         id,
 							Name:       c.String("name"),
 							AppId:      c.String("app"),
 							Script:     c.String("script"),
@@ -850,12 +873,16 @@ func main() {
 							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
+							Name:  "id, id",
+							Usage: "id of the job",
+						},
+						cli.StringFlag{
 							Name:  "name, n",
 							Usage: "name of the job",
 						},
 						cli.StringFlag{
 							Name:  "app, a",
-							Usage: "app name",
+							Usage: "app id",
 						},
 						cli.StringFlag{
 							Name:  "cron, c",
@@ -877,6 +904,7 @@ func main() {
 					Action: func(c *cli.Context) error {
 						master := c.String("master")
 						job := &Job{
+							Id:         c.String("id"),
 							Name:       c.String("name"),
 							AppId:      c.String("app"),
 							Script:     c.String("script"),
@@ -915,18 +943,18 @@ func main() {
 							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
-							Name:  "name, n",
-							Usage: "name of the job",
+							Name:  "id, i",
+							Usage: "id of the job",
 						},
 						cli.StringFlag{
 							Name:  "app, a",
-							Usage: "app name",
+							Usage: "app id",
 						},
 					},
 					Action: func(c *cli.Context) error {
 						master := c.String("master")
 						job := &Job{
-							Name:  c.String("name"),
+							Id:    c.String("id"),
 							AppId: c.String("app"),
 						}
 						jobJSONBytes, err := json.Marshal(job)
@@ -972,7 +1000,7 @@ func main() {
 						},
 						cli.StringFlag{
 							Name:  "app, a",
-							Usage: "app name",
+							Usage: "app id",
 						},
 						cli.StringFlag{
 							Name:  "mode, o",
@@ -989,13 +1017,13 @@ func main() {
 					},
 					Action: func(c *cli.Context) error {
 						master := c.String("master")
-						tokenId := strings.Replace(uuid.NewV4().String(), "-", "", -1)
+						id := strings.Replace(uuid.NewV4().String(), "-", "", -1)
 						token := &Token{
+							Id:     id,
 							Name:   c.String("name"),
 							AppId:  c.String("app"),
 							Mode:   c.String("mode"),
 							Target: c.String("target"),
-							Token:  tokenId,
 							Note:   c.String("note"),
 						}
 						tokenJSONBytes, err := json.Marshal(token)
@@ -1033,12 +1061,12 @@ func main() {
 							Usage: "name of the token",
 						},
 						cli.StringFlag{
-							Name:  "token, k",
-							Usage: "the token",
+							Name:  "id, i",
+							Usage: "id of the token",
 						},
 						cli.StringFlag{
 							Name:  "app, a",
-							Usage: "app name",
+							Usage: "app id",
 						},
 						cli.StringFlag{
 							Name:  "mode, o",
@@ -1056,11 +1084,11 @@ func main() {
 					Action: func(c *cli.Context) error {
 						master := c.String("master")
 						token := &Token{
+							Id:     c.String("id"),
 							Name:   c.String("name"),
 							AppId:  c.String("app"),
 							Mode:   c.String("mode"),
 							Target: c.String("target"),
-							Token:  c.String("token"),
 							Note:   c.String("note"),
 						}
 						tokenJSONBytes, err := json.Marshal(token)
@@ -1094,18 +1122,18 @@ func main() {
 							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
-							Name:  "token, k",
-							Usage: "the token",
+							Name:  "id, i",
+							Usage: "id of the token",
 						},
 						cli.StringFlag{
 							Name:  "app, a",
-							Usage: "app name",
+							Usage: "app id",
 						},
 					},
 					Action: func(c *cli.Context) error {
 						master := c.String("master")
 						token := &Token{
-							Token: c.String("token"),
+							Id:    c.String("id"),
 							AppId: c.String("app"),
 						}
 						jobJSONBytes, err := json.Marshal(token)
@@ -1148,7 +1176,7 @@ func main() {
 						},
 						cli.StringFlag{
 							Name:  "app, a",
-							Usage: "app name",
+							Usage: "app id",
 						},
 						cli.StringFlag{
 							Name:  "target, g",
@@ -1163,7 +1191,7 @@ func main() {
 							Usage: "type of the local interceptor",
 						},
 						cli.StringFlag{
-							Name:  "action, i",
+							Name:  "action, o",
 							Usage: "action type of the local interceptor",
 						},
 						cli.StringFlag{
@@ -1177,7 +1205,9 @@ func main() {
 					},
 					Action: func(c *cli.Context) error {
 						master := c.String("master")
+						id := strings.Replace(uuid.NewV4().String(), "-", "", -1)
 						li := &LocalInterceptor{
+							Id:         id,
 							Name:       c.String("name"),
 							AppId:      c.String("app"),
 							Target:     c.String("target"),
@@ -1216,12 +1246,16 @@ func main() {
 							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
+							Name:  "id, i",
+							Usage: "id of the local interceptor",
+						},
+						cli.StringFlag{
 							Name:  "name, n",
 							Usage: "name of the local interceptor",
 						},
 						cli.StringFlag{
 							Name:  "app, a",
-							Usage: "app name",
+							Usage: "app id",
 						},
 						cli.StringFlag{
 							Name:  "target, g",
@@ -1236,7 +1270,7 @@ func main() {
 							Usage: "type of the local interceptor",
 						},
 						cli.StringFlag{
-							Name:  "action, i",
+							Name:  "action, o",
 							Usage: "action type of the local interceptor",
 						},
 						cli.StringFlag{
@@ -1251,6 +1285,7 @@ func main() {
 					Action: func(c *cli.Context) error {
 						master := c.String("master")
 						li := &LocalInterceptor{
+							Id:         c.String("id"),
 							Name:       c.String("name"),
 							AppId:      c.String("app"),
 							Target:     c.String("target"),
@@ -1289,8 +1324,8 @@ func main() {
 							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
-							Name:  "name, n",
-							Usage: "the name of the local interceptor",
+							Name:  "id, i",
+							Usage: "the id of the local interceptor",
 						},
 						cli.StringFlag{
 							Name:  "app, a",
@@ -1300,7 +1335,7 @@ func main() {
 					Action: func(c *cli.Context) error {
 						master := c.String("master")
 						li := &LocalInterceptor{
-							Name:  c.String("name"),
+							Id:    c.String("id"),
 							AppId: c.String("app"),
 						}
 						liJSONBytes, err := json.Marshal(li)
@@ -1343,7 +1378,7 @@ func main() {
 						},
 						cli.StringFlag{
 							Name:  "app, a",
-							Usage: "app name",
+							Usage: "app id",
 						},
 						cli.StringFlag{
 							Name:  "target, g",
@@ -1367,7 +1402,7 @@ func main() {
 							Usage: "type of the remote interceptor",
 						},
 						cli.StringFlag{
-							Name:  "action, i",
+							Name:  "action, o",
 							Usage: "action type of the remote interceptor",
 						},
 						cli.StringFlag{
@@ -1381,7 +1416,9 @@ func main() {
 					},
 					Action: func(c *cli.Context) error {
 						master := c.String("master")
+						id := strings.Replace(uuid.NewV4().String(), "-", "", -1)
 						ri := &RemoteInterceptor{
+							Id:         id,
 							Name:       c.String("name"),
 							AppId:      c.String("app"),
 							Target:     c.String("target"),
@@ -1422,12 +1459,16 @@ func main() {
 							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
+							Name:  "id, i",
+							Usage: "id of the remote interceptor",
+						},
+						cli.StringFlag{
 							Name:  "name, n",
 							Usage: "name of the remote interceptor",
 						},
 						cli.StringFlag{
 							Name:  "app, a",
-							Usage: "app name",
+							Usage: "app id",
 						},
 						cli.StringFlag{
 							Name:  "target, g",
@@ -1466,6 +1507,7 @@ func main() {
 					Action: func(c *cli.Context) error {
 						master := c.String("master")
 						ri := &RemoteInterceptor{
+							Id:         c.String("id"),
 							Name:       c.String("name"),
 							AppId:      c.String("app"),
 							Target:     c.String("target"),
@@ -1506,18 +1548,18 @@ func main() {
 							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
-							Name:  "name, n",
-							Usage: "the name of the remote interceptor",
+							Name:  "id, i",
+							Usage: "the id of the remote interceptor",
 						},
 						cli.StringFlag{
 							Name:  "app, a",
-							Usage: "app name",
+							Usage: "app id",
 						},
 					},
 					Action: func(c *cli.Context) error {
 						master := c.String("master")
 						ri := &RemoteInterceptor{
-							Name:  c.String("name"),
+							Id:    c.String("id"),
 							AppId: c.String("app"),
 						}
 						riJSONBytes, err := json.Marshal(ri)

@@ -79,7 +79,6 @@ type Job struct {
 type Token struct {
 	Id     string
 	Name   string
-	Token  string
 	Mode   string
 	Target string
 	AppId  string
@@ -402,8 +401,8 @@ func (this *MasterData) UpdateJob(job *Job) error {
 
 func (this *MasterData) AddToken(token *Token) error {
 	for _, v := range this.Tokens {
-		if v.Name == token.Name || v.Token == token.Token {
-			return errors.New("token existed: " + token.Name + " - " + token.Token)
+		if v.Name == token.Name || v.Id == token.Id {
+			return errors.New("token existed: " + token.Name + " - " + token.Id)
 		}
 	}
 	appFound := false
@@ -423,7 +422,7 @@ func (this *MasterData) AddToken(token *Token) error {
 func (this *MasterData) RemoveToken(token string, appName string) error {
 	index := -1
 	for i, v := range this.Tokens {
-		if v.Token == token && v.AppId == appName {
+		if v.Id == token && v.AppId == appName {
 			index = i
 			break
 		}
@@ -438,13 +437,13 @@ func (this *MasterData) RemoveToken(token string, appName string) error {
 func (this *MasterData) UpdateToken(token *Token) error {
 	index := -1
 	for i, v := range this.Tokens {
-		if v.Token == token.Token && v.AppId == token.AppId {
+		if v.Id == token.Id && v.AppId == token.AppId {
 			index = i
 			break
 		}
 	}
 	if index == -1 {
-		return errors.New("Token not found: " + token.Token)
+		return errors.New("Token not found: " + token.Id)
 	}
 
 	appFound := false

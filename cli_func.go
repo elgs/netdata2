@@ -149,7 +149,7 @@ func processCliCommand(message []byte) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		err = masterData.RemoveToken(token.Token, token.AppId)
+		err = masterData.RemoveToken(token.Id, token.AppId)
 		if err != nil {
 			return "", err
 		}
