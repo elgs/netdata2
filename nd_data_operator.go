@@ -32,7 +32,7 @@ func loadQuery(projectId, queryName string) (map[string]string, error) {
 		return queryMap, nil
 	}
 
-	defaultDbo := gorest2.GetDbo("default")
+	defaultDbo, err := gorest2.GetDbo("default")
 	defaultDb, err := defaultDbo.GetConn()
 	if err != nil {
 		return nil, err
@@ -282,6 +282,28 @@ func (this *NdDataOperator) Exec(tableId string, params [][]interface{}, queryPa
 	tx.Commit()
 
 	return rowsAffectedArray, err
+}
+
+func MakeGetDbo(dbType string, masterData *MasterData) func(id string) (gorest2.DataOperator, error) {
+	return func(id string) (gorest2.DataOperator, error) {
+		ret := gorest2.DboRegistry[id]
+		if ret != nil {
+			return ret, nil
+		}
+
+		//		query := `SELECT data_store.*,
+		//			CONCAT_WS('_','nd',project.PROJECT_KEY) AS DB,project.ID AS PROJECT_ID,project.PROJECT_KEY FROM project
+		//			INNER JOIN data_store ON project.DATA_STORE_NAME=data_store.DATA_STORE_NAME WHERE project.ID=?`
+
+		for _, app := range masterData.Apps {
+			fmt.Println(app)
+		}
+
+		ds := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v", "PROJECT_KEY", id, "HOST", "PORT", "DB")
+		ret = NewDbo(ds, dbType)
+		gorest2.DboRegistry[id] = ret
+		return ret, nil
+	}
 }
 
 /*

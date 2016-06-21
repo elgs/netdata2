@@ -169,6 +169,7 @@ func main() {
 							}
 						})
 
+						gorest2.GetDbo = MakeGetDbo("mysql", &masterData)
 						gorest2.RegisterHandler("/api", gorest2.RestFunc)
 
 						// serve
@@ -497,9 +498,9 @@ func main() {
 					Action: func(c *cli.Context) error {
 						master := c.String("master")
 						app := &App{
-							Name:         c.String("name"),
-							DataNodeName: c.String("datanode"),
-							Note:         c.String("note"),
+							Name:       c.String("name"),
+							DataNodeId: c.String("datanode"),
+							Note:       c.String("note"),
 						}
 						appJSONBytes, err := json.Marshal(app)
 						if err != nil {
@@ -547,9 +548,9 @@ func main() {
 					Action: func(c *cli.Context) error {
 						master := c.String("master")
 						app := &App{
-							Name:         c.String("name"),
-							DataNodeName: c.String("datanode"),
-							Note:         c.String("note"),
+							Name:       c.String("name"),
+							DataNodeId: c.String("datanode"),
+							Note:       c.String("note"),
 						}
 						appJSONBytes, err := json.Marshal(app)
 						if err != nil {
@@ -641,10 +642,10 @@ func main() {
 					Action: func(c *cli.Context) error {
 						master := c.String("master")
 						query := &Query{
-							Name:    c.String("name"),
-							AppName: c.String("app"),
-							Script:  c.String("script"),
-							Note:    c.String("note"),
+							Name:   c.String("name"),
+							AppId:  c.String("app"),
+							Script: c.String("script"),
+							Note:   c.String("note"),
 						}
 						queryJSONBytes, err := json.Marshal(query)
 						if err != nil {
@@ -696,10 +697,10 @@ func main() {
 					Action: func(c *cli.Context) error {
 						master := c.String("master")
 						query := &Query{
-							Name:    c.String("name"),
-							AppName: c.String("app"),
-							Script:  c.String("script"),
-							Note:    c.String("note"),
+							Name:   c.String("name"),
+							AppId:  c.String("app"),
+							Script: c.String("script"),
+							Note:   c.String("note"),
 						}
 						queryJSONBytes, err := json.Marshal(query)
 						if err != nil {
@@ -743,8 +744,8 @@ func main() {
 					Action: func(c *cli.Context) error {
 						master := c.String("master")
 						query := &Query{
-							Name:    c.String("name"),
-							AppName: c.String("app"),
+							Name:  c.String("name"),
+							AppId: c.String("app"),
 						}
 						queryJSONBytes, err := json.Marshal(query)
 						if err != nil {
@@ -812,7 +813,7 @@ func main() {
 						master := c.String("master")
 						job := &Job{
 							Name:       c.String("name"),
-							AppName:    c.String("app"),
+							AppId:      c.String("app"),
 							Script:     c.String("script"),
 							LoopScript: c.String("loopscript"),
 							Cron:       c.String("cron"),
@@ -877,7 +878,7 @@ func main() {
 						master := c.String("master")
 						job := &Job{
 							Name:       c.String("name"),
-							AppName:    c.String("app"),
+							AppId:      c.String("app"),
 							Script:     c.String("script"),
 							LoopScript: c.String("loopscript"),
 							Cron:       c.String("cron"),
@@ -925,8 +926,8 @@ func main() {
 					Action: func(c *cli.Context) error {
 						master := c.String("master")
 						job := &Job{
-							Name:    c.String("name"),
-							AppName: c.String("app"),
+							Name:  c.String("name"),
+							AppId: c.String("app"),
 						}
 						jobJSONBytes, err := json.Marshal(job)
 						if err != nil {
@@ -990,12 +991,12 @@ func main() {
 						master := c.String("master")
 						tokenId := strings.Replace(uuid.NewV4().String(), "-", "", -1)
 						token := &Token{
-							Name:    c.String("name"),
-							AppName: c.String("app"),
-							Mode:    c.String("mode"),
-							Target:  c.String("target"),
-							Token:   tokenId,
-							Note:    c.String("note"),
+							Name:   c.String("name"),
+							AppId:  c.String("app"),
+							Mode:   c.String("mode"),
+							Target: c.String("target"),
+							Token:  tokenId,
+							Note:   c.String("note"),
 						}
 						tokenJSONBytes, err := json.Marshal(token)
 						if err != nil {
@@ -1055,12 +1056,12 @@ func main() {
 					Action: func(c *cli.Context) error {
 						master := c.String("master")
 						token := &Token{
-							Name:    c.String("name"),
-							AppName: c.String("app"),
-							Mode:    c.String("mode"),
-							Target:  c.String("target"),
-							Token:   c.String("token"),
-							Note:    c.String("note"),
+							Name:   c.String("name"),
+							AppId:  c.String("app"),
+							Mode:   c.String("mode"),
+							Target: c.String("target"),
+							Token:  c.String("token"),
+							Note:   c.String("note"),
 						}
 						tokenJSONBytes, err := json.Marshal(token)
 						if err != nil {
@@ -1104,8 +1105,8 @@ func main() {
 					Action: func(c *cli.Context) error {
 						master := c.String("master")
 						token := &Token{
-							Token:   c.String("token"),
-							AppName: c.String("app"),
+							Token: c.String("token"),
+							AppId: c.String("app"),
 						}
 						jobJSONBytes, err := json.Marshal(token)
 						if err != nil {
@@ -1178,7 +1179,7 @@ func main() {
 						master := c.String("master")
 						li := &LocalInterceptor{
 							Name:       c.String("name"),
-							AppName:    c.String("app"),
+							AppId:      c.String("app"),
 							Target:     c.String("target"),
 							Callback:   c.String("callback"),
 							Type:       c.String("type"),
@@ -1251,7 +1252,7 @@ func main() {
 						master := c.String("master")
 						li := &LocalInterceptor{
 							Name:       c.String("name"),
-							AppName:    c.String("app"),
+							AppId:      c.String("app"),
 							Target:     c.String("target"),
 							Callback:   c.String("callback"),
 							Type:       c.String("type"),
@@ -1299,8 +1300,8 @@ func main() {
 					Action: func(c *cli.Context) error {
 						master := c.String("master")
 						li := &LocalInterceptor{
-							Name:    c.String("name"),
-							AppName: c.String("app"),
+							Name:  c.String("name"),
+							AppId: c.String("app"),
 						}
 						liJSONBytes, err := json.Marshal(li)
 						if err != nil {
@@ -1382,7 +1383,7 @@ func main() {
 						master := c.String("master")
 						ri := &RemoteInterceptor{
 							Name:       c.String("name"),
-							AppName:    c.String("app"),
+							AppId:      c.String("app"),
 							Target:     c.String("target"),
 							Method:     c.String("method"),
 							Url:        c.String("url"),
@@ -1466,7 +1467,7 @@ func main() {
 						master := c.String("master")
 						ri := &RemoteInterceptor{
 							Name:       c.String("name"),
-							AppName:    c.String("app"),
+							AppId:      c.String("app"),
 							Target:     c.String("target"),
 							Method:     c.String("method"),
 							Url:        c.String("url"),
@@ -1516,8 +1517,8 @@ func main() {
 					Action: func(c *cli.Context) error {
 						master := c.String("master")
 						ri := &RemoteInterceptor{
-							Name:    c.String("name"),
-							AppName: c.String("app"),
+							Name:  c.String("name"),
+							AppId: c.String("app"),
 						}
 						riJSONBytes, err := json.Marshal(ri)
 						if err != nil {
