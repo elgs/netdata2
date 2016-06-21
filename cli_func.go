@@ -89,7 +89,7 @@ func processCliCommand(message []byte) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		err = masterData.RemoveQuery(query.Name, query.AppId)
+		err = masterData.RemoveQuery(query.Id, query.AppId)
 		if err != nil {
 			return "", err
 		}
@@ -119,7 +119,7 @@ func processCliCommand(message []byte) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		err = masterData.RemoveJob(job.Name, job.AppId)
+		err = masterData.RemoveJob(job.Id, job.AppId)
 		if err != nil {
 			return "", err
 		}
@@ -179,7 +179,7 @@ func processCliCommand(message []byte) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		err = masterData.RemoveToken(li.Name, li.AppId)
+		err = masterData.RemoveLI(li.Id, li.AppId)
 		if err != nil {
 			return "", err
 		}
@@ -209,7 +209,7 @@ func processCliCommand(message []byte) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		err = masterData.RemoveRI(ri.Name, ri.AppId)
+		err = masterData.RemoveRI(ri.Id, ri.AppId)
 		if err != nil {
 			return "", err
 		}
