@@ -14,9 +14,9 @@ type Command struct {
 }
 
 type MasterData struct {
-	Version            int64
-	DataNodes          []DataNode
-	ApiNodes           []ApiNode
+	Version   int64
+	DataNodes []DataNode
+	//	ApiNodes           []ApiNode
 	Apps               []App
 	Queries            []Query
 	Jobs               []Job
@@ -35,19 +35,6 @@ type DataNode struct {
 	Type     string
 	Note     string
 	Status   string
-}
-type ApiNode struct {
-	Id          string
-	Name        string
-	ServerName  string
-	ServerIP4   string
-	ServerIP6   string
-	ServerPort  int64
-	CountryCode string
-	Region      string
-	SuperRegion string
-	Note        string
-	Status      string
 }
 type App struct {
 	Id         string
@@ -110,6 +97,20 @@ type RemoteInterceptor struct {
 	Callback   string
 	Note       string
 	Status     string
+}
+
+type ApiNode struct {
+	Id          string
+	Name        string
+	ServerName  string
+	ServerIP4   string
+	ServerIP6   string
+	ServerPort  int64
+	CountryCode string
+	Region      string
+	SuperRegion string
+	Note        string
+	Status      string
 }
 
 func (this *MasterData) AddDataNode(dataNode *DataNode) error {
@@ -242,33 +243,6 @@ func (this *MasterData) ListApps(mode string) string {
 		}
 	}
 	return buffer.String()
-}
-
-func (this *MasterData) AddApiNode(apiNode *ApiNode) error {
-	for _, v := range this.ApiNodes {
-		if v.Name == apiNode.Name {
-			return errors.New("API node existed: " + apiNode.Name)
-		}
-	}
-	this.ApiNodes = append(this.ApiNodes, *apiNode)
-	this.Version++
-	return propagateMasterData()
-}
-
-func (this *MasterData) RemoveApiNode(id string) error {
-	index := -1
-	for i, v := range this.ApiNodes {
-		if v.Id == id {
-			index = i
-			break
-		}
-	}
-	if index == -1 {
-		return errors.New("API node not found: " + id)
-	}
-	this.ApiNodes = append(this.ApiNodes[:index], this.ApiNodes[index+1:]...)
-	this.Version++
-	return propagateMasterData()
 }
 
 func (this *MasterData) AddQuery(query *Query) error {
@@ -589,4 +563,29 @@ func (this *MasterData) UpdateRI(ri *RemoteInterceptor) error {
 	this.RemoteInterceptors = append(this.RemoteInterceptors, this.RemoteInterceptors[index+1:]...)
 	this.Version++
 	return propagateMasterData()
+}
+
+func AddApiNode(apiNode *ApiNode) error {
+	for _, v := range apiNodes {
+		if v.Name == apiNode.Name {
+			return errors.New("API node existed: " + apiNode.Name)
+		}
+	}
+	apiNodes = append(apiNodes, *apiNode)
+	return nil
+}
+
+func RemoveApiNode(id string) error {
+	index := -1
+	for i, v := range apiNodes {
+		if v.Id == id {
+			index = i
+			break
+		}
+	}
+	if index == -1 {
+		return errors.New("API node not found: " + id)
+	}
+	apiNodes = append(apiNodes[:index], apiNodes[index+1:]...)
+	return nil
 }

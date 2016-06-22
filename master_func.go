@@ -26,7 +26,7 @@ func processWsCommandMaster(conn *websocket.Conn, message []byte) error {
 			Name: conn.RemoteAddr().String(),
 			//			ServerName: fmt.Sprint(service.HostHttps, ":", service.PortHttps),
 		}
-		err = masterData.AddApiNode(apiNode)
+		err = AddApiNode(apiNode)
 		if err != nil {
 			conn.Close()
 			return err

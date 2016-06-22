@@ -19,8 +19,10 @@ import (
 )
 
 var slaveConn *websocket.Conn
+
 var wsConns = make(map[string]*websocket.Conn)
 var masterData MasterData
+var apiNodes []ApiNode
 var pwd string
 var homeDir string
 
@@ -91,7 +93,6 @@ func main() {
 								return err
 							}
 						}
-						masterData.ApiNodes = nil
 						if len(strings.TrimSpace(service.Master)) > 0 {
 							// load data from master if slave
 							RegisterToMaster(wsDrop)
@@ -103,13 +104,13 @@ func main() {
 									http.Error(w, err.Error(), http.StatusInternalServerError)
 									return
 								}
-
+								apiNodes = nil
 								go func(c *websocket.Conn) {
 									defer c.Close()
 									for {
 										_, message, err := c.ReadMessage()
 										if err != nil {
-											masterData.RemoveApiNode(c.RemoteAddr().String())
+											RemoveApiNode(c.RemoteAddr().String())
 											c.Close()
 											log.Println(c.RemoteAddr(), "dropped.")
 											for k, v := range wsConns {
