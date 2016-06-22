@@ -24,9 +24,6 @@ var masterData MasterData
 var pwd string
 var homeDir string
 
-func loadMasterData(file string)             {}
-func storeMasterData(masterData *MasterData) {}
-
 var service = &CliService{
 	EnableHttp: true,
 	HostHttp:   "127.0.0.1",
