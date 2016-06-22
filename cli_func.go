@@ -219,6 +219,12 @@ func processCliCommand(message []byte) (string, error) {
 			return "", err
 		}
 		return string(masterDataBytes), nil
+	case "CLI_SHOW_API_NODES":
+		apiNodesBytes, err := json.Marshal(apiNodes)
+		if err != nil {
+			return "", err
+		}
+		return string(apiNodesBytes), nil
 	}
 	return "", nil
 }

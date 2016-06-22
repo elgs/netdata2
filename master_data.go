@@ -575,16 +575,16 @@ func AddApiNode(apiNode *ApiNode) error {
 	return nil
 }
 
-func RemoveApiNode(id string) error {
+func RemoveApiNode(remoteAddr string) error {
 	index := -1
 	for i, v := range apiNodes {
-		if v.Id == id {
+		if v.Name == remoteAddr {
 			index = i
 			break
 		}
 	}
 	if index == -1 {
-		return errors.New("API node not found: " + id)
+		return errors.New("API node not found: " + remoteAddr)
 	}
 	apiNodes = append(apiNodes[:index], apiNodes[index+1:]...)
 	return nil

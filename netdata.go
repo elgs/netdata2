@@ -104,14 +104,19 @@ func main() {
 									http.Error(w, err.Error(), http.StatusInternalServerError)
 									return
 								}
-								apiNodes = nil
 								go func(c *websocket.Conn) {
 									defer c.Close()
 									for {
 										_, message, err := c.ReadMessage()
 										if err != nil {
-											RemoveApiNode(c.RemoteAddr().String())
-											c.Close()
+											err = RemoveApiNode(c.RemoteAddr().String())
+											if err != nil {
+												log.Println(err)
+											}
+											err = c.Close()
+											if err != nil {
+												log.Println(err)
+											}
 											log.Println(c.RemoteAddr(), "dropped.")
 											for k, v := range wsConns {
 												if v == c {
@@ -1601,6 +1606,33 @@ func main() {
 							Type: "CLI_SHOW_MASTER",
 						}
 						response, err := sendCliCommand(master, cliShowMasterCommand)
+						if err != nil {
+							fmt.Println(err)
+							return err
+						}
+						output := string(response)
+						if output != "" {
+							fmt.Println(strings.TrimSpace(output))
+						}
+						return nil
+					},
+				},
+				{
+					Name:  "apinodes",
+					Usage: "show api nodes info",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "master, m",
+							Value: "127.0.0.1:2015",
+							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+						},
+					},
+					Action: func(c *cli.Context) error {
+						master := c.String("master")
+						cliShowApiNodesCommand := &Command{
+							Type: "CLI_SHOW_API_NODES",
+						}
+						response, err := sendCliCommand(master, cliShowApiNodesCommand)
 						if err != nil {
 							fmt.Println(err)
 							return err
