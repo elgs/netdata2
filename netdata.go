@@ -14,6 +14,8 @@ import (
 
 	"github.com/codegangsta/cli"
 	"github.com/elgs/gorest2"
+	"github.com/elgs/gostrgen"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/websocket"
 	"github.com/satori/go.uuid"
 )
@@ -508,10 +510,15 @@ func main() {
 					Action: func(c *cli.Context) error {
 						master := c.String("master")
 						id := strings.Replace(uuid.NewV4().String(), "-", "", -1)
+						dbName, err := gostrgen.RandGen(16, gostrgen.LowerDigit, "", "")
+						if err != nil {
+							return err
+						}
 						app := &App{
 							Id:         id,
 							Name:       c.String("name"),
 							DataNodeId: c.String("datanode"),
+							DbName:     dbName,
 							Note:       c.String("note"),
 						}
 						appJSONBytes, err := json.Marshal(app)
