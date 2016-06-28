@@ -291,15 +291,30 @@ func MakeGetDbo(dbType string, masterData *MasterData) func(id string) (gorest2.
 			return ret, nil
 		}
 
-		//		query := `SELECT data_store.*,
-		//			CONCAT_WS('_','nd',project.PROJECT_KEY) AS DB,project.ID AS PROJECT_ID,project.PROJECT_KEY FROM project
-		//			INNER JOIN data_store ON project.DATA_STORE_NAME=data_store.DATA_STORE_NAME WHERE project.ID=?`
-
-		for _, app := range masterData.Apps {
-			fmt.Println(app)
+		var app *App = nil
+		var dn *DataNode = nil
+		for _, a := range masterData.Apps {
+			if a.Id == id {
+				app = &a
+				break
+			}
+		}
+		if app == nil {
+			return nil, errors.New("App not found: " + id)
 		}
 
-		ds := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v", "PROJECT_KEY", id, "HOST", "PORT", "DB")
+		for _, d := range masterData.DataNodes {
+			if d.Id == app.DataNodeId {
+				dn = &d
+				break
+			}
+		}
+
+		if dn == nil {
+			return nil, errors.New("Data node not found: " + app.DataNodeId)
+		}
+
+		ds := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v", app.DbName, id, dn.Host, dn.Port, "nd_"+app.DbName)
 		ret = NewDbo(ds, dbType)
 		gorest2.DboRegistry[id] = ret
 		return ret, nil

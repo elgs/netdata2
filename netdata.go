@@ -498,7 +498,7 @@ func main() {
 						},
 						cli.StringFlag{
 							Name:  "datanode, d",
-							Usage: "data node name",
+							Usage: "data node id",
 						},
 						cli.StringFlag{
 							Name:  "note, t",
@@ -554,7 +554,7 @@ func main() {
 						},
 						cli.StringFlag{
 							Name:  "datanode, d",
-							Usage: "data node name",
+							Usage: "data node id",
 						},
 						cli.StringFlag{
 							Name:  "note, t",
