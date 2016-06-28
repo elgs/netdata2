@@ -292,7 +292,6 @@ func MakeGetDbo(dbType string, masterData *MasterData) func(id string) (gorest2.
 		}
 
 		var app *App = nil
-		var dn *DataNode = nil
 		for _, a := range masterData.Apps {
 			if a.Id == id {
 				app = &a
@@ -303,18 +302,7 @@ func MakeGetDbo(dbType string, masterData *MasterData) func(id string) (gorest2.
 			return nil, errors.New("App not found: " + id)
 		}
 
-		for _, d := range masterData.DataNodes {
-			if d.Id == app.DataNodeId {
-				dn = &d
-				break
-			}
-		}
-
-		if dn == nil {
-			return nil, errors.New("Data node not found: " + app.DataNodeId)
-		}
-
-		ds := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v", app.DbName, id, dn.Host, dn.Port, "nd_"+app.DbName)
+		ds := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v", app.DbName, id, app.DataNode.Host, app.DataNode.Port, "nd_"+app.DbName)
 		ret = NewDbo(ds, dbType)
 		gorest2.DboRegistry[id] = ret
 		return ret, nil
