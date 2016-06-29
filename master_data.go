@@ -49,7 +49,7 @@ type Query struct {
 	Name   string
 	Script string
 	AppId  string
-	App    App
+	//	App    App
 	Note   string
 	Status string
 }
@@ -60,9 +60,9 @@ type Job struct {
 	Script     string
 	LoopScript string
 	AppId      string
-	App        App
-	Note       string
-	Status     string
+	//	App        App
+	Note   string
+	Status string
 }
 type Token struct {
 	Id     string
@@ -70,15 +70,15 @@ type Token struct {
 	Mode   string
 	Target string
 	AppId  string
-	App    App
+	//	App    App
 	Note   string
 	Status string
 }
 type LocalInterceptor struct {
-	Id         string
-	Name       string
-	AppId      string
-	App        App
+	Id    string
+	Name  string
+	AppId string
+	//	App        App
 	Target     string
 	Callback   string
 	Type       string
@@ -88,10 +88,10 @@ type LocalInterceptor struct {
 	Status     string
 }
 type RemoteInterceptor struct {
-	Id         string
-	Name       string
-	AppId      string
-	App        App
+	Id    string
+	Name  string
+	AppId string
+	//	App        App
 	Target     string
 	Method     string
 	Url        string
@@ -270,7 +270,7 @@ func (this *MasterData) AddQuery(query *Query) error {
 	for _, v := range this.Apps {
 		if v.Id == query.AppId {
 			found = true
-			query.App = v
+			//			query.App = v
 			break
 		}
 	}
@@ -312,7 +312,7 @@ func (this *MasterData) UpdateQuery(query *Query) error {
 	for _, v := range this.Apps {
 		if v.Id == query.AppId {
 			found = true
-			query.App = v
+			//			query.App = v
 			break
 		}
 	}
@@ -337,7 +337,7 @@ func (this *MasterData) AddJob(job *Job) error {
 	for _, v := range this.Apps {
 		if v.Id == job.AppId {
 			found = true
-			job.App = v
+			//			job.App = v
 			break
 		}
 	}
@@ -379,7 +379,7 @@ func (this *MasterData) UpdateJob(job *Job) error {
 	for _, v := range this.Apps {
 		if v.Id == job.AppId {
 			found = true
-			job.App = v
+			//			job.App = v
 			break
 		}
 	}
@@ -404,7 +404,7 @@ func (this *MasterData) AddToken(token *Token) error {
 	for _, v := range this.Apps {
 		if v.Id == token.AppId {
 			found = true
-			token.App = v
+			//			token.App = v
 			break
 		}
 	}
@@ -446,7 +446,7 @@ func (this *MasterData) UpdateToken(token *Token) error {
 	for _, v := range this.Apps {
 		if v.Id == token.AppId {
 			found = true
-			token.App = v
+			//			token.App = v
 			break
 		}
 	}
@@ -471,7 +471,7 @@ func (this *MasterData) AddLI(li *LocalInterceptor) error {
 	for _, v := range this.Apps {
 		if v.Id == li.AppId {
 			found = true
-			li.App = v
+			//			li.App = v
 			break
 		}
 	}
@@ -513,7 +513,7 @@ func (this *MasterData) UpdateLI(li *LocalInterceptor) error {
 	for _, v := range this.Apps {
 		if v.Id == li.AppId {
 			found = true
-			li.App = v
+			//			li.App = v
 			break
 		}
 	}
@@ -538,7 +538,7 @@ func (this *MasterData) AddRI(ri *RemoteInterceptor) error {
 	for _, v := range this.Apps {
 		if v.Id == ri.AppId {
 			found = true
-			ri.App = v
+			//			ri.App = v
 			break
 		}
 	}
@@ -580,7 +580,7 @@ func (this *MasterData) UpdateRI(ri *RemoteInterceptor) error {
 	for _, v := range this.Apps {
 		if v.Id == ri.AppId {
 			found = true
-			ri.App = v
+			//			ri.App = v
 			break
 		}
 	}
