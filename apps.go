@@ -33,6 +33,46 @@ func OnAppCreateOrUpdate(app *App) error {
 
 func OnAppRemove(app *App) error {
 
+	var newQueries []Query
+	for _, v := range masterData.Queries {
+		if v.AppId != app.Id {
+			newQueries = append(newQueries, v)
+		}
+	}
+	masterData.Queries = newQueries
+
+	var newJobs []Job
+	for _, v := range masterData.Jobs {
+		if v.AppId != app.Id {
+			newJobs = append(newJobs, v)
+		}
+	}
+	masterData.Jobs = newJobs
+
+	var newTokens []Token
+	for _, v := range masterData.Tokens {
+		if v.AppId != app.Id {
+			newTokens = append(newTokens, v)
+		}
+	}
+	masterData.Tokens = newTokens
+
+	var newLi []LocalInterceptor
+	for _, v := range masterData.LocalInterceptors {
+		if v.AppId != app.Id {
+			newLi = append(newLi, v)
+		}
+	}
+	masterData.LocalInterceptors = newLi
+
+	var newRi []RemoteInterceptor
+	for _, v := range masterData.RemoteInterceptors {
+		if v.AppId != app.Id {
+			newRi = append(newRi, v)
+		}
+	}
+	masterData.RemoteInterceptors = newRi
+
 	ds := fmt.Sprintf("%v:%v@tcp(%v:%v)/", app.DataNode.Username, app.DataNode.Password,
 		app.DataNode.Host, app.DataNode.Port)
 	appDb, err := sql.Open("mysql", ds)
