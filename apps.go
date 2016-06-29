@@ -32,6 +32,7 @@ func OnAppCreateOrUpdate(app *App) error {
 }
 
 func OnAppRemove(app *App) error {
+
 	ds := fmt.Sprintf("%v:%v@tcp(%v:%v)/", app.DataNode.Username, app.DataNode.Password,
 		app.DataNode.Host, app.DataNode.Port)
 	appDb, err := sql.Open("mysql", ds)
