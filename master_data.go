@@ -187,7 +187,10 @@ func (this *MasterData) AddApp(app *App) error {
 	if app.DataNode == nil {
 		return errors.New("Data node does not exist: " + app.DataNodeId)
 	}
-	OnAppCreateOrUpdate(app)
+	err := OnAppCreateOrUpdate(app)
+	if err != nil {
+		return err
+	}
 	this.Apps = append(this.Apps, *app)
 	this.Version++
 	return propagateMasterData()
@@ -197,7 +200,10 @@ func (this *MasterData) RemoveApp(id string) error {
 	for i, v := range this.Apps {
 		if v.Id == id {
 			index = i
-			OnAppRemove(&v)
+			err := OnAppRemove(&v)
+			if err != nil {
+				return err
+			}
 			break
 		}
 	}
