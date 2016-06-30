@@ -25,29 +25,25 @@ func NewDbo(ds, dbType string) gorest2.DataOperator {
 	}
 }
 
-func loadQuery(projectId, queryName string) (map[string]string, error) {
-	key := fmt.Sprint("query:", projectId, ":", queryName)
-	queryMap := gorest2.RedisLocal.HGetAllMap(key).Val()
-	if len(queryMap) > 0 {
-		return queryMap, nil
+func loadQuery(projectId, queryName string) (*Query, error) {
+	var app *App = nil
+	for _, vApp := range masterData.Apps {
+		if projectId == vApp.Id {
+			app = &vApp
+			break
+		}
 	}
 
-	defaultDbo, err := gorest2.GetDbo("default")
-	defaultDb, err := defaultDbo.GetConn()
-	if err != nil {
-		return nil, err
-	}
-	queryData, err := gosqljson.QueryDbToMap(defaultDb, "upper",
-		"SELECT * FROM query WHERE PROJECT_ID=? AND NAME=?", projectId, queryName)
-	if err != nil {
-		return nil, err
-	}
-	if len(queryData) == 0 {
-		return nil, errors.New("Query not found.")
+	if app == nil {
+		return nil, errors.New("App not found: " + projectId)
 	}
 
-	err = gorest2.RedisMaster.HMSet(key, "name", queryData[0]["NAME"], "script", queryData[0]["SCRIPT"]).Err()
-	return queryData[0], nil
+	for iQuery, vQuery := range app.Queries {
+		if vQuery.Name == queryName {
+			return &app.Queries[iQuery], nil
+		}
+	}
+	return nil, errors.New("Query not found: " + queryName)
 }
 
 func (this *NdDataOperator) QueryMap(tableId string, params []interface{}, queryParams []string, context map[string]interface{}) ([]map[string]string, error) {
@@ -59,7 +55,7 @@ func (this *NdDataOperator) QueryMap(tableId string, params []interface{}, query
 
 	ret := make([]map[string]string, 0)
 
-	script := query["script"]
+	script := query.Script
 
 	count, err := gosplitargs.CountSeparators(script, "\\?")
 	if err != nil {
@@ -140,7 +136,7 @@ func (this *NdDataOperator) QueryArray(tableId string, params []interface{}, que
 		return nil, nil, err
 	}
 
-	script := query["script"]
+	script := query.Script
 	count, err := gosplitargs.CountSeparators(script, "\\?")
 	if err != nil {
 		return nil, nil, err
@@ -220,7 +216,7 @@ func (this *NdDataOperator) Exec(tableId string, params [][]interface{}, queryPa
 	if err != nil {
 		return nil, err
 	}
-	scripts := query["script"]
+	scripts := query.Script
 
 	db, err := this.GetConn()
 	if err != nil {
@@ -302,7 +298,19 @@ func MakeGetDbo(dbType string, masterData *MasterData) func(id string) (gorest2.
 			return nil, errors.New("App not found: " + id)
 		}
 
-		ds := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v", app.DbName, id, app.DataNode.Host, app.DataNode.Port, "nd_"+app.DbName)
+		var dn *DataNode = nil
+		for _, vDn := range masterData.DataNodes {
+			if app.DataNodeId == vDn.Id {
+				dn = &vDn
+				break
+			}
+		}
+
+		if dn == nil {
+			return nil, errors.New("Data node not found: " + app.DataNodeId)
+		}
+
+		ds := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v", app.DbName, id, dn.Host, dn.Port, "nd_"+app.DbName)
 		ret = NewDbo(ds, dbType)
 		gorest2.DboRegistry[id] = ret
 		return ret, nil

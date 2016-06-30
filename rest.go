@@ -62,7 +62,7 @@ func serve(service *CliService) {
 			}
 		}
 	}
-	//	_ = handler
+
 	http.HandleFunc("/", handler)
 
 	if service.EnableHttp {
