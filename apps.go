@@ -69,7 +69,7 @@ func OnAppRemove(app *App) error {
 		return err
 	}
 
-	sqlDropUser := fmt.Sprintf("DROP USER `%s`", app.DbName)
+	sqlDropUser := fmt.Sprintf("DROP USER IF EXISTS `%s`", app.DbName)
 	_, err = gosqljson.ExecDb(appDb, sqlDropUser)
 	if err != nil {
 		fmt.Println(err)

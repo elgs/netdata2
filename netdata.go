@@ -1625,8 +1625,8 @@ func main() {
 					},
 				},
 				{
-					Name:  "apinodes",
-					Usage: "show api nodes info",
+					Name:  "slave",
+					Usage: "show slave api nodes info",
 					Flags: []cli.Flag{
 						cli.StringFlag{
 							Name:  "master, m",
