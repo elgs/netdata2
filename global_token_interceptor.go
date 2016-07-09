@@ -75,19 +75,17 @@ func checkProjectToken(context map[string]interface{}, tableId string, op string
 func (this *GlobalTokenInterceptor) BeforeCreate(resourceId string, db *sql.DB, context map[string]interface{}, data []map[string]interface{}) (bool, error) {
 	ctn, err := checkProjectToken(context, resourceId, "w")
 	if ctn && err == nil {
-		if context["meta"] != nil && context["meta"].(bool) {
-			for _, data1 := range data {
-				data1["CREATE_TIME"] = time.Now().UTC()
-				data1["UPDATE_TIME"] = time.Now().UTC()
-				if userId, found := context["user_id"]; found {
-					data1["CREATOR_ID"] = userId
-					data1["UPDATER_ID"] = userId
-				}
-				if email, found := context["email"]; found {
-					data1["CREATOR_CODE"] = email
-					data1["UPDATER_CODE"] = email
-				}
-			}
+		for _, data1 := range data {
+			data1["CREATE_TIME"] = time.Now().UTC()
+			data1["UPDATE_TIME"] = time.Now().UTC()
+			//			if userId, found := context["user_id"]; found {
+			//				data1["CREATOR_ID"] = userId
+			//				data1["UPDATER_ID"] = userId
+			//			}
+			//			if email, found := context["email"]; found {
+			//				data1["CREATOR_CODE"] = email
+			//				data1["UPDATER_CODE"] = email
+			//			}
 		}
 	}
 	return ctn, err
@@ -105,15 +103,13 @@ func (this *GlobalTokenInterceptor) BeforeUpdate(resourceId string, db *sql.DB, 
 	ctn, err := checkProjectToken(context, resourceId, "w")
 	if ctn && err == nil {
 		for _, data1 := range data {
-			if context["meta"] != nil && context["meta"].(bool) {
-				data1["UPDATE_TIME"] = time.Now().UTC()
-			}
-			if userId, found := context["user_id"]; found {
-				data1["UPDATER_ID"] = userId
-			}
-			if email, found := context["email"]; found {
-				data1["UPDATER_CODE"] = email
-			}
+			data1["UPDATE_TIME"] = time.Now().UTC()
+			//			if userId, found := context["user_id"]; found {
+			//				data1["UPDATER_ID"] = userId
+			//			}
+			//			if email, found := context["email"]; found {
+			//				data1["UPDATER_CODE"] = email
+			//			}
 		}
 	}
 	return ctn, err
