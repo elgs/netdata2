@@ -103,7 +103,7 @@ func main() {
 							RegisterToMaster(wsDrop)
 						} else {
 							// load data from data file if master
-							gorest2.StartDaemons()
+							StartDaemons()
 							gorest2.RegisterHandler("/sys/ws", func(w http.ResponseWriter, r *http.Request) {
 								conn, err := websocket.Upgrade(w, r, nil, 1024, 1024)
 								if err != nil {
