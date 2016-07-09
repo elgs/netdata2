@@ -95,11 +95,15 @@ func main() {
 								return err
 							}
 						}
+
+						gorest2.GetDbo = MakeGetDbo("mysql", &masterData)
+
 						if len(strings.TrimSpace(service.Master)) > 0 {
 							// load data from master if slave
 							RegisterToMaster(wsDrop)
 						} else {
 							// load data from data file if master
+							gorest2.StartDaemons()
 							gorest2.RegisterHandler("/sys/ws", func(w http.ResponseWriter, r *http.Request) {
 								conn, err := websocket.Upgrade(w, r, nil, 1024, 1024)
 								if err != nil {
@@ -174,7 +178,6 @@ func main() {
 							}
 						})
 
-						gorest2.GetDbo = MakeGetDbo("mysql", &masterData)
 						gorest2.RegisterHandler("/api", gorest2.RestFunc)
 
 						// serve
