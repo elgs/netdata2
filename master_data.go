@@ -347,13 +347,11 @@ func (this *MasterData) UpdateJob(job *Job) error {
 }
 
 func (this *MasterData) StartJob(job *Job) error {
-appLoop:
 	for iApp, _ := range this.Apps {
 		if this.Apps[iApp].Id == job.AppId {
 			for _, vJob := range this.Apps[iApp].Jobs {
 				if vJob.Id == job.Id {
-					vJob.Start()
-					break appLoop
+					return vJob.Start()
 				}
 			}
 		}
