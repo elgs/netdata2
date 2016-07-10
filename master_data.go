@@ -183,7 +183,7 @@ func (this *MasterData) AddApp(app *App) error {
 	if !found {
 		return errors.New("Data node does not exist: " + app.DataNodeId)
 	}
-	err := OnAppCreateOrUpdate(app)
+	err := app.OnAppCreateOrUpdate()
 	if err != nil {
 		return err
 	}
@@ -196,7 +196,7 @@ func (this *MasterData) RemoveApp(id string) error {
 	for i, v := range this.Apps {
 		if v.Id == id {
 			index = i
-			err := OnAppRemove(&v)
+			err := v.OnAppRemove()
 			if err != nil {
 				return err
 			}
@@ -233,7 +233,7 @@ func (this *MasterData) UpdateApp(app *App) error {
 		return errors.New("Data node does not exist: " + app.DataNodeId)
 	}
 
-	OnAppCreateOrUpdate(app)
+	app.OnAppCreateOrUpdate()
 	this.Apps = append(this.Apps[:index], *app)
 	this.Apps = append(this.Apps, this.Apps[index+1:]...)
 	this.Version++
@@ -306,6 +306,7 @@ func (this *MasterData) AddJob(job *Job) error {
 					return errors.New("Job existed: " + job.Name)
 				}
 			}
+			job.OnJobCreate()
 			this.Apps[iApp].Jobs = append(this.Apps[iApp].Jobs, *job)
 			this.Version++
 			return propagateMasterData()
@@ -318,6 +319,7 @@ func (this *MasterData) RemoveJob(id string, appId string) error {
 		if this.Apps[iApp].Id == appId {
 			for iJob, vJob := range this.Apps[iApp].Jobs {
 				if vJob.Id == id && vJob.AppId == appId {
+					vJob.OnJobRemove()
 					this.Apps[iApp].Jobs = append(this.Apps[iApp].Jobs[:iJob], this.Apps[iApp].Jobs[iJob+1:]...)
 					this.Version++
 					return propagateMasterData()
@@ -332,6 +334,7 @@ func (this *MasterData) UpdateJob(job *Job) error {
 		if vApp.Id == job.AppId {
 			for iJob, vJob := range this.Apps[iApp].Jobs {
 				if vJob.Id == job.Id && vJob.AppId == job.AppId {
+					job.OnJobUpdate()
 					this.Apps[iApp].Jobs = append(this.Apps[iApp].Jobs[:iJob], *job)
 					this.Apps[iApp].Jobs = append(this.Apps[iApp].Jobs, this.Apps[iApp].Jobs[iJob+1:]...)
 					this.Version++

@@ -116,13 +116,25 @@ func StartDaemons() {
 	Sched.Start()
 }
 
-func OnJobCreate(job *Job) error {
-	jobRuntimeId, err := Sched.AddFunc(job.Cron, job.Action("sql"))
+func (this *Job) OnJobCreate() error {
+	jobRuntimeId, err := Sched.AddFunc(this.Cron, this.Action("sql"))
 	if err != nil {
 		return err
 	}
-	jobStatus[job.Id] = jobRuntimeId
+	jobStatus[this.Id] = jobRuntimeId
 	return nil
 }
-func OnJobUpdate(job *Job) error { return nil }
-func OnJobRemove(job *Job) error { return nil }
+func (this *Job) OnJobUpdate() error {
+	err := this.OnJobRemove()
+	if err != nil {
+		return err
+	}
+	return this.OnJobCreate()
+}
+func (this *Job) OnJobRemove() error {
+	if jobRuntimeId, ok := jobStatus[this.Id]; ok {
+		Sched.RemoveFunc(jobRuntimeId)
+		delete(jobStatus, this.Id)
+	}
+	return nil
+}
