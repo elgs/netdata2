@@ -129,7 +129,7 @@ func processCliCommand(message []byte) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		err = job.Start()
+		err = masterData.StartJob(job)
 		if err != nil {
 			return "", err
 		}
@@ -139,7 +139,7 @@ func processCliCommand(message []byte) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		err = job.Restart()
+		err = masterData.RestartJob(job)
 		if err != nil {
 			return "", err
 		}
@@ -149,7 +149,7 @@ func processCliCommand(message []byte) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		err = job.Stop()
+		err = masterData.StopJob(job)
 		if err != nil {
 			return "", err
 		}

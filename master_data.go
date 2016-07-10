@@ -346,6 +346,31 @@ func (this *MasterData) UpdateJob(job *Job) error {
 	return errors.New("Job not found: " + job.Name)
 }
 
+func (this *MasterData) StartJob(job *Job) error {
+appLoop:
+	for iApp, _ := range this.Apps {
+		if this.Apps[iApp].Id == job.AppId {
+			for _, vJob := range this.Apps[iApp].Jobs {
+				if vJob.Id == job.Id {
+					vJob.Start()
+					break appLoop
+				}
+			}
+		}
+	}
+	return errors.New("Job not found: " + job.Id)
+}
+func (this *MasterData) RestartJob(job *Job) error {
+	err := this.StopJob(job)
+	if err != nil {
+		return err
+	}
+	return this.StartJob(job)
+}
+func (this *MasterData) StopJob(job *Job) error {
+	return job.Stop()
+}
+
 func (this *MasterData) AddToken(token *Token) error {
 	for iApp, vApp := range this.Apps {
 		if vApp.Id == token.AppId {

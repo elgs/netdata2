@@ -2,6 +2,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -135,6 +136,8 @@ func (this *Job) Stop() error {
 	if jobRuntimeId, ok := jobStatus[this.Id]; ok {
 		Sched.RemoveFunc(jobRuntimeId)
 		delete(jobStatus, this.Id)
+	} else {
+		return errors.New("Job not started: " + this.Id)
 	}
 	return nil
 }
