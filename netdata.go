@@ -886,7 +886,7 @@ func main() {
 							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
-							Name:  "id, id",
+							Name:  "id, i",
 							Usage: "id of the job",
 						},
 						cli.StringFlag{
