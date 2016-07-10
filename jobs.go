@@ -101,7 +101,7 @@ func (this *Job) Action(mode string) func() {
 var Sched *cron.Cron
 var jobStatus = make(map[string]int)
 
-func StartDaemons() {
+func StartJobs() {
 	Sched = cron.New()
 	for _, app := range masterData.Apps {
 		for _, job := range app.Jobs {
@@ -116,7 +116,7 @@ func StartDaemons() {
 	Sched.Start()
 }
 
-func (this *Job) OnJobCreate() error {
+func (this *Job) Start() error {
 	jobRuntimeId, err := Sched.AddFunc(this.Cron, this.Action("sql"))
 	if err != nil {
 		return err
@@ -124,14 +124,14 @@ func (this *Job) OnJobCreate() error {
 	jobStatus[this.Id] = jobRuntimeId
 	return nil
 }
-func (this *Job) OnJobUpdate() error {
-	err := this.OnJobRemove()
+func (this *Job) Restart() error {
+	err := this.Stop()
 	if err != nil {
 		return err
 	}
-	return this.OnJobCreate()
+	return this.Start()
 }
-func (this *Job) OnJobRemove() error {
+func (this *Job) Stop() error {
 	if jobRuntimeId, ok := jobStatus[this.Id]; ok {
 		Sched.RemoveFunc(jobRuntimeId)
 		delete(jobStatus, this.Id)

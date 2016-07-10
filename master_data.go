@@ -306,7 +306,7 @@ func (this *MasterData) AddJob(job *Job) error {
 					return errors.New("Job existed: " + job.Name)
 				}
 			}
-			job.OnJobCreate()
+			job.Start()
 			this.Apps[iApp].Jobs = append(this.Apps[iApp].Jobs, *job)
 			this.Version++
 			return propagateMasterData()
@@ -319,7 +319,7 @@ func (this *MasterData) RemoveJob(id string, appId string) error {
 		if this.Apps[iApp].Id == appId {
 			for iJob, vJob := range this.Apps[iApp].Jobs {
 				if vJob.Id == id && vJob.AppId == appId {
-					vJob.OnJobRemove()
+					vJob.Stop()
 					this.Apps[iApp].Jobs = append(this.Apps[iApp].Jobs[:iJob], this.Apps[iApp].Jobs[iJob+1:]...)
 					this.Version++
 					return propagateMasterData()
@@ -334,7 +334,7 @@ func (this *MasterData) UpdateJob(job *Job) error {
 		if vApp.Id == job.AppId {
 			for iJob, vJob := range this.Apps[iApp].Jobs {
 				if vJob.Id == job.Id && vJob.AppId == job.AppId {
-					job.OnJobUpdate()
+					job.Restart()
 					this.Apps[iApp].Jobs = append(this.Apps[iApp].Jobs[:iJob], *job)
 					this.Apps[iApp].Jobs = append(this.Apps[iApp].Jobs, this.Apps[iApp].Jobs[iJob+1:]...)
 					this.Version++

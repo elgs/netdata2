@@ -123,6 +123,36 @@ func processCliCommand(message []byte) (string, error) {
 		if err != nil {
 			return "", err
 		}
+	case "CLI_JOB_START":
+		job := &Job{}
+		err := json.Unmarshal([]byte(cliCommand.Data), job)
+		if err != nil {
+			return "", err
+		}
+		err = job.Start()
+		if err != nil {
+			return "", err
+		}
+	case "CLI_JOB_RESTART":
+		job := &Job{}
+		err := json.Unmarshal([]byte(cliCommand.Data), job)
+		if err != nil {
+			return "", err
+		}
+		err = job.Restart()
+		if err != nil {
+			return "", err
+		}
+	case "CLI_JOB_STOP":
+		job := &Job{}
+		err := json.Unmarshal([]byte(cliCommand.Data), job)
+		if err != nil {
+			return "", err
+		}
+		err = job.Stop()
+		if err != nil {
+			return "", err
+		}
 	case "CLI_TOKEN_ADD":
 		token := &Token{}
 		err := json.Unmarshal([]byte(cliCommand.Data), token)

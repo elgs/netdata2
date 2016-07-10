@@ -103,7 +103,7 @@ func main() {
 							RegisterToMaster(wsDrop)
 						} else {
 							// load data from data file if master
-							StartDaemons()
+							StartJobs()
 							gorest2.RegisterHandler("/sys/ws", func(w http.ResponseWriter, r *http.Request) {
 								conn, err := websocket.Upgrade(w, r, nil, 1024, 1024)
 								if err != nil {
@@ -980,6 +980,141 @@ func main() {
 							Data: string(jobJSONBytes),
 						}
 						response, err := sendCliCommand(master, cliJobRemoveCommand)
+						if err != nil {
+							fmt.Println(err)
+							return err
+						}
+						output := string(response)
+						if output != "" {
+							fmt.Println(strings.TrimSpace(output))
+						}
+						return nil
+					},
+				},
+				{
+					Name:  "start",
+					Usage: "start a job",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "master, m",
+							Value: "127.0.0.1:2015",
+							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+						},
+						cli.StringFlag{
+							Name:  "id, i",
+							Usage: "id of the job",
+						},
+						cli.StringFlag{
+							Name:  "app, a",
+							Usage: "app id",
+						},
+					},
+					Action: func(c *cli.Context) error {
+						master := c.String("master")
+						job := &Job{
+							Id:    c.String("id"),
+							AppId: c.String("app"),
+						}
+						jobJSONBytes, err := json.Marshal(job)
+						if err != nil {
+							fmt.Println(err)
+							return err
+						}
+						cliJobStartCommand := &Command{
+							Type: "CLI_JOB_START",
+							Data: string(jobJSONBytes),
+						}
+						response, err := sendCliCommand(master, cliJobStartCommand)
+						if err != nil {
+							fmt.Println(err)
+							return err
+						}
+						output := string(response)
+						if output != "" {
+							fmt.Println(strings.TrimSpace(output))
+						}
+						return nil
+					},
+				},
+				{
+					Name:  "restart",
+					Usage: "restart a job",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "master, m",
+							Value: "127.0.0.1:2015",
+							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+						},
+						cli.StringFlag{
+							Name:  "id, i",
+							Usage: "id of the job",
+						},
+						cli.StringFlag{
+							Name:  "app, a",
+							Usage: "app id",
+						},
+					},
+					Action: func(c *cli.Context) error {
+						master := c.String("master")
+						job := &Job{
+							Id:    c.String("id"),
+							AppId: c.String("app"),
+						}
+						jobJSONBytes, err := json.Marshal(job)
+						if err != nil {
+							fmt.Println(err)
+							return err
+						}
+						cliJobRestartCommand := &Command{
+							Type: "CLI_JOB_RESTART",
+							Data: string(jobJSONBytes),
+						}
+						response, err := sendCliCommand(master, cliJobRestartCommand)
+						if err != nil {
+							fmt.Println(err)
+							return err
+						}
+						output := string(response)
+						if output != "" {
+							fmt.Println(strings.TrimSpace(output))
+						}
+						return nil
+					},
+				},
+				{
+					Name:  "stop",
+					Usage: "stop a job",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "master, m",
+							Value: "127.0.0.1:2015",
+							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+						},
+						cli.StringFlag{
+							Name:  "id, i",
+							Usage: "id of the job",
+						},
+						cli.StringFlag{
+							Name:  "app, a",
+							Usage: "app id",
+						},
+					},
+					Action: func(c *cli.Context) error {
+						master := c.String("master")
+						job := &Job{
+							Id:    c.String("id"),
+							AppId: c.String("app"),
+						}
+						jobJSONBytes, err := json.Marshal(job)
+						if err != nil {
+							fmt.Println(err)
+							return err
+						}
+						cliJobStopCommand := &Command{
+							Type: "CLI_JOB_STOP",
+							Data: string(jobJSONBytes),
+						}
+						response, err := sendCliCommand(master, cliJobStopCommand)
 						if err != nil {
 							fmt.Println(err)
 							return err
