@@ -118,6 +118,9 @@ func StartJobs() {
 }
 
 func (this *Job) Start() error {
+	if _, ok := jobStatus[this.Id]; ok {
+		return errors.New("Job already started: " + this.Id)
+	}
 	jobRuntimeId, err := Sched.AddFunc(this.Cron, this.Action("sql"))
 	if err != nil {
 		return err
