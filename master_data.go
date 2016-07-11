@@ -31,11 +31,10 @@ type DataNode struct {
 	Status   string
 }
 type App struct {
-	Id         string
-	Name       string
-	DbName     string
-	DataNodeId string
-	//	DataNode           DataNode
+	Id                 string
+	Name               string
+	DbName             string
+	DataNodeId         string
 	Note               string
 	Status             string
 	Queries            []Query
