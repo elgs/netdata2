@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	gorest2.RegisterGlobalDataInterceptor(20, &GlobalTokenInterceptor{Id: "GlobalTokenInterceptor"})
+	gorest2.RegisterGlobalDataInterceptor(0, &GlobalTokenInterceptor{Id: "GlobalTokenInterceptor"})
 }
 
 type GlobalTokenInterceptor struct {
