@@ -838,6 +838,10 @@ func main() {
 							Name:  "loopscript, l",
 							Usage: "loop script of the job",
 						},
+						cli.BoolFlag{
+							Name:  "auto, u",
+							Usage: "auto start the job?",
+						},
 						cli.StringFlag{
 							Name:  "note, t",
 							Usage: "a note for the job",
@@ -853,6 +857,7 @@ func main() {
 							Script:     c.String("script"),
 							LoopScript: c.String("loopscript"),
 							Cron:       c.String("cron"),
+							AutoStart:  c.Bool("auto"),
 							Note:       c.String("note"),
 						}
 						jobJSONBytes, err := json.Marshal(job)
@@ -909,6 +914,10 @@ func main() {
 							Name:  "loopscript, l",
 							Usage: "loop script of the job",
 						},
+						cli.BoolFlag{
+							Name:  "auto, u",
+							Usage: "auto start the job?",
+						},
 						cli.StringFlag{
 							Name:  "note, t",
 							Usage: "a note for the job",
@@ -923,6 +932,7 @@ func main() {
 							Script:     c.String("script"),
 							LoopScript: c.String("loopscript"),
 							Cron:       c.String("cron"),
+							AutoStart:  c.Bool("auto"),
 							Note:       c.String("note"),
 						}
 						jobJSONBytes, err := json.Marshal(job)

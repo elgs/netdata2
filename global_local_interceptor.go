@@ -113,7 +113,7 @@ func (this *GlobalLocalInterceptor) commonBefore(tx *sql.Tx, db *sql.DB, resourc
 		return false, err
 	}
 
-	return this.checkAgainstBeforeRemoteInterceptor(tx, db, context, payload, appId, resourceId, action, ri)
+	return this.checkAgainstBeforeLocalInterceptor(tx, db, context, payload, appId, resourceId, action, ri)
 }
 
 func (this *GlobalLocalInterceptor) commonAfter(resourceId string, context map[string]interface{}, action string, data interface{}) error {
@@ -148,7 +148,7 @@ func (this *GlobalLocalInterceptor) commonAfter(resourceId string, context map[s
 	if err != nil {
 		return err
 	}
-	return this.executeAfterRemoteInterceptor(payload, appId, resourceId, action, ri, context)
+	return this.executeAfterLocalInterceptor(payload, appId, resourceId, action, ri, context)
 }
 
 func (this *GlobalLocalInterceptor) createPayload(target string, action string, data interface{}) (string, error) {

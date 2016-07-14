@@ -106,12 +106,14 @@ func StartJobs() {
 	Sched = cron.New()
 	for _, app := range masterData.Apps {
 		for _, job := range app.Jobs {
-			h, err := Sched.AddFunc(job.Cron, job.Action("sql"))
-			if err != nil {
-				log.Println(err)
-				continue
+			if job.AutoStart {
+				h, err := Sched.AddFunc(job.Cron, job.Action("sql"))
+				if err != nil {
+					log.Println(err)
+					continue
+				}
+				jobStatus[job.Id] = h
 			}
-			jobStatus[job.Id] = h
 		}
 	}
 	Sched.Start()
@@ -143,4 +145,11 @@ func (this *Job) Stop() error {
 		return errors.New("Job not started: " + this.Id)
 	}
 	return nil
+}
+func (this *Job) Started() bool {
+	if _, ok := jobStatus[this.Id]; ok {
+		return true
+	} else {
+		return false
+	}
 }
