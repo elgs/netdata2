@@ -4,7 +4,6 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"strings"
 	"time"
 
@@ -24,33 +23,22 @@ type GlobalLocalInterceptor struct {
 }
 
 func (this *GlobalLocalInterceptor) checkAgainstBeforeLocalInterceptor(tx *sql.Tx, db *sql.DB, context map[string]interface{}, data string, appId string, resourceId string, action string, ri *RemoteInterceptor) (bool, error) {
-	res, status, err := httpRequest(ri.Url, ri.Method, data, -1)
+
+	// return a array of array as parameters for callback
+	query, err := loadQuery(appId, callback)
 	if err != nil {
 		return false, err
 	}
-	if status != 200 {
-		return false, errors.New("Client rejected.")
+	scripts := query.Script
+	replaceContext := buildReplaceContext(context)
+	queryParams, params, err := buildParams(clientData)
+	//		fmt.Println(queryParams, params)
+	if err != nil {
+		return false, err
 	}
-	callback := ri.Callback
-	clientData := string(res)
-
-	if strings.TrimSpace(callback) != "" {
-		// return a array of array as parameters for callback
-		query, err := loadQuery(appId, callback)
-		if err != nil {
-			return false, err
-		}
-		scripts := query.Script
-		replaceContext := buildReplaceContext(context)
-		queryParams, params, err := buildParams(clientData)
-		//		fmt.Println(queryParams, params)
-		if err != nil {
-			return false, err
-		}
-		_, err = batchExecuteTx(tx, db, &scripts, queryParams, params, replaceContext)
-		if err != nil {
-			return false, err
-		}
+	_, err = batchExecuteTx(tx, db, &scripts, queryParams, params, replaceContext)
+	if err != nil {
+		return false, err
 	}
 	return true, nil
 
@@ -82,7 +70,12 @@ func (this *GlobalLocalInterceptor) executeAfterLocalInterceptor(data string, ap
 func (this *GlobalLocalInterceptor) commonBefore(tx *sql.Tx, db *sql.DB, resourceId string, context map[string]interface{}, action string, data interface{}) (bool, error) {
 	rts := strings.Split(strings.Replace(resourceId, "`", "", -1), ".")
 	resourceId = rts[len(rts)-1]
-	appId := context["app_id"].(string)
+	app := context["app"].(*App)
+	for _, li := range app.LocalInterceptors {
+		if li.Target == resourceId && li.AppId == app.Id {
+
+		}
+	}
 	ri := &RemoteInterceptor{}
 
 	criteria := ri.Criteria
