@@ -5,13 +5,11 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
-	"time"
 
 	"github.com/elgs/gorest2"
-	"github.com/elgs/gosqljson"
 	"github.com/elgs/jsonql"
-	"github.com/satori/go.uuid"
 )
 
 func init() {
@@ -23,97 +21,71 @@ type GlobalRemoteInterceptor struct {
 	Id string
 }
 
-func (this *GlobalRemoteInterceptor) checkAgainstBeforeRemoteInterceptor(tx *sql.Tx, db *sql.DB, context map[string]interface{}, data string, appId string, resourceId string, action string, ri *RemoteInterceptor) (bool, error) {
-	res, status, err := httpRequest(ri.Url, ri.Method, data, -1)
+func (this *GlobalRemoteInterceptor) checkAgainstBeforeRemoteInterceptor(tx *sql.Tx, db *sql.DB, context map[string]interface{}, data interface{}, appId string, resourceId string, action string, ri *RemoteInterceptor) (bool, error) {
+	// return a array of array as parameters for callback
+	query, err := loadQuery(appId, ri.Callback)
 	if err != nil {
 		return false, err
 	}
-	if status != 200 {
-		return false, errors.New("Client rejected.")
-	}
-	callback := ri.Callback
-	clientData := string(res)
+	scripts := query.Script
+	replaceContext := buildReplaceContext(context)
 
-	if strings.TrimSpace(callback) != "" {
-		// return a array of array as parameters for callback
-		query, err := loadQuery(appId, callback)
-		if err != nil {
-			return false, err
-		}
-		scripts := query.Script
-		replaceContext := buildReplaceContext(context)
-		queryParams, params, err := buildParams(clientData)
-		//		fmt.Println(queryParams, params)
-		if err != nil {
-			return false, err
-		}
-		_, err = batchExecuteTx(tx, db, &scripts, queryParams, params, replaceContext)
-		if err != nil {
-			return false, err
-		}
+	if err != nil {
+		return false, err
+	}
+	_, err = batchExecuteTx(tx, db, &scripts, []string{}, data.([][]interface{}), replaceContext)
+	if err != nil {
+		return false, err
 	}
 	return true, nil
-
 }
 
 func (this *GlobalRemoteInterceptor) executeAfterRemoteInterceptor(data string, appId string, resourceId string, action string, ri *RemoteInterceptor, context map[string]interface{}) error {
-	dataId := strings.Replace(uuid.NewV4().String(), "-", "", -1)
-	insert := `INSERT INTO push_notification(ID,PROJECT_ID,TARGET,METHOD,URL,TYPE,ACTION_TYPE,STATUS,DATA,CALLBACK,
-	CREATOR_ID,CREATOR_CODE,CREATE_TIME,UPDATER_ID,UPDATER_CODE,UPDATE_TIME) 
-	VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
-	now := time.Now().UTC()
-	userId := context["user_id"]
-	userCode := context["email"]
 
-	params := []interface{}{dataId, appId, resourceId, ri.Method, ri.Url, "after", action, "0", data, ri.Callback,
-		userId, userCode, now, userId, userCode, now}
-	defaultDbo, err := gorest2.GetDbo("default")
+	res, status, err := httpRequest(ri.Url, ri.Method, data, -1)
 	if err != nil {
 		return err
 	}
-	defaultDb, err := defaultDbo.GetConn()
-	if err != nil {
-		return err
+	if status != 200 {
+		return errors.New("Client rejected.")
 	}
-	_, err = gosqljson.ExecDb(defaultDb, insert, params...)
-	return err
+	clientData := string(res)
+	fmt.Println(clientData)
+	return nil
 }
 
 func (this *GlobalRemoteInterceptor) commonBefore(tx *sql.Tx, db *sql.DB, resourceId string, context map[string]interface{}, action string, data interface{}) (bool, error) {
 	rts := strings.Split(strings.Replace(resourceId, "`", "", -1), ".")
 	resourceId = rts[len(rts)-1]
-	appId := context["app_id"].(string)
-	ri := &RemoteInterceptor{}
+	app := context["app"].(*App)
+	for _, ri := range app.RemoteInterceptors {
+		if ri.Target == resourceId && ri.AppId == app.Id {
+			if len(strings.TrimSpace(ri.Criteria)) > 0 {
+				parser := jsonql.NewQuery(data)
+				criteriaResult, err := parser.Query(ri.Criteria)
+				if err != nil {
+					return true, err
+				}
 
-	criteria := ri.Criteria
-	if len(strings.TrimSpace(criteria)) > 0 {
-		parser := jsonql.NewQuery(data)
-		criteriaResult, err := parser.Query(criteria)
-		if err != nil {
-			return true, err
-		}
-
-		switch v := criteriaResult.(type) {
-		case []interface{}:
-			if len(v) == 0 {
-				return true, nil
+				switch v := criteriaResult.(type) {
+				case []interface{}:
+					if len(v) == 0 {
+						return true, nil
+					}
+				case map[string]interface{}:
+					if v == nil {
+						return true, nil
+					}
+				default:
+					return true, nil
+				}
+				this.checkAgainstBeforeRemoteInterceptor(tx, db, context, criteriaResult, app.Id, resourceId, action, &ri)
+			} else {
+				this.checkAgainstBeforeRemoteInterceptor(tx, db, context, data, app.Id, resourceId, action, &ri)
 			}
-		case map[string]interface{}:
-			if v == nil {
-				return true, nil
-			}
-		default:
-			return true, nil
 		}
-		data = criteriaResult
 	}
-
-	payload, err := this.createPayload(resourceId, "before_"+action, data)
-	if err != nil {
-		return false, err
-	}
-
-	return this.checkAgainstBeforeRemoteInterceptor(tx, db, context, payload, appId, resourceId, action, ri)
+	return true, nil
 }
 
 func (this *GlobalRemoteInterceptor) commonAfter(resourceId string, context map[string]interface{}, action string, data interface{}) error {

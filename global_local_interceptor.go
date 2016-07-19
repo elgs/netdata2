@@ -36,7 +36,6 @@ func (this *GlobalLocalInterceptor) checkAgainstBeforeLocalInterceptor(tx *sql.T
 		return false, err
 	}
 	return true, nil
-
 }
 
 func (this *GlobalLocalInterceptor) executeAfterLocalInterceptor(tx *sql.Tx, db *sql.DB, context map[string]interface{}, data interface{}, appId string, resourceId string, action string, li *LocalInterceptor) error {
