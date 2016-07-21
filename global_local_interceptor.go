@@ -44,9 +44,6 @@ func (this *GlobalLocalInterceptor) executeAfterLocalInterceptor(tx *sql.Tx, db 
 	scripts := query.Script
 	replaceContext := buildReplaceContext(context)
 
-	if err != nil {
-		return err
-	}
 	_, err = batchExecuteTx(tx, db, &scripts, []string{}, data.([][]interface{}), replaceContext)
 	if err != nil {
 		return err
