@@ -20,7 +20,7 @@ type GlobalRemoteInterceptor struct {
 	Id string
 }
 
-func (this *GlobalRemoteInterceptor) checkAgainstBeforeRemoteInterceptor(tx *sql.Tx, db *sql.DB, context map[string]interface{}, data interface{}, appId string, resourceId string, action string, ri *RemoteInterceptor) (bool, error) {
+func (this *GlobalRemoteInterceptor) checkAgainstBeforeRemoteInterceptor(tx *sql.Tx, db *sql.DB, context map[string]interface{}, data interface{}, appId string, resourceId string, ri *RemoteInterceptor) (bool, error) {
 	query, err := loadQuery(appId, ri.Callback)
 	if err != nil {
 		return false, err
@@ -38,7 +38,7 @@ func (this *GlobalRemoteInterceptor) checkAgainstBeforeRemoteInterceptor(tx *sql
 	return true, nil
 }
 
-func (this *GlobalRemoteInterceptor) executeAfterRemoteInterceptor(tx *sql.Tx, db *sql.DB, context map[string]interface{}, data string, appId string, resourceId string, action string, ri *RemoteInterceptor) error {
+func (this *GlobalRemoteInterceptor) executeAfterRemoteInterceptor(tx *sql.Tx, db *sql.DB, context map[string]interface{}, data string, appId string, resourceId string, ri *RemoteInterceptor) error {
 	res, status, err := httpRequest(ri.Url, ri.Method, data, -1)
 	if err != nil {
 		return err
@@ -72,7 +72,7 @@ func (this *GlobalRemoteInterceptor) commonBefore(tx *sql.Tx, db *sql.DB, resour
 	resourceId = rts[len(rts)-1]
 	app := context["app"].(*App)
 	for _, ri := range app.RemoteInterceptors {
-		if ri.Type == "before" && ri.Target == resourceId && ri.AppId == app.Id {
+		if ri.Type == "before" && ri.ActionType == action && ri.Target == resourceId && ri.AppId == app.Id {
 			if len(strings.TrimSpace(ri.Criteria)) > 0 {
 				parser := jsonql.NewQuery(data)
 				criteriaResult, err := parser.Query(ri.Criteria)
@@ -92,9 +92,9 @@ func (this *GlobalRemoteInterceptor) commonBefore(tx *sql.Tx, db *sql.DB, resour
 				default:
 					return true, nil
 				}
-				this.checkAgainstBeforeRemoteInterceptor(tx, db, context, criteriaResult, app.Id, resourceId, action, &ri)
+				this.checkAgainstBeforeRemoteInterceptor(tx, db, context, criteriaResult, app.Id, resourceId, &ri)
 			} else {
-				this.checkAgainstBeforeRemoteInterceptor(tx, db, context, data, app.Id, resourceId, action, &ri)
+				this.checkAgainstBeforeRemoteInterceptor(tx, db, context, data, app.Id, resourceId, &ri)
 			}
 		}
 	}
@@ -106,7 +106,7 @@ func (this *GlobalRemoteInterceptor) commonAfter(tx *sql.Tx, db *sql.DB, resourc
 	resourceId = rts[len(rts)-1]
 	app := context["app"].(*App)
 	for _, ri := range app.RemoteInterceptors {
-		if ri.Type == "after" && ri.Target == resourceId && ri.AppId == app.Id {
+		if ri.Type == "after" && ri.ActionType == action && ri.Target == resourceId && ri.AppId == app.Id {
 			if len(strings.TrimSpace(ri.Criteria)) > 0 {
 				parser := jsonql.NewQuery(data)
 				criteriaResult, err := parser.Query(ri.Criteria)
@@ -130,7 +130,7 @@ func (this *GlobalRemoteInterceptor) commonAfter(tx *sql.Tx, db *sql.DB, resourc
 				if err != nil {
 					return err
 				}
-				err = this.executeAfterRemoteInterceptor(tx, db, context, payload, app.Id, resourceId, action, &ri)
+				err = this.executeAfterRemoteInterceptor(tx, db, context, payload, app.Id, resourceId, &ri)
 				if err != nil {
 					return err
 				}
@@ -139,7 +139,7 @@ func (this *GlobalRemoteInterceptor) commonAfter(tx *sql.Tx, db *sql.DB, resourc
 				if err != nil {
 					return err
 				}
-				err = this.executeAfterRemoteInterceptor(tx, db, context, payload, app.Id, resourceId, action, &ri)
+				err = this.executeAfterRemoteInterceptor(tx, db, context, payload, app.Id, resourceId, &ri)
 				if err != nil {
 					return err
 				}

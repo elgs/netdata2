@@ -18,7 +18,7 @@ type GlobalLocalInterceptor struct {
 	Id string
 }
 
-func (this *GlobalLocalInterceptor) checkAgainstBeforeLocalInterceptor(tx *sql.Tx, db *sql.DB, context map[string]interface{}, data interface{}, appId string, resourceId string, action string, li *LocalInterceptor) (bool, error) {
+func (this *GlobalLocalInterceptor) checkAgainstBeforeLocalInterceptor(tx *sql.Tx, db *sql.DB, context map[string]interface{}, data interface{}, appId string, resourceId string, li *LocalInterceptor) (bool, error) {
 	query, err := loadQuery(appId, li.Callback)
 	if err != nil {
 		return false, err
@@ -36,7 +36,7 @@ func (this *GlobalLocalInterceptor) checkAgainstBeforeLocalInterceptor(tx *sql.T
 	return true, nil
 }
 
-func (this *GlobalLocalInterceptor) executeAfterLocalInterceptor(tx *sql.Tx, db *sql.DB, context map[string]interface{}, data interface{}, appId string, resourceId string, action string, li *LocalInterceptor) error {
+func (this *GlobalLocalInterceptor) executeAfterLocalInterceptor(tx *sql.Tx, db *sql.DB, context map[string]interface{}, data interface{}, appId string, resourceId string, li *LocalInterceptor) error {
 	query, err := loadQuery(appId, li.Callback)
 	if err != nil {
 		return err
@@ -56,7 +56,7 @@ func (this *GlobalLocalInterceptor) commonBefore(tx *sql.Tx, db *sql.DB, resourc
 	resourceId = rts[len(rts)-1]
 	app := context["app"].(*App)
 	for _, li := range app.LocalInterceptors {
-		if li.Type == "before" && li.Target == resourceId && li.AppId == app.Id {
+		if li.Type == "before" && li.ActionType == action && li.Target == resourceId && li.AppId == app.Id {
 			if len(strings.TrimSpace(li.Criteria)) > 0 {
 				parser := jsonql.NewQuery(data)
 				criteriaResult, err := parser.Query(li.Criteria)
@@ -76,9 +76,9 @@ func (this *GlobalLocalInterceptor) commonBefore(tx *sql.Tx, db *sql.DB, resourc
 				default:
 					return true, nil
 				}
-				this.checkAgainstBeforeLocalInterceptor(tx, db, context, criteriaResult, app.Id, resourceId, action, &li)
+				this.checkAgainstBeforeLocalInterceptor(tx, db, context, criteriaResult, app.Id, resourceId, &li)
 			} else {
-				this.checkAgainstBeforeLocalInterceptor(tx, db, context, data, app.Id, resourceId, action, &li)
+				this.checkAgainstBeforeLocalInterceptor(tx, db, context, data, app.Id, resourceId, &li)
 			}
 		}
 	}
@@ -90,7 +90,7 @@ func (this *GlobalLocalInterceptor) commonAfter(tx *sql.Tx, db *sql.DB, resource
 	resourceId = rts[len(rts)-1]
 	app := context["app"].(*App)
 	for _, li := range app.LocalInterceptors {
-		if li.Type == "after" && li.Target == resourceId && li.AppId == app.Id {
+		if li.Type == "after" && li.ActionType == action && li.Target == resourceId && li.AppId == app.Id {
 			if len(strings.TrimSpace(li.Criteria)) > 0 {
 				parser := jsonql.NewQuery(data)
 				criteriaResult, err := parser.Query(li.Criteria)
@@ -110,9 +110,9 @@ func (this *GlobalLocalInterceptor) commonAfter(tx *sql.Tx, db *sql.DB, resource
 				default:
 					return nil
 				}
-				this.executeAfterLocalInterceptor(tx, db, context, criteriaResult, app.Id, resourceId, action, &li)
+				this.executeAfterLocalInterceptor(tx, db, context, criteriaResult, app.Id, resourceId, &li)
 			} else {
-				this.executeAfterLocalInterceptor(tx, db, context, data, app.Id, resourceId, action, &li)
+				this.executeAfterLocalInterceptor(tx, db, context, data, app.Id, resourceId, &li)
 			}
 		}
 	}
