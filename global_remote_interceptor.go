@@ -22,7 +22,6 @@ type GlobalRemoteInterceptor struct {
 }
 
 func (this *GlobalRemoteInterceptor) checkAgainstBeforeRemoteInterceptor(tx *sql.Tx, db *sql.DB, context map[string]interface{}, data interface{}, appId string, resourceId string, action string, ri *RemoteInterceptor) (bool, error) {
-	// return a array of array as parameters for callback
 	query, err := loadQuery(appId, ri.Callback)
 	if err != nil {
 		return false, err
@@ -41,7 +40,6 @@ func (this *GlobalRemoteInterceptor) checkAgainstBeforeRemoteInterceptor(tx *sql
 }
 
 func (this *GlobalRemoteInterceptor) executeAfterRemoteInterceptor(data string, appId string, resourceId string, action string, ri *RemoteInterceptor, context map[string]interface{}) error {
-
 	res, status, err := httpRequest(ri.Url, ri.Method, data, -1)
 	if err != nil {
 		return err
@@ -59,7 +57,7 @@ func (this *GlobalRemoteInterceptor) commonBefore(tx *sql.Tx, db *sql.DB, resour
 	resourceId = rts[len(rts)-1]
 	app := context["app"].(*App)
 	for _, ri := range app.RemoteInterceptors {
-		if ri.Target == resourceId && ri.AppId == app.Id {
+		if ri.Type == "before" && ri.Target == resourceId && ri.AppId == app.Id {
 			if len(strings.TrimSpace(ri.Criteria)) > 0 {
 				parser := jsonql.NewQuery(data)
 				criteriaResult, err := parser.Query(ri.Criteria)

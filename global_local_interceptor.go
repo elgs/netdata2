@@ -1,4 +1,4 @@
-// global_remote_interceptor
+// global_local_interceptor
 package main
 
 import (
@@ -19,8 +19,6 @@ type GlobalLocalInterceptor struct {
 }
 
 func (this *GlobalLocalInterceptor) checkAgainstBeforeLocalInterceptor(tx *sql.Tx, db *sql.DB, context map[string]interface{}, data interface{}, appId string, resourceId string, action string, li *LocalInterceptor) (bool, error) {
-
-	// return a array of array as parameters for callback
 	query, err := loadQuery(appId, li.Callback)
 	if err != nil {
 		return false, err
@@ -39,7 +37,6 @@ func (this *GlobalLocalInterceptor) checkAgainstBeforeLocalInterceptor(tx *sql.T
 }
 
 func (this *GlobalLocalInterceptor) executeAfterLocalInterceptor(tx *sql.Tx, db *sql.DB, context map[string]interface{}, data interface{}, appId string, resourceId string, action string, li *LocalInterceptor) error {
-	// return a array of array as parameters for callback
 	query, err := loadQuery(appId, li.Callback)
 	if err != nil {
 		return err
@@ -62,7 +59,7 @@ func (this *GlobalLocalInterceptor) commonBefore(tx *sql.Tx, db *sql.DB, resourc
 	resourceId = rts[len(rts)-1]
 	app := context["app"].(*App)
 	for _, li := range app.LocalInterceptors {
-		if li.Target == resourceId && li.AppId == app.Id {
+		if li.Type == "before" && li.Target == resourceId && li.AppId == app.Id {
 			if len(strings.TrimSpace(li.Criteria)) > 0 {
 				parser := jsonql.NewQuery(data)
 				criteriaResult, err := parser.Query(li.Criteria)
@@ -96,7 +93,7 @@ func (this *GlobalLocalInterceptor) commonAfter(tx *sql.Tx, db *sql.DB, resource
 	resourceId = rts[len(rts)-1]
 	app := context["app"].(*App)
 	for _, li := range app.LocalInterceptors {
-		if li.Target == resourceId && li.AppId == app.Id {
+		if li.Type == "after" && li.Target == resourceId && li.AppId == app.Id {
 			if len(strings.TrimSpace(li.Criteria)) > 0 {
 				parser := jsonql.NewQuery(data)
 				criteriaResult, err := parser.Query(li.Criteria)
