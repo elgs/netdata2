@@ -1365,15 +1365,14 @@ func main() {
 						master := c.String("master")
 						id := strings.Replace(uuid.NewV4().String(), "-", "", -1)
 						li := &LocalInterceptor{
-							Id:         id,
-							Name:       c.String("name"),
-							AppId:      c.String("app"),
-							Target:     c.String("target"),
-							Callback:   c.String("callback"),
-							Type:       c.String("type"),
-							ActionType: c.String("action"),
-							Criteria:   c.String("criteria"),
-							Note:       c.String("note"),
+							Id:       id,
+							Name:     c.String("name"),
+							AppId:    c.String("app"),
+							Target:   c.String("target"),
+							Callback: c.String("callback"),
+							Type:     c.String("type"),
+							Criteria: c.String("criteria"),
+							Note:     c.String("note"),
 						}
 						liJSONBytes, err := json.Marshal(li)
 						if err != nil {
@@ -1443,15 +1442,14 @@ func main() {
 					Action: func(c *cli.Context) error {
 						master := c.String("master")
 						li := &LocalInterceptor{
-							Id:         c.String("id"),
-							Name:       c.String("name"),
-							AppId:      c.String("app"),
-							Target:     c.String("target"),
-							Callback:   c.String("callback"),
-							Type:       c.String("type"),
-							ActionType: c.String("action"),
-							Criteria:   c.String("criteria"),
-							Note:       c.String("note"),
+							Id:       c.String("id"),
+							Name:     c.String("name"),
+							AppId:    c.String("app"),
+							Target:   c.String("target"),
+							Callback: c.String("callback"),
+							Type:     c.String("type"),
+							Criteria: c.String("criteria"),
+							Note:     c.String("note"),
 						}
 						liJSONBytes, err := json.Marshal(li)
 						if err != nil {

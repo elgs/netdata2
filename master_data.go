@@ -72,16 +72,15 @@ type Token struct {
 	Status string
 }
 type LocalInterceptor struct {
-	Id         string
-	Name       string
-	AppId      string
-	Target     string
-	Callback   string
-	Type       string
-	ActionType string
-	Criteria   string
-	Note       string
-	Status     string
+	Id       string
+	Name     string
+	AppId    string
+	Target   string
+	Callback string
+	Type     string
+	Criteria string
+	Note     string
+	Status   string
 }
 type RemoteInterceptor struct {
 	Id         string
