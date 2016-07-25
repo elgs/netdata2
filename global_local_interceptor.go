@@ -18,25 +18,7 @@ type GlobalLocalInterceptor struct {
 	Id string
 }
 
-func (this *GlobalLocalInterceptor) checkAgainstBeforeLocalInterceptor(tx *sql.Tx, db *sql.DB, context map[string]interface{}, data interface{}, appId string, resourceId string, li *LocalInterceptor) (bool, error) {
-	query, err := loadQuery(appId, li.Callback)
-	if err != nil {
-		return false, err
-	}
-	scripts := query.Script
-	replaceContext := buildReplaceContext(context)
-
-	if err != nil {
-		return false, err
-	}
-	_, err = batchExecuteTx(tx, db, &scripts, []string{}, data.([][]interface{}), replaceContext)
-	if err != nil {
-		return false, err
-	}
-	return true, nil
-}
-
-func (this *GlobalLocalInterceptor) executeAfterLocalInterceptor(tx *sql.Tx, db *sql.DB, context map[string]interface{}, data interface{}, appId string, resourceId string, li *LocalInterceptor) error {
+func (this *GlobalLocalInterceptor) executeLocalInterceptor(tx *sql.Tx, db *sql.DB, context map[string]interface{}, data interface{}, appId string, resourceId string, li *LocalInterceptor) error {
 	query, err := loadQuery(appId, li.Callback)
 	if err != nil {
 		return err
@@ -63,22 +45,15 @@ func (this *GlobalLocalInterceptor) commonBefore(tx *sql.Tx, db *sql.DB, resourc
 				if err != nil {
 					return true, err
 				}
-
-				switch v := criteriaResult.(type) {
-				case []interface{}:
-					if len(v) == 0 {
-						return true, nil
-					}
-				case map[string]interface{}:
-					if v == nil {
-						return true, nil
-					}
-				default:
-					return true, nil
+				err = this.executeLocalInterceptor(tx, db, context, criteriaResult, app.Id, resourceId, &li)
+				if err != nil {
+					return false, err
 				}
-				this.checkAgainstBeforeLocalInterceptor(tx, db, context, criteriaResult, app.Id, resourceId, &li)
 			} else {
-				this.checkAgainstBeforeLocalInterceptor(tx, db, context, data, app.Id, resourceId, &li)
+				err := this.executeLocalInterceptor(tx, db, context, data, app.Id, resourceId, &li)
+				if err != nil {
+					return false, err
+				}
 			}
 		}
 	}
@@ -97,22 +72,15 @@ func (this *GlobalLocalInterceptor) commonAfter(tx *sql.Tx, db *sql.DB, resource
 				if err != nil {
 					return err
 				}
-
-				switch v := criteriaResult.(type) {
-				case []interface{}:
-					if len(v) == 0 {
-						return nil
-					}
-				case map[string]interface{}:
-					if v == nil {
-						return nil
-					}
-				default:
-					return nil
+				err = this.executeLocalInterceptor(tx, db, context, criteriaResult, app.Id, resourceId, &li)
+				if err != nil {
+					return err
 				}
-				this.executeAfterLocalInterceptor(tx, db, context, criteriaResult, app.Id, resourceId, &li)
 			} else {
-				this.executeAfterLocalInterceptor(tx, db, context, data, app.Id, resourceId, &li)
+				err := this.executeLocalInterceptor(tx, db, context, data, app.Id, resourceId, &li)
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}

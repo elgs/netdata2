@@ -20,25 +20,7 @@ type GlobalRemoteInterceptor struct {
 	Id string
 }
 
-func (this *GlobalRemoteInterceptor) checkAgainstBeforeRemoteInterceptor(tx *sql.Tx, db *sql.DB, context map[string]interface{}, data interface{}, appId string, resourceId string, ri *RemoteInterceptor) (bool, error) {
-	query, err := loadQuery(appId, ri.Callback)
-	if err != nil {
-		return false, err
-	}
-	scripts := query.Script
-	replaceContext := buildReplaceContext(context)
-
-	if err != nil {
-		return false, err
-	}
-	_, err = batchExecuteTx(tx, db, &scripts, []string{}, data.([][]interface{}), replaceContext)
-	if err != nil {
-		return false, err
-	}
-	return true, nil
-}
-
-func (this *GlobalRemoteInterceptor) executeAfterRemoteInterceptor(tx *sql.Tx, db *sql.DB, context map[string]interface{}, data string, appId string, resourceId string, ri *RemoteInterceptor) error {
+func (this *GlobalRemoteInterceptor) executeRemoteInterceptor(tx *sql.Tx, db *sql.DB, context map[string]interface{}, data string, appId string, resourceId string, ri *RemoteInterceptor) error {
 	res, status, err := httpRequest(ri.Url, ri.Method, data, -1)
 	if err != nil {
 		return err
@@ -77,24 +59,26 @@ func (this *GlobalRemoteInterceptor) commonBefore(tx *sql.Tx, db *sql.DB, resour
 				parser := jsonql.NewQuery(data)
 				criteriaResult, err := parser.Query(ri.Criteria)
 				if err != nil {
-					return true, err
+					return false, err
 				}
 
-				switch v := criteriaResult.(type) {
-				case []interface{}:
-					if len(v) == 0 {
-						return true, nil
-					}
-				case map[string]interface{}:
-					if v == nil {
-						return true, nil
-					}
-				default:
-					return true, nil
+				payload, err := this.createPayload(resourceId, "before_"+action, criteriaResult)
+				if err != nil {
+					return false, err
 				}
-				this.checkAgainstBeforeRemoteInterceptor(tx, db, context, criteriaResult, app.Id, resourceId, &ri)
+				err = this.executeRemoteInterceptor(tx, db, context, payload, app.Id, resourceId, &ri)
+				if err != nil {
+					return false, err
+				}
 			} else {
-				this.checkAgainstBeforeRemoteInterceptor(tx, db, context, data, app.Id, resourceId, &ri)
+				payload, err := this.createPayload(resourceId, "before_"+action, data)
+				if err != nil {
+					return false, err
+				}
+				err = this.executeRemoteInterceptor(tx, db, context, payload, app.Id, resourceId, &ri)
+				if err != nil {
+					return false, err
+				}
 			}
 		}
 	}
@@ -114,23 +98,11 @@ func (this *GlobalRemoteInterceptor) commonAfter(tx *sql.Tx, db *sql.DB, resourc
 					return err
 				}
 
-				switch v := criteriaResult.(type) {
-				case []interface{}:
-					if len(v) == 0 {
-						return nil
-					}
-				case map[string]interface{}:
-					if v == nil {
-						return nil
-					}
-				default:
-					return nil
-				}
 				payload, err := this.createPayload(resourceId, "after_"+action, criteriaResult)
 				if err != nil {
 					return err
 				}
-				err = this.executeAfterRemoteInterceptor(tx, db, context, payload, app.Id, resourceId, &ri)
+				err = this.executeRemoteInterceptor(tx, db, context, payload, app.Id, resourceId, &ri)
 				if err != nil {
 					return err
 				}
@@ -139,7 +111,7 @@ func (this *GlobalRemoteInterceptor) commonAfter(tx *sql.Tx, db *sql.DB, resourc
 				if err != nil {
 					return err
 				}
-				err = this.executeAfterRemoteInterceptor(tx, db, context, payload, app.Id, resourceId, &ri)
+				err = this.executeRemoteInterceptor(tx, db, context, payload, app.Id, resourceId, &ri)
 				if err != nil {
 					return err
 				}
