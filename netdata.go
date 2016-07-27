@@ -214,9 +214,9 @@ func main() {
 					Usage: "list all data nodes",
 					Flags: []cli.Flag{
 						cli.StringFlag{
-							Name:  "master, m",
+							Name:  "node, N",
 							Value: "127.0.0.1:2015",
-							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+							Usage: "node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.BoolTFlag{
 							Name:  "full, f",
@@ -227,7 +227,7 @@ func main() {
 							Usage: "show a compact list of data nodes",
 						}},
 					Action: func(c *cli.Context) error {
-						master := c.String("master")
+						node := c.String("node")
 						full := c.IsSet("full")
 						compact := c.IsSet("compact")
 						mode := "normal"
@@ -240,7 +240,7 @@ func main() {
 							Type: "CLI_DN_LIST",
 							Data: mode,
 						}
-						response, err := sendCliCommand(master, cliDnListCommand)
+						response, err := sendCliCommand(node, cliDnListCommand)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -257,9 +257,9 @@ func main() {
 					Usage: "add a new data node",
 					Flags: []cli.Flag{
 						cli.StringFlag{
-							Name:  "master, m",
+							Name:  "node, N",
 							Value: "127.0.0.1:2015",
-							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+							Usage: "node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
 							Name:  "name, n",
@@ -288,7 +288,7 @@ func main() {
 						},
 					},
 					Action: func(c *cli.Context) error {
-						master := c.String("master")
+						node := c.String("node")
 						id := strings.Replace(uuid.NewV4().String(), "-", "", -1)
 						dataNode := &DataNode{
 							Id:       id,
@@ -308,7 +308,7 @@ func main() {
 							Type: "CLI_DN_ADD",
 							Data: string(dataNodeJSONBytes),
 						}
-						response, err := sendCliCommand(master, cliDnAddCommand)
+						response, err := sendCliCommand(node, cliDnAddCommand)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -325,9 +325,9 @@ func main() {
 					Usage: "update an existing data node",
 					Flags: []cli.Flag{
 						cli.StringFlag{
-							Name:  "master, m",
+							Name:  "node, N",
 							Value: "127.0.0.1:2015",
-							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+							Usage: "node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
 							Name:  "id, i",
@@ -360,7 +360,7 @@ func main() {
 						},
 					},
 					Action: func(c *cli.Context) error {
-						master := c.String("master")
+						node := c.String("node")
 						dataNode := &DataNode{
 							Id:       c.String("id"),
 							Name:     c.String("name"),
@@ -379,7 +379,7 @@ func main() {
 							Type: "CLI_DN_UPDATE",
 							Data: string(dataNodeJSONBytes),
 						}
-						response, err := sendCliCommand(master, cliDnUpdateCommand)
+						response, err := sendCliCommand(node, cliDnUpdateCommand)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -396,9 +396,9 @@ func main() {
 					Usage: "remove an existing data node",
 					Flags: []cli.Flag{
 						cli.StringFlag{
-							Name:  "master, m",
+							Name:  "node, N",
 							Value: "127.0.0.1:2015",
-							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+							Usage: "node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
 							Name:  "id, i",
@@ -406,13 +406,13 @@ func main() {
 						},
 					},
 					Action: func(c *cli.Context) error {
-						master := c.String("master")
+						node := c.String("node")
 						id := c.String("id")
 						cliDnRemoveCommand := &Command{
 							Type: "CLI_DN_REMOVE",
 							Data: id,
 						}
-						response, err := sendCliCommand(master, cliDnRemoveCommand)
+						response, err := sendCliCommand(node, cliDnRemoveCommand)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -421,20 +421,6 @@ func main() {
 						if output != "" {
 							fmt.Println(strings.TrimSpace(output))
 						}
-						return nil
-					},
-				},
-			},
-		},
-		{
-			Name:    "apinode",
-			Aliases: []string{"an"},
-			Usage:   "api node commands",
-			Subcommands: []cli.Command{
-				{
-					Name:  "list",
-					Usage: "list all api nodes",
-					Action: func(c *cli.Context) error {
 						return nil
 					},
 				},
@@ -450,9 +436,9 @@ func main() {
 					Usage: "list all apps",
 					Flags: []cli.Flag{
 						cli.StringFlag{
-							Name:  "master, m",
+							Name:  "node, N",
 							Value: "127.0.0.1:2015",
-							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+							Usage: "node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.BoolTFlag{
 							Name:  "full, f",
@@ -463,7 +449,7 @@ func main() {
 							Usage: "show a compact list of apps",
 						}},
 					Action: func(c *cli.Context) error {
-						master := c.String("master")
+						node := c.String("node")
 						full := c.IsSet("full")
 						compact := c.IsSet("compact")
 						mode := "normal"
@@ -476,7 +462,7 @@ func main() {
 							Type: "CLI_APP_LIST",
 							Data: mode,
 						}
-						response, err := sendCliCommand(master, cliAppListCommand)
+						response, err := sendCliCommand(node, cliAppListCommand)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -493,9 +479,9 @@ func main() {
 					Usage: "add a new app",
 					Flags: []cli.Flag{
 						cli.StringFlag{
-							Name:  "master, m",
+							Name:  "node, N",
 							Value: "127.0.0.1:2015",
-							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+							Usage: "node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
 							Name:  "name, n",
@@ -511,7 +497,7 @@ func main() {
 						},
 					},
 					Action: func(c *cli.Context) error {
-						master := c.String("master")
+						node := c.String("node")
 						id := strings.Replace(uuid.NewV4().String(), "-", "", -1)
 						dbName, err := gostrgen.RandGen(16, gostrgen.LowerDigit, "", "")
 						if err != nil {
@@ -533,7 +519,7 @@ func main() {
 							Type: "CLI_APP_ADD",
 							Data: string(appJSONBytes),
 						}
-						response, err := sendCliCommand(master, cliAppAddCommand)
+						response, err := sendCliCommand(node, cliAppAddCommand)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -550,9 +536,9 @@ func main() {
 					Usage: "update an existing app",
 					Flags: []cli.Flag{
 						cli.StringFlag{
-							Name:  "master, m",
+							Name:  "node, N",
 							Value: "127.0.0.1:2015",
-							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+							Usage: "node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
 							Name:  "id, i",
@@ -572,7 +558,7 @@ func main() {
 						},
 					},
 					Action: func(c *cli.Context) error {
-						master := c.String("master")
+						node := c.String("node")
 						app := &App{
 							Id:         c.String("id"),
 							Name:       c.String("name"),
@@ -588,7 +574,7 @@ func main() {
 							Type: "CLI_APP_UPDATE",
 							Data: string(appJSONBytes),
 						}
-						response, err := sendCliCommand(master, cliAppUpdateCommand)
+						response, err := sendCliCommand(node, cliAppUpdateCommand)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -605,9 +591,9 @@ func main() {
 					Usage: "remove an existing app",
 					Flags: []cli.Flag{
 						cli.StringFlag{
-							Name:  "master, m",
+							Name:  "node, N",
 							Value: "127.0.0.1:2015",
-							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+							Usage: "node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
 							Name:  "id, i",
@@ -615,13 +601,13 @@ func main() {
 						},
 					},
 					Action: func(c *cli.Context) error {
-						master := c.String("master")
+						node := c.String("node")
 						id := c.String("id")
 						cliAppRemoveCommand := &Command{
 							Type: "CLI_APP_REMOVE",
 							Data: id,
 						}
-						response, err := sendCliCommand(master, cliAppRemoveCommand)
+						response, err := sendCliCommand(node, cliAppRemoveCommand)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -645,9 +631,9 @@ func main() {
 					Usage: "add a new query",
 					Flags: []cli.Flag{
 						cli.StringFlag{
-							Name:  "master, m",
+							Name:  "node, N",
 							Value: "127.0.0.1:2015",
-							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+							Usage: "node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
 							Name:  "name, n",
@@ -667,7 +653,7 @@ func main() {
 						},
 					},
 					Action: func(c *cli.Context) error {
-						master := c.String("master")
+						node := c.String("node")
 						id := strings.Replace(uuid.NewV4().String(), "-", "", -1)
 						query := &Query{
 							Id:     id,
@@ -685,7 +671,7 @@ func main() {
 							Type: "CLI_QUERY_ADD",
 							Data: string(queryJSONBytes),
 						}
-						response, err := sendCliCommand(master, cliQueryAddCommand)
+						response, err := sendCliCommand(node, cliQueryAddCommand)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -702,9 +688,9 @@ func main() {
 					Usage: "update an existing query",
 					Flags: []cli.Flag{
 						cli.StringFlag{
-							Name:  "master, m",
+							Name:  "node, N",
 							Value: "127.0.0.1:2015",
-							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+							Usage: "node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
 							Name:  "id, i",
@@ -728,7 +714,7 @@ func main() {
 						},
 					},
 					Action: func(c *cli.Context) error {
-						master := c.String("master")
+						node := c.String("node")
 						query := &Query{
 							Id:     c.String("id"),
 							Name:   c.String("name"),
@@ -745,7 +731,7 @@ func main() {
 							Type: "CLI_QUERY_UPDATE",
 							Data: string(queryJSONBytes),
 						}
-						response, err := sendCliCommand(master, cliQueryUpdateCommand)
+						response, err := sendCliCommand(node, cliQueryUpdateCommand)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -762,9 +748,9 @@ func main() {
 					Usage: "remove an existing query",
 					Flags: []cli.Flag{
 						cli.StringFlag{
-							Name:  "master, m",
+							Name:  "node, N",
 							Value: "127.0.0.1:2015",
-							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+							Usage: "node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
 							Name:  "id, id",
@@ -776,7 +762,7 @@ func main() {
 						},
 					},
 					Action: func(c *cli.Context) error {
-						master := c.String("master")
+						node := c.String("node")
 						query := &Query{
 							Id:    c.String("id"),
 							AppId: c.String("app"),
@@ -790,7 +776,7 @@ func main() {
 							Type: "CLI_QUERY_REMOVE",
 							Data: string(queryJSONBytes),
 						}
-						response, err := sendCliCommand(master, cliQueryRemoveCommand)
+						response, err := sendCliCommand(node, cliQueryRemoveCommand)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -814,9 +800,9 @@ func main() {
 					Usage: "add a new job",
 					Flags: []cli.Flag{
 						cli.StringFlag{
-							Name:  "master, m",
+							Name:  "node, N",
 							Value: "127.0.0.1:2015",
-							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+							Usage: "node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
 							Name:  "name, n",
@@ -848,7 +834,7 @@ func main() {
 						},
 					},
 					Action: func(c *cli.Context) error {
-						master := c.String("master")
+						node := c.String("node")
 						id := strings.Replace(uuid.NewV4().String(), "-", "", -1)
 						job := &Job{
 							Id:         id,
@@ -869,7 +855,7 @@ func main() {
 							Type: "CLI_JOB_ADD",
 							Data: string(jobJSONBytes),
 						}
-						response, err := sendCliCommand(master, cliJobAddCommand)
+						response, err := sendCliCommand(node, cliJobAddCommand)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -886,9 +872,9 @@ func main() {
 					Usage: "update an existing job",
 					Flags: []cli.Flag{
 						cli.StringFlag{
-							Name:  "master, m",
+							Name:  "node, N",
 							Value: "127.0.0.1:2015",
-							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+							Usage: "node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
 							Name:  "id, i",
@@ -924,7 +910,7 @@ func main() {
 						},
 					},
 					Action: func(c *cli.Context) error {
-						master := c.String("master")
+						node := c.String("node")
 						job := &Job{
 							Id:         c.String("id"),
 							Name:       c.String("name"),
@@ -944,7 +930,7 @@ func main() {
 							Type: "CLI_JOB_UPDATE",
 							Data: string(jobJSONBytes),
 						}
-						response, err := sendCliCommand(master, cliJobUpdateCommand)
+						response, err := sendCliCommand(node, cliJobUpdateCommand)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -961,9 +947,9 @@ func main() {
 					Usage: "remove an existing job",
 					Flags: []cli.Flag{
 						cli.StringFlag{
-							Name:  "master, m",
+							Name:  "node, N",
 							Value: "127.0.0.1:2015",
-							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+							Usage: "node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
 							Name:  "id, i",
@@ -975,7 +961,7 @@ func main() {
 						},
 					},
 					Action: func(c *cli.Context) error {
-						master := c.String("master")
+						node := c.String("node")
 						job := &Job{
 							Id:    c.String("id"),
 							AppId: c.String("app"),
@@ -989,7 +975,7 @@ func main() {
 							Type: "CLI_JOB_REMOVE",
 							Data: string(jobJSONBytes),
 						}
-						response, err := sendCliCommand(master, cliJobRemoveCommand)
+						response, err := sendCliCommand(node, cliJobRemoveCommand)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -1006,9 +992,9 @@ func main() {
 					Usage: "start a job",
 					Flags: []cli.Flag{
 						cli.StringFlag{
-							Name:  "master, m",
+							Name:  "node, N",
 							Value: "127.0.0.1:2015",
-							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+							Usage: "node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
 							Name:  "id, i",
@@ -1020,7 +1006,7 @@ func main() {
 						},
 					},
 					Action: func(c *cli.Context) error {
-						master := c.String("master")
+						node := c.String("node")
 						job := &Job{
 							Id:    c.String("id"),
 							AppId: c.String("app"),
@@ -1034,7 +1020,7 @@ func main() {
 							Type: "CLI_JOB_START",
 							Data: string(jobJSONBytes),
 						}
-						response, err := sendCliCommand(master, cliJobStartCommand)
+						response, err := sendCliCommand(node, cliJobStartCommand)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -1051,9 +1037,9 @@ func main() {
 					Usage: "restart a job",
 					Flags: []cli.Flag{
 						cli.StringFlag{
-							Name:  "master, m",
+							Name:  "node, N",
 							Value: "127.0.0.1:2015",
-							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+							Usage: "node node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
 							Name:  "id, i",
@@ -1065,7 +1051,7 @@ func main() {
 						},
 					},
 					Action: func(c *cli.Context) error {
-						master := c.String("master")
+						node := c.String("node")
 						job := &Job{
 							Id:    c.String("id"),
 							AppId: c.String("app"),
@@ -1079,7 +1065,7 @@ func main() {
 							Type: "CLI_JOB_RESTART",
 							Data: string(jobJSONBytes),
 						}
-						response, err := sendCliCommand(master, cliJobRestartCommand)
+						response, err := sendCliCommand(node, cliJobRestartCommand)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -1096,9 +1082,9 @@ func main() {
 					Usage: "stop a job",
 					Flags: []cli.Flag{
 						cli.StringFlag{
-							Name:  "master, m",
+							Name:  "node, N",
 							Value: "127.0.0.1:2015",
-							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+							Usage: "node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
 							Name:  "id, i",
@@ -1110,7 +1096,7 @@ func main() {
 						},
 					},
 					Action: func(c *cli.Context) error {
-						master := c.String("master")
+						node := c.String("node")
 						job := &Job{
 							Id:    c.String("id"),
 							AppId: c.String("app"),
@@ -1124,7 +1110,7 @@ func main() {
 							Type: "CLI_JOB_STOP",
 							Data: string(jobJSONBytes),
 						}
-						response, err := sendCliCommand(master, cliJobStopCommand)
+						response, err := sendCliCommand(node, cliJobStopCommand)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -1148,9 +1134,9 @@ func main() {
 					Usage: "add a new token",
 					Flags: []cli.Flag{
 						cli.StringFlag{
-							Name:  "master, m",
+							Name:  "node, N",
 							Value: "127.0.0.1:2015",
-							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+							Usage: "node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
 							Name:  "name, n",
@@ -1174,7 +1160,7 @@ func main() {
 						},
 					},
 					Action: func(c *cli.Context) error {
-						master := c.String("master")
+						node := c.String("node")
 						id := strings.Replace(uuid.NewV4().String(), "-", "", -1)
 						token := &Token{
 							Id:     id,
@@ -1193,7 +1179,7 @@ func main() {
 							Type: "CLI_TOKEN_ADD",
 							Data: string(tokenJSONBytes),
 						}
-						response, err := sendCliCommand(master, cliTokenAddCommand)
+						response, err := sendCliCommand(node, cliTokenAddCommand)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -1210,9 +1196,9 @@ func main() {
 					Usage: "update an existing token",
 					Flags: []cli.Flag{
 						cli.StringFlag{
-							Name:  "master, m",
+							Name:  "node, N",
 							Value: "127.0.0.1:2015",
-							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+							Usage: "node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
 							Name:  "name, n",
@@ -1240,7 +1226,7 @@ func main() {
 						},
 					},
 					Action: func(c *cli.Context) error {
-						master := c.String("master")
+						node := c.String("node")
 						token := &Token{
 							Id:     c.String("id"),
 							Name:   c.String("name"),
@@ -1258,7 +1244,7 @@ func main() {
 							Type: "CLI_TOKEN_ADD",
 							Data: string(tokenJSONBytes),
 						}
-						response, err := sendCliCommand(master, cliTokenAddCommand)
+						response, err := sendCliCommand(node, cliTokenAddCommand)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -1275,9 +1261,9 @@ func main() {
 					Usage: "remove an existing token",
 					Flags: []cli.Flag{
 						cli.StringFlag{
-							Name:  "master, m",
+							Name:  "node, N",
 							Value: "127.0.0.1:2015",
-							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+							Usage: "node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
 							Name:  "id, i",
@@ -1289,7 +1275,7 @@ func main() {
 						},
 					},
 					Action: func(c *cli.Context) error {
-						master := c.String("master")
+						node := c.String("node")
 						token := &Token{
 							Id:    c.String("id"),
 							AppId: c.String("app"),
@@ -1302,7 +1288,7 @@ func main() {
 							Type: "CLI_TOKEN_REMOVE",
 							Data: string(jobJSONBytes),
 						}
-						response, err := sendCliCommand(master, cliTokenRemoveCommand)
+						response, err := sendCliCommand(node, cliTokenRemoveCommand)
 						if err != nil {
 							return err
 						}
@@ -1324,9 +1310,9 @@ func main() {
 					Usage: "add a new local interceptor",
 					Flags: []cli.Flag{
 						cli.StringFlag{
-							Name:  "master, m",
+							Name:  "node, N",
 							Value: "127.0.0.1:2015",
-							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+							Usage: "node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
 							Name:  "name, n",
@@ -1349,10 +1335,6 @@ func main() {
 							Usage: "type of the local interceptor",
 						},
 						cli.StringFlag{
-							Name:  "action, o",
-							Usage: "action type of the local interceptor",
-						},
-						cli.StringFlag{
 							Name:  "criteria, f",
 							Usage: "criteria type of the local interceptor",
 						},
@@ -1362,7 +1344,7 @@ func main() {
 						},
 					},
 					Action: func(c *cli.Context) error {
-						master := c.String("master")
+						node := c.String("node")
 						id := strings.Replace(uuid.NewV4().String(), "-", "", -1)
 						li := &LocalInterceptor{
 							Id:       id,
@@ -1382,7 +1364,7 @@ func main() {
 							Type: "CLI_LI_ADD",
 							Data: string(liJSONBytes),
 						}
-						response, err := sendCliCommand(master, cliLiAddCommand)
+						response, err := sendCliCommand(node, cliLiAddCommand)
 						if err != nil {
 							return err
 						}
@@ -1398,9 +1380,9 @@ func main() {
 					Usage: "update an existing local interceptor",
 					Flags: []cli.Flag{
 						cli.StringFlag{
-							Name:  "master, m",
+							Name:  "node, N",
 							Value: "127.0.0.1:2015",
-							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+							Usage: "node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
 							Name:  "id, i",
@@ -1427,10 +1409,6 @@ func main() {
 							Usage: "type of the local interceptor",
 						},
 						cli.StringFlag{
-							Name:  "action, o",
-							Usage: "action type of the local interceptor",
-						},
-						cli.StringFlag{
 							Name:  "criteria, f",
 							Usage: "criteria type of the local interceptor",
 						},
@@ -1440,7 +1418,7 @@ func main() {
 						},
 					},
 					Action: func(c *cli.Context) error {
-						master := c.String("master")
+						node := c.String("node")
 						li := &LocalInterceptor{
 							Id:       c.String("id"),
 							Name:     c.String("name"),
@@ -1459,7 +1437,7 @@ func main() {
 							Type: "CLI_LI_UPDATE",
 							Data: string(liJSONBytes),
 						}
-						response, err := sendCliCommand(master, cliLiUpdateCommand)
+						response, err := sendCliCommand(node, cliLiUpdateCommand)
 						if err != nil {
 							return err
 						}
@@ -1475,9 +1453,9 @@ func main() {
 					Usage: "remove an existing local interceptor",
 					Flags: []cli.Flag{
 						cli.StringFlag{
-							Name:  "master, m",
+							Name:  "node, N",
 							Value: "127.0.0.1:2015",
-							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+							Usage: "node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
 							Name:  "id, i",
@@ -1489,7 +1467,7 @@ func main() {
 						},
 					},
 					Action: func(c *cli.Context) error {
-						master := c.String("master")
+						node := c.String("node")
 						li := &LocalInterceptor{
 							Id:    c.String("id"),
 							AppId: c.String("app"),
@@ -1502,7 +1480,7 @@ func main() {
 							Type: "CLI_LI_REMOVE",
 							Data: string(liJSONBytes),
 						}
-						response, err := sendCliCommand(master, cliLiRemoveCommand)
+						response, err := sendCliCommand(node, cliLiRemoveCommand)
 						if err != nil {
 							return err
 						}
@@ -1524,9 +1502,9 @@ func main() {
 					Usage: "add a new remote interceptor",
 					Flags: []cli.Flag{
 						cli.StringFlag{
-							Name:  "master, m",
+							Name:  "node, N",
 							Value: "127.0.0.1:2015",
-							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+							Usage: "node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
 							Name:  "name, n",
@@ -1571,7 +1549,7 @@ func main() {
 						},
 					},
 					Action: func(c *cli.Context) error {
-						master := c.String("master")
+						node := c.String("node")
 						id := strings.Replace(uuid.NewV4().String(), "-", "", -1)
 						ri := &RemoteInterceptor{
 							Id:         id,
@@ -1594,7 +1572,7 @@ func main() {
 							Type: "CLI_RI_ADD",
 							Data: string(riJSONBytes),
 						}
-						response, err := sendCliCommand(master, cliRiAddCommand)
+						response, err := sendCliCommand(node, cliRiAddCommand)
 						if err != nil {
 							return err
 						}
@@ -1610,9 +1588,9 @@ func main() {
 					Usage: "update an existing remote interceptor",
 					Flags: []cli.Flag{
 						cli.StringFlag{
-							Name:  "master, m",
+							Name:  "node, N",
 							Value: "127.0.0.1:2015",
-							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+							Usage: "node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
 							Name:  "id, i",
@@ -1661,7 +1639,7 @@ func main() {
 						},
 					},
 					Action: func(c *cli.Context) error {
-						master := c.String("master")
+						node := c.String("node")
 						ri := &RemoteInterceptor{
 							Id:         c.String("id"),
 							Name:       c.String("name"),
@@ -1683,7 +1661,7 @@ func main() {
 							Type: "CLI_RI_UPDATE",
 							Data: string(riJSONBytes),
 						}
-						response, err := sendCliCommand(master, cliRiUpdateCommand)
+						response, err := sendCliCommand(node, cliRiUpdateCommand)
 						if err != nil {
 							return err
 						}
@@ -1699,9 +1677,9 @@ func main() {
 					Usage: "remove an existing remote interceptor",
 					Flags: []cli.Flag{
 						cli.StringFlag{
-							Name:  "master, m",
+							Name:  "node, N",
 							Value: "127.0.0.1:2015",
-							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+							Usage: "node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
 							Name:  "id, i",
@@ -1713,7 +1691,7 @@ func main() {
 						},
 					},
 					Action: func(c *cli.Context) error {
-						master := c.String("master")
+						node := c.String("node")
 						ri := &RemoteInterceptor{
 							Id:    c.String("id"),
 							AppId: c.String("app"),
@@ -1726,7 +1704,7 @@ func main() {
 							Type: "CLI_RI_REMOVE",
 							Data: string(riJSONBytes),
 						}
-						response, err := sendCliCommand(master, cliRiRemoveCommand)
+						response, err := sendCliCommand(node, cliRiRemoveCommand)
 						if err != nil {
 							return err
 						}
@@ -1748,17 +1726,17 @@ func main() {
 					Usage: "show master data",
 					Flags: []cli.Flag{
 						cli.StringFlag{
-							Name:  "master, m",
+							Name:  "node, N",
 							Value: "127.0.0.1:2015",
-							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+							Usage: "node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 					},
 					Action: func(c *cli.Context) error {
-						master := c.String("master")
+						node := c.String("node")
 						cliShowMasterCommand := &Command{
 							Type: "CLI_SHOW_MASTER",
 						}
-						response, err := sendCliCommand(master, cliShowMasterCommand)
+						response, err := sendCliCommand(node, cliShowMasterCommand)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -1775,17 +1753,17 @@ func main() {
 					Usage: "show slave api nodes info",
 					Flags: []cli.Flag{
 						cli.StringFlag{
-							Name:  "master, m",
+							Name:  "node, N",
 							Value: "127.0.0.1:2015",
-							Usage: "master node url, format: host:port. 127.0.0.1:2015 if empty",
+							Usage: "node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 					},
 					Action: func(c *cli.Context) error {
-						master := c.String("master")
+						node := c.String("node")
 						cliShowApiNodesCommand := &Command{
 							Type: "CLI_SHOW_API_NODES",
 						}
-						response, err := sendCliCommand(master, cliShowApiNodesCommand)
+						response, err := sendCliCommand(node, cliShowApiNodesCommand)
 						if err != nil {
 							fmt.Println(err)
 							return err

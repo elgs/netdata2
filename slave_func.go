@@ -13,7 +13,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func sendCliCommand(master string, command *Command) ([]byte, error) {
+func sendCliCommand(node string, command *Command) ([]byte, error) {
 	message, err := json.Marshal(command)
 	if err != nil {
 		return nil, err
@@ -22,7 +22,7 @@ func sendCliCommand(master string, command *Command) ([]byte, error) {
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 	client := &http.Client{Transport: tr}
-	req, err := http.NewRequest("POST", "https://"+master+"/sys/cli", strings.NewReader(string(message)))
+	req, err := http.NewRequest("POST", "https://"+node+"/sys/cli", strings.NewReader(string(message)))
 	if err != nil {
 		return nil, err
 	}
