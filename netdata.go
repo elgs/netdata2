@@ -1335,10 +1335,6 @@ func main() {
 							Usage: "type of the local interceptor",
 						},
 						cli.StringFlag{
-							Name:  "criteria, f",
-							Usage: "criteria type of the local interceptor",
-						},
-						cli.StringFlag{
 							Name:  "note, t",
 							Usage: "note for the local interceptor",
 						},
@@ -1353,7 +1349,6 @@ func main() {
 							Target:   c.String("target"),
 							Callback: c.String("callback"),
 							Type:     c.String("type"),
-							Criteria: c.String("criteria"),
 							Note:     c.String("note"),
 						}
 						liJSONBytes, err := json.Marshal(li)
@@ -1409,10 +1404,6 @@ func main() {
 							Usage: "type of the local interceptor",
 						},
 						cli.StringFlag{
-							Name:  "criteria, f",
-							Usage: "criteria type of the local interceptor",
-						},
-						cli.StringFlag{
 							Name:  "note, t",
 							Usage: "note for the local interceptor",
 						},
@@ -1426,7 +1417,6 @@ func main() {
 							Target:   c.String("target"),
 							Callback: c.String("callback"),
 							Type:     c.String("type"),
-							Criteria: c.String("criteria"),
 							Note:     c.String("note"),
 						}
 						liJSONBytes, err := json.Marshal(li)
@@ -1540,10 +1530,6 @@ func main() {
 							Usage: "action type of the remote interceptor",
 						},
 						cli.StringFlag{
-							Name:  "criteria, f",
-							Usage: "criteria type of the remote interceptor",
-						},
-						cli.StringFlag{
 							Name:  "note, t",
 							Usage: "note for the remote interceptor",
 						},
@@ -1561,7 +1547,6 @@ func main() {
 							Callback:   c.String("callback"),
 							Type:       c.String("type"),
 							ActionType: c.String("action"),
-							Criteria:   c.String("criteria"),
 							Note:       c.String("note"),
 						}
 						riJSONBytes, err := json.Marshal(ri)
@@ -1630,10 +1615,6 @@ func main() {
 							Usage: "action type of the remote interceptor",
 						},
 						cli.StringFlag{
-							Name:  "criteria, f",
-							Usage: "criteria type of the remote interceptor",
-						},
-						cli.StringFlag{
 							Name:  "note, t",
 							Usage: "note for the remote interceptor",
 						},
@@ -1650,7 +1631,6 @@ func main() {
 							Callback:   c.String("callback"),
 							Type:       c.String("type"),
 							ActionType: c.String("action"),
-							Criteria:   c.String("criteria"),
 							Note:       c.String("note"),
 						}
 						riJSONBytes, err := json.Marshal(ri)

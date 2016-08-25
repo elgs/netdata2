@@ -78,7 +78,6 @@ type LocalInterceptor struct {
 	Target   string
 	Callback string
 	Type     string
-	Criteria string
 	Note     string
 	Status   string
 }
@@ -91,7 +90,6 @@ type RemoteInterceptor struct {
 	Url        string
 	Type       string
 	ActionType string
-	Criteria   string
 	Callback   string
 	Note       string
 	Status     string
