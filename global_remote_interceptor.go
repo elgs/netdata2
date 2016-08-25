@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/elgs/gorest2"
-	"github.com/elgs/jsonql"
 )
 
 func init() {
@@ -55,30 +54,13 @@ func (this *GlobalRemoteInterceptor) commonBefore(tx *sql.Tx, db *sql.DB, resour
 	app := context["app"].(*App)
 	for _, ri := range app.RemoteInterceptors {
 		if ri.Type == "before" && ri.ActionType == action && ri.Target == resourceId && ri.AppId == app.Id {
-			if len(strings.TrimSpace(ri.Criteria)) > 0 {
-				parser := jsonql.NewQuery(data)
-				criteriaResult, err := parser.Query(ri.Criteria)
-				if err != nil {
-					return false, err
-				}
-
-				payload, err := this.createPayload(resourceId, "before_"+action, criteriaResult)
-				if err != nil {
-					return false, err
-				}
-				err = this.executeRemoteInterceptor(tx, db, context, payload, app.Id, resourceId, &ri)
-				if err != nil {
-					return false, err
-				}
-			} else {
-				payload, err := this.createPayload(resourceId, "before_"+action, data)
-				if err != nil {
-					return false, err
-				}
-				err = this.executeRemoteInterceptor(tx, db, context, payload, app.Id, resourceId, &ri)
-				if err != nil {
-					return false, err
-				}
+			payload, err := this.createPayload(resourceId, "before_"+action, data)
+			if err != nil {
+				return false, err
+			}
+			err = this.executeRemoteInterceptor(tx, db, context, payload, app.Id, resourceId, &ri)
+			if err != nil {
+				return false, err
 			}
 		}
 	}
@@ -91,30 +73,13 @@ func (this *GlobalRemoteInterceptor) commonAfter(tx *sql.Tx, db *sql.DB, resourc
 	app := context["app"].(*App)
 	for _, ri := range app.RemoteInterceptors {
 		if ri.Type == "after" && ri.ActionType == action && ri.Target == resourceId && ri.AppId == app.Id {
-			if len(strings.TrimSpace(ri.Criteria)) > 0 {
-				parser := jsonql.NewQuery(data)
-				criteriaResult, err := parser.Query(ri.Criteria)
-				if err != nil {
-					return err
-				}
-
-				payload, err := this.createPayload(resourceId, "after_"+action, criteriaResult)
-				if err != nil {
-					return err
-				}
-				err = this.executeRemoteInterceptor(tx, db, context, payload, app.Id, resourceId, &ri)
-				if err != nil {
-					return err
-				}
-			} else {
-				payload, err := this.createPayload(resourceId, "after_"+action, data)
-				if err != nil {
-					return err
-				}
-				err = this.executeRemoteInterceptor(tx, db, context, payload, app.Id, resourceId, &ri)
-				if err != nil {
-					return err
-				}
+			payload, err := this.createPayload(resourceId, "after_"+action, data)
+			if err != nil {
+				return err
+			}
+			err = this.executeRemoteInterceptor(tx, db, context, payload, app.Id, resourceId, &ri)
+			if err != nil {
+				return err
 			}
 		}
 	}
@@ -136,60 +101,60 @@ func (this *GlobalRemoteInterceptor) createPayload(target string, action string,
 	return string(jsonData), nil
 }
 
-func (this *GlobalRemoteInterceptor) BeforeCreate(resourceId string, db *sql.DB, context map[string]interface{}, data []map[string]interface{}) (bool, error) {
-	return this.commonBefore(nil, db, resourceId, context, "create", data)
-}
-func (this *GlobalRemoteInterceptor) AfterCreate(resourceId string, db *sql.DB, context map[string]interface{}, data []map[string]interface{}) error {
-	return this.commonAfter(nil, db, resourceId, context, "create", data)
-}
-func (this *GlobalRemoteInterceptor) BeforeLoad(resourceId string, db *sql.DB, fields string, context map[string]interface{}, id string) (bool, error) {
-	return this.commonBefore(nil, db, resourceId, context, "load", map[string]string{"id": id})
-}
-func (this *GlobalRemoteInterceptor) AfterLoad(resourceId string, db *sql.DB, fields string, context map[string]interface{}, data map[string]string) error {
-	return this.commonAfter(nil, db, resourceId, context, "load", data)
-}
-func (this *GlobalRemoteInterceptor) BeforeUpdate(resourceId string, db *sql.DB, context map[string]interface{}, data []map[string]interface{}) (bool, error) {
-	return this.commonBefore(nil, db, resourceId, context, "update", data)
-}
-func (this *GlobalRemoteInterceptor) AfterUpdate(resourceId string, db *sql.DB, context map[string]interface{}, data []map[string]interface{}) error {
-	return this.commonAfter(nil, db, resourceId, context, "update", data)
-}
-func (this *GlobalRemoteInterceptor) BeforeDuplicate(resourceId string, db *sql.DB, context map[string]interface{}, id []string) (bool, error) {
-	return this.commonBefore(nil, db, resourceId, context, "duplicate", map[string][]string{"id": id})
-}
-func (this *GlobalRemoteInterceptor) AfterDuplicate(resourceId string, db *sql.DB, context map[string]interface{}, id []string, newId []string) error {
-	return this.commonAfter(nil, db, resourceId, context, "duplicate", map[string][]string{"new_id": newId})
-}
-func (this *GlobalRemoteInterceptor) BeforeDelete(resourceId string, db *sql.DB, context map[string]interface{}, id []string) (bool, error) {
-	return this.commonBefore(nil, db, resourceId, context, "delete", map[string][]string{"id": id})
-}
-func (this *GlobalRemoteInterceptor) AfterDelete(resourceId string, db *sql.DB, context map[string]interface{}, id []string) error {
-	return this.commonAfter(nil, db, resourceId, context, "delete", map[string][]string{"id": id})
-}
-func (this *GlobalRemoteInterceptor) BeforeListMap(resourceId string, db *sql.DB, fields string, context map[string]interface{}, filter *string, sort *string, group *string, start int64, limit int64) (bool, error) {
-	return this.commonBefore(nil, db, resourceId, context, "list_map", map[string]interface{}{"fields": fields, "filter": *filter, "sort": *sort, "group": *group, "start": start, "limit": limit})
-}
-func (this *GlobalRemoteInterceptor) AfterListMap(resourceId string, db *sql.DB, fields string, context map[string]interface{}, data *[]map[string]string, total int64) error {
-	return this.commonAfter(nil, db, resourceId, context, "list_map", *data)
-}
-func (this *GlobalRemoteInterceptor) BeforeListArray(resourceId string, db *sql.DB, fields string, context map[string]interface{}, filter *string, sort *string, group *string, start int64, limit int64) (bool, error) {
-	return this.commonBefore(nil, db, resourceId, context, "list_array", map[string]interface{}{"fields": fields, "filter": *filter, "sort": *sort, "group": *group, "start": start, "limit": limit})
-}
-func (this *GlobalRemoteInterceptor) AfterListArray(resourceId string, db *sql.DB, fields string, context map[string]interface{}, headers *[]string, data *[][]string, total int64) error {
-	return this.commonAfter(nil, db, resourceId, context, "list_array", map[string]interface{}{"headers": *headers, "data": *data})
-}
-func (this *GlobalRemoteInterceptor) BeforeQueryMap(resourceId string, script string, params *[]interface{}, db *sql.DB, context map[string]interface{}) (bool, error) {
-	return this.commonBefore(nil, db, resourceId, context, "query_map", map[string]interface{}{"params": *params})
-}
-func (this *GlobalRemoteInterceptor) AfterQueryMap(resourceId string, script string, params *[]interface{}, db *sql.DB, context map[string]interface{}, data *[]map[string]string) error {
-	return this.commonAfter(nil, db, resourceId, context, "query_map", *data)
-}
-func (this *GlobalRemoteInterceptor) BeforeQueryArray(resourceId string, script string, params *[]interface{}, db *sql.DB, context map[string]interface{}) (bool, error) {
-	return this.commonBefore(nil, db, resourceId, context, "query_array", map[string]interface{}{"params": *params})
-}
-func (this *GlobalRemoteInterceptor) AfterQueryArray(resourceId string, script string, params *[]interface{}, db *sql.DB, context map[string]interface{}, headers *[]string, data *[][]string) error {
-	return this.commonAfter(nil, db, resourceId, context, "query_array", map[string]interface{}{"headers": *headers, "data": *data})
-}
+//func (this *GlobalRemoteInterceptor) BeforeCreate(resourceId string, db *sql.DB, context map[string]interface{}, data []map[string]interface{}) (bool, error) {
+//	return this.commonBefore(nil, db, resourceId, context, "create", data)
+//}
+//func (this *GlobalRemoteInterceptor) AfterCreate(resourceId string, db *sql.DB, context map[string]interface{}, data []map[string]interface{}) error {
+//	return this.commonAfter(nil, db, resourceId, context, "create", data)
+//}
+//func (this *GlobalRemoteInterceptor) BeforeLoad(resourceId string, db *sql.DB, fields string, context map[string]interface{}, id string) (bool, error) {
+//	return this.commonBefore(nil, db, resourceId, context, "load", map[string]string{"id": id})
+//}
+//func (this *GlobalRemoteInterceptor) AfterLoad(resourceId string, db *sql.DB, fields string, context map[string]interface{}, data map[string]string) error {
+//	return this.commonAfter(nil, db, resourceId, context, "load", data)
+//}
+//func (this *GlobalRemoteInterceptor) BeforeUpdate(resourceId string, db *sql.DB, context map[string]interface{}, data []map[string]interface{}) (bool, error) {
+//	return this.commonBefore(nil, db, resourceId, context, "update", data)
+//}
+//func (this *GlobalRemoteInterceptor) AfterUpdate(resourceId string, db *sql.DB, context map[string]interface{}, data []map[string]interface{}) error {
+//	return this.commonAfter(nil, db, resourceId, context, "update", data)
+//}
+//func (this *GlobalRemoteInterceptor) BeforeDuplicate(resourceId string, db *sql.DB, context map[string]interface{}, id []string) (bool, error) {
+//	return this.commonBefore(nil, db, resourceId, context, "duplicate", map[string][]string{"id": id})
+//}
+//func (this *GlobalRemoteInterceptor) AfterDuplicate(resourceId string, db *sql.DB, context map[string]interface{}, id []string, newId []string) error {
+//	return this.commonAfter(nil, db, resourceId, context, "duplicate", map[string][]string{"new_id": newId})
+//}
+//func (this *GlobalRemoteInterceptor) BeforeDelete(resourceId string, db *sql.DB, context map[string]interface{}, id []string) (bool, error) {
+//	return this.commonBefore(nil, db, resourceId, context, "delete", map[string][]string{"id": id})
+//}
+//func (this *GlobalRemoteInterceptor) AfterDelete(resourceId string, db *sql.DB, context map[string]interface{}, id []string) error {
+//	return this.commonAfter(nil, db, resourceId, context, "delete", map[string][]string{"id": id})
+//}
+//func (this *GlobalRemoteInterceptor) BeforeListMap(resourceId string, db *sql.DB, fields string, context map[string]interface{}, filter *string, sort *string, group *string, start int64, limit int64) (bool, error) {
+//	return this.commonBefore(nil, db, resourceId, context, "list_map", map[string]interface{}{"fields": fields, "filter": *filter, "sort": *sort, "group": *group, "start": start, "limit": limit})
+//}
+//func (this *GlobalRemoteInterceptor) AfterListMap(resourceId string, db *sql.DB, fields string, context map[string]interface{}, data *[]map[string]string, total int64) error {
+//	return this.commonAfter(nil, db, resourceId, context, "list_map", *data)
+//}
+//func (this *GlobalRemoteInterceptor) BeforeListArray(resourceId string, db *sql.DB, fields string, context map[string]interface{}, filter *string, sort *string, group *string, start int64, limit int64) (bool, error) {
+//	return this.commonBefore(nil, db, resourceId, context, "list_array", map[string]interface{}{"fields": fields, "filter": *filter, "sort": *sort, "group": *group, "start": start, "limit": limit})
+//}
+//func (this *GlobalRemoteInterceptor) AfterListArray(resourceId string, db *sql.DB, fields string, context map[string]interface{}, headers *[]string, data *[][]string, total int64) error {
+//	return this.commonAfter(nil, db, resourceId, context, "list_array", map[string]interface{}{"headers": *headers, "data": *data})
+//}
+//func (this *GlobalRemoteInterceptor) BeforeQueryMap(resourceId string, script string, params *[]interface{}, db *sql.DB, context map[string]interface{}) (bool, error) {
+//	return this.commonBefore(nil, db, resourceId, context, "query_map", map[string]interface{}{"params": *params})
+//}
+//func (this *GlobalRemoteInterceptor) AfterQueryMap(resourceId string, script string, params *[]interface{}, db *sql.DB, context map[string]interface{}, data *[]map[string]string) error {
+//	return this.commonAfter(nil, db, resourceId, context, "query_map", *data)
+//}
+//func (this *GlobalRemoteInterceptor) BeforeQueryArray(resourceId string, script string, params *[]interface{}, db *sql.DB, context map[string]interface{}) (bool, error) {
+//	return this.commonBefore(nil, db, resourceId, context, "query_array", map[string]interface{}{"params": *params})
+//}
+//func (this *GlobalRemoteInterceptor) AfterQueryArray(resourceId string, script string, params *[]interface{}, db *sql.DB, context map[string]interface{}, headers *[]string, data *[][]string) error {
+//	return this.commonAfter(nil, db, resourceId, context, "query_array", map[string]interface{}{"headers": *headers, "data": *data})
+//}
 func (this *GlobalRemoteInterceptor) BeforeExec(resourceId string, scripts string, params *[][]interface{}, queryParams []string, tx *sql.Tx, context map[string]interface{}) (bool, error) {
 	return this.commonBefore(tx, nil, resourceId, context, "exec", map[string]interface{}{"params": *params, "query_params": queryParams})
 }
