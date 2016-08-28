@@ -77,7 +77,7 @@ func (this *NdDataOperator) QueryMap(tableId string, params []interface{}, query
 	globalDataInterceptors, globalSortedKeys := gorest2.GetGlobalDataInterceptors()
 	for _, k := range globalSortedKeys {
 		globalDataInterceptor := globalDataInterceptors[k]
-		ctn, err := globalDataInterceptor.BeforeQueryMap(tableId, script, &params, db, context)
+		ctn, err := globalDataInterceptor.BeforeQueryMap(tableId, script, &params, queryParams, db, context)
 		if !ctn {
 			return ret, err
 		}
@@ -86,7 +86,7 @@ func (this *NdDataOperator) QueryMap(tableId string, params []interface{}, query
 	for _, k := range sortedKeys {
 		dataInterceptor := dataInterceptors[k]
 		if dataInterceptor != nil {
-			ctn, err := dataInterceptor.BeforeQueryMap(tableId, script, &params, db, context)
+			ctn, err := dataInterceptor.BeforeQueryMap(tableId, script, &params, queryParams, db, context)
 			if !ctn {
 				return ret, err
 			}
@@ -119,12 +119,12 @@ func (this *NdDataOperator) QueryMap(tableId string, params []interface{}, query
 	for _, k := range sortedKeys {
 		dataInterceptor := dataInterceptors[k]
 		if dataInterceptor != nil {
-			dataInterceptor.AfterQueryMap(tableId, script, &params, db, context, &m)
+			dataInterceptor.AfterQueryMap(tableId, script, &params, queryParams, db, context, &m)
 		}
 	}
 	for _, k := range globalSortedKeys {
 		globalDataInterceptor := globalDataInterceptors[k]
-		globalDataInterceptor.AfterQueryMap(tableId, script, &params, db, context, &m)
+		globalDataInterceptor.AfterQueryMap(tableId, script, &params, queryParams, db, context, &m)
 	}
 
 	return m, err
@@ -157,7 +157,7 @@ func (this *NdDataOperator) QueryArray(tableId string, params []interface{}, que
 	globalDataInterceptors, globalSortedKeys := gorest2.GetGlobalDataInterceptors()
 	for _, k := range globalSortedKeys {
 		globalDataInterceptor := globalDataInterceptors[k]
-		ctn, err := globalDataInterceptor.BeforeQueryArray(tableId, script, &params, db, context)
+		ctn, err := globalDataInterceptor.BeforeQueryArray(tableId, script, &params, queryParams, db, context)
 		if !ctn {
 			return nil, nil, err
 		}
@@ -166,7 +166,7 @@ func (this *NdDataOperator) QueryArray(tableId string, params []interface{}, que
 	for _, k := range sortedKeys {
 		dataInterceptor := dataInterceptors[k]
 		if dataInterceptor != nil {
-			ctn, err := dataInterceptor.BeforeQueryArray(tableId, script, &params, db, context)
+			ctn, err := dataInterceptor.BeforeQueryArray(tableId, script, &params, queryParams, db, context)
 			if !ctn {
 				return nil, nil, err
 			}
@@ -199,12 +199,12 @@ func (this *NdDataOperator) QueryArray(tableId string, params []interface{}, que
 	for _, k := range sortedKeys {
 		dataInterceptor := dataInterceptors[k]
 		if dataInterceptor != nil {
-			dataInterceptor.AfterQueryArray(tableId, script, &params, db, context, &h, &a)
+			dataInterceptor.AfterQueryArray(tableId, script, &params, queryParams, db, context, &h, &a)
 		}
 	}
 	for _, k := range globalSortedKeys {
 		globalDataInterceptor := globalDataInterceptors[k]
-		globalDataInterceptor.AfterQueryArray(tableId, script, &params, db, context, &h, &a)
+		globalDataInterceptor.AfterQueryArray(tableId, script, &params, queryParams, db, context, &h, &a)
 	}
 
 	return h, a, err

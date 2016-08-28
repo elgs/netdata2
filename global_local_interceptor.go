@@ -104,18 +104,26 @@ func (this *GlobalLocalInterceptor) commonAfter(tx *sql.Tx, db *sql.DB, resource
 //func (this *GlobalLocalInterceptor) AfterListArray(resourceId string, db *sql.DB, fields string, context map[string]interface{}, headers *[]string, data *[][]string, total int64) error {
 //	return this.commonAfter(nil, db, resourceId, context, "list_array", map[string]interface{}{"headers": *headers, "data": *data})
 //}
-//func (this *GlobalLocalInterceptor) BeforeQueryMap(resourceId string, script string, params *[]interface{}, db *sql.DB, context map[string]interface{}) (bool, error) {
-//	return this.commonBefore(nil, db, resourceId, context, "query_map", map[string]interface{}{"params": *params})
-//}
-//func (this *GlobalLocalInterceptor) AfterQueryMap(resourceId string, script string, params *[]interface{}, db *sql.DB, context map[string]interface{}, data *[]map[string]string) error {
-//	return this.commonAfter(nil, db, resourceId, context, "query_map", *data)
-//}
-//func (this *GlobalLocalInterceptor) BeforeQueryArray(resourceId string, script string, params *[]interface{}, db *sql.DB, context map[string]interface{}) (bool, error) {
-//	return this.commonBefore(nil, db, resourceId, context, "query_array", map[string]interface{}{"params": *params})
-//}
-//func (this *GlobalLocalInterceptor) AfterQueryArray(resourceId string, script string, params *[]interface{}, db *sql.DB, context map[string]interface{}, headers *[]string, data *[][]string) error {
-//	return this.commonAfter(nil, db, resourceId, context, "query_array", map[string]interface{}{"headers": *headers, "data": *data})
-//}
+func (this *GlobalLocalInterceptor) BeforeQueryMap(resourceId string, script string, params *[]interface{}, queryParams []string, db *sql.DB, context map[string]interface{}) (bool, error) {
+	return this.commonBefore(nil, db, resourceId, context, "query_map", queryParams, [][]interface{}{*params})
+}
+func (this *GlobalLocalInterceptor) AfterQueryMap(resourceId string, script string, params *[]interface{}, queryParams []string, db *sql.DB, context map[string]interface{}, data *[]map[string]string) error {
+	return this.commonAfter(nil, db, resourceId, context, "query_map", queryParams, [][]interface{}{*params})
+}
+func (this *GlobalLocalInterceptor) BeforeQueryArray(resourceId string, script string, params *[]interface{}, queryParams []string, db *sql.DB, context map[string]interface{}) (bool, error) {
+	return this.commonBefore(nil, db, resourceId, context, "query_array", queryParams, [][]interface{}{*params})
+}
+func (this *GlobalLocalInterceptor) AfterQueryArray(resourceId string, script string, params *[]interface{}, queryParams []string, db *sql.DB, context map[string]interface{}, headers *[]string, data *[][]string) error {
+	results := make([][]interface{}, len(*data))
+	for i, v := range *data {
+		result := make([]interface{}, len(v))
+		for ii, vv := range v {
+			result[ii] = vv
+		}
+		results[i] = result
+	}
+	return this.commonAfter(nil, db, resourceId, context, "query_array", queryParams, results)
+}
 func (this *GlobalLocalInterceptor) BeforeExec(resourceId string, scripts string, params *[][]interface{}, queryParams []string, tx *sql.Tx, context map[string]interface{}) (bool, error) {
 	return this.commonBefore(tx, nil, resourceId, context, "exec", queryParams, *params)
 }
