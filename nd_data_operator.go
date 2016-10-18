@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/elgs/gorest2"
@@ -41,15 +42,34 @@ func loadQuery(projectId, queryName string) (string, error) {
 
 	for iQuery, vQuery := range app.Queries {
 		if vQuery.Name == queryName {
-			q := app.Queries[iQuery].Script
-			if strings.HasPrefix(q, "./") || strings.HasPrefix(q, "/") {
-				content, err := ioutil.ReadFile(q)
+			q := app.Queries[iQuery]
+			if strings.HasPrefix(q.Script, "./") || strings.HasPrefix(q.Script, "/") {
+				content, err := ioutil.ReadFile(q.Script)
 				if err != nil {
-					return "", errors.New("File not found: " + q)
+					return "", errors.New("File not found: " + q.Script)
+				}
+				return string(content), nil
+			} else if strings.TrimSpace(q.Script) == "" {
+				qFileName := ".netdata/" + app.Name + "/" + q.Name
+				if _, err := os.Stat(homeDir + "/" + qFileName); os.IsExist(err) {
+					qFileName = homeDir + "/" + qFileName
+				} else if _, err := os.Stat(homeDir + "/" + qFileName + ".sql"); os.IsExist(err) {
+					qFileName = homeDir + "/" + qFileName + ".sql"
+				} else if _, err := os.Stat(pwd + "/" + qFileName); os.IsExist(err) {
+					qFileName = pwd + "/" + qFileName
+				} else if _, err := os.Stat(pwd + "/" + qFileName + ".sql"); os.IsExist(err) {
+					qFileName = pwd + "/" + qFileName + ".sql"
+				} else {
+					return "", errors.New("Query file not found.")
+				}
+
+				content, err := ioutil.ReadFile(qFileName)
+				if err != nil {
+					return "", errors.New("Failed to open query file not found: " + qFileName)
 				}
 				return string(content), nil
 			} else {
-				return q, nil
+				return q.Script, nil
 			}
 		}
 	}
