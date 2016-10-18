@@ -4,6 +4,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"strings"
 
 	"github.com/elgs/gorest2"
@@ -25,7 +26,7 @@ func NewDbo(ds, dbType string) gorest2.DataOperator {
 	}
 }
 
-func loadQuery(projectId, queryName string) (*Query, error) {
+func loadQuery(projectId, queryName string) (string, error) {
 	var app *App = nil
 	for _, vApp := range masterData.Apps {
 		if projectId == vApp.Id {
@@ -35,27 +36,36 @@ func loadQuery(projectId, queryName string) (*Query, error) {
 	}
 
 	if app == nil {
-		return nil, errors.New("App not found: " + projectId)
+		return "", errors.New("App not found: " + projectId)
 	}
 
 	for iQuery, vQuery := range app.Queries {
 		if vQuery.Name == queryName {
-			return &app.Queries[iQuery], nil
+			q := app.Queries[iQuery].Script
+			if strings.HasPrefix(q, "./") || strings.HasPrefix(q, "/") {
+				content, err := ioutil.ReadFile(q)
+				if err != nil {
+					return "", errors.New("File not found: " + q)
+				}
+				return string(content), nil
+			} else {
+				return q, nil
+			}
 		}
 	}
-	return nil, errors.New("Query not found: " + queryName)
+	return "", errors.New("Query not found: " + queryName)
 }
 
 func (this *NdDataOperator) QueryMap(tableId string, params []interface{}, queryParams []string, context map[string]interface{}) ([]map[string]string, error) {
 	projectId := context["app_id"].(string)
-	query, err := loadQuery(projectId, tableId)
+	sqlScript, err := loadQuery(projectId, tableId)
 	if err != nil {
 		return nil, err
 	}
 
 	ret := make([]map[string]string, 0)
 
-	script := query.Script
+	script := sqlScript
 
 	count, err := gosplitargs.CountSeparators(script, "\\?")
 	if err != nil {
@@ -131,12 +141,12 @@ func (this *NdDataOperator) QueryMap(tableId string, params []interface{}, query
 }
 func (this *NdDataOperator) QueryArray(tableId string, params []interface{}, queryParams []string, context map[string]interface{}) ([]string, [][]string, error) {
 	projectId := context["app_id"].(string)
-	query, err := loadQuery(projectId, tableId)
+	sqlScript, err := loadQuery(projectId, tableId)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	script := query.Script
+	script := sqlScript
 	count, err := gosplitargs.CountSeparators(script, "\\?")
 	if err != nil {
 		return nil, nil, err
@@ -212,11 +222,11 @@ func (this *NdDataOperator) QueryArray(tableId string, params []interface{}, que
 func (this *NdDataOperator) Exec(tableId string, params [][]interface{}, queryParams []string, context map[string]interface{}) ([][]int64, error) {
 	projectId := context["app_id"].(string)
 
-	query, err := loadQuery(projectId, tableId)
+	sqlScript, err := loadQuery(projectId, tableId)
 	if err != nil {
 		return nil, err
 	}
-	scripts := query.Script
+	scripts := sqlScript
 
 	db, err := this.GetConn()
 	if err != nil {

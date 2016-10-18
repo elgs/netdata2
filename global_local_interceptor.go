@@ -18,11 +18,11 @@ type GlobalLocalInterceptor struct {
 }
 
 func (this *GlobalLocalInterceptor) executeLocalInterceptor(tx *sql.Tx, db *sql.DB, context map[string]interface{}, queryParams []string, data [][]interface{}, appId string, resourceId string, li *LocalInterceptor) error {
-	query, err := loadQuery(appId, li.Callback)
+	sqlScript, err := loadQuery(appId, li.Callback)
 	if err != nil {
 		return err
 	}
-	scripts := query.Script
+	scripts := sqlScript
 	replaceContext := buildReplaceContext(context)
 
 	_, err = batchExecuteTx(tx, db, &scripts, queryParams, data, replaceContext)

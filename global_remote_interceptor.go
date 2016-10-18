@@ -29,11 +29,11 @@ func (this *GlobalRemoteInterceptor) executeRemoteInterceptor(tx *sql.Tx, db *sq
 	}
 	clientData := string(res)
 
-	query, err := loadQuery(appId, ri.Callback)
+	sqlScript, err := loadQuery(appId, ri.Callback)
 	if err != nil {
 		return err
 	}
-	scripts := query.Script
+	scripts := sqlScript
 	replaceContext := buildReplaceContext(context)
 
 	queryParams, params, err := buildParams(clientData)
