@@ -53,14 +53,9 @@ func loadQuery(projectId, queryName string) (string, error) {
 				qFileName := ".netdata/" + app.Name + "/" + q.Name
 				if _, err := os.Stat(homeDir + "/" + qFileName); os.IsExist(err) {
 					qFileName = homeDir + "/" + qFileName
-				} else if _, err := os.Stat(homeDir + "/" + qFileName + ".sql"); os.IsExist(err) {
-					qFileName = homeDir + "/" + qFileName + ".sql"
-				} else if _, err := os.Stat(pwd + "/" + qFileName); os.IsExist(err) {
+				}
+				if _, err := os.Stat(pwd + "/" + qFileName); os.IsExist(err) {
 					qFileName = pwd + "/" + qFileName
-				} else if _, err := os.Stat(pwd + "/" + qFileName + ".sql"); os.IsExist(err) {
-					qFileName = pwd + "/" + qFileName + ".sql"
-				} else {
-					return "", errors.New("Query file not found.")
 				}
 
 				content, err := ioutil.ReadFile(qFileName)
