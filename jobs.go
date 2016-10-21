@@ -4,7 +4,9 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/elgs/cron"
@@ -20,7 +22,7 @@ func (this *Job) Action(mode string) func() {
 				log.Println(err)
 			}
 		}()
-		script := this.Script
+		script := this.ScriptText
 		appId := this.AppId
 		loopScript := this.LoopScript
 
@@ -151,5 +153,42 @@ func (this *Job) Started() bool {
 		return true
 	} else {
 		return false
+	}
+}
+
+func (this *Job) Reload() error {
+	var app *App = nil
+	for _, vApp := range masterData.Apps {
+		if this.AppId == vApp.Id {
+			app = &vApp
+			break
+		}
+	}
+
+	if app == nil {
+		return errors.New("App not found: " + this.AppId)
+	}
+	if strings.TrimSpace(this.ScriptPath) == "" {
+		jFileName := ".netdata/" + app.Name + "/" + this.Name
+		if _, err := os.Stat(homeDir + "/" + jFileName); os.IsExist(err) {
+			jFileName = homeDir + "/" + jFileName
+		}
+		if _, err := os.Stat(pwd + "/" + jFileName); os.IsExist(err) {
+			jFileName = pwd + "/" + jFileName
+		}
+
+		content, err := ioutil.ReadFile(jFileName)
+		if err != nil {
+			return errors.New("Failed to open job file: " + jFileName)
+		}
+		this.ScriptText = string(content)
+		return nil
+	} else {
+		content, err := ioutil.ReadFile(this.ScriptPath)
+		if err != nil {
+			return errors.New("File not found: " + this.ScriptPath)
+		}
+		this.ScriptText = string(content)
+		return nil
 	}
 }

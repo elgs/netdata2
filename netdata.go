@@ -75,9 +75,10 @@ func main() {
 			Usage:   "service commands",
 			Subcommands: []cli.Command{
 				{
-					Name:  "start",
-					Usage: "start service",
-					Flags: service.Flags(),
+					Name:    "start",
+					Aliases: []string{"s"},
+					Usage:   "start service",
+					Flags:   service.Flags(),
 					Action: func(c *cli.Context) error {
 						service.LoadConfigs(c)
 						if _, err := os.Stat(service.DataFile); os.IsNotExist(err) {
@@ -184,8 +185,9 @@ func main() {
 					},
 				},
 				{
-					Name:  "stop",
-					Usage: "stop service",
+					Name:    "stop",
+					Aliases: []string{"st"},
+					Usage:   "stop service",
 					Action: func(c *cli.Context) error {
 						if len(c.Args()) > 0 {
 							_, err := http.Post(fmt.Sprint("http://127.0.0.1:", c.Args()[0], "/sys/shutdown"), "text/plain", nil)
@@ -815,7 +817,7 @@ func main() {
 						},
 						cli.StringFlag{
 							Name:  "script, s",
-							Usage: "script of the job",
+							Usage: "script path of the job",
 						},
 						cli.StringFlag{
 							Name:  "loopscript, l",
@@ -837,7 +839,7 @@ func main() {
 							Id:         id,
 							Name:       c.String("name"),
 							AppId:      c.String("app"),
-							Script:     c.String("script"),
+							ScriptPath: c.String("script"),
 							LoopScript: c.String("loopscript"),
 							Cron:       c.String("cron"),
 							AutoStart:  c.Bool("auto"),
@@ -891,7 +893,7 @@ func main() {
 						},
 						cli.StringFlag{
 							Name:  "script, s",
-							Usage: "script of the job",
+							Usage: "script path of the job",
 						},
 						cli.StringFlag{
 							Name:  "loopscript, l",
@@ -912,7 +914,7 @@ func main() {
 							Id:         c.String("id"),
 							Name:       c.String("name"),
 							AppId:      c.String("app"),
-							Script:     c.String("script"),
+							ScriptPath: c.String("script"),
 							LoopScript: c.String("loopscript"),
 							Cron:       c.String("cron"),
 							AutoStart:  c.Bool("auto"),
@@ -1759,8 +1761,9 @@ func main() {
 			Usage: "master commands",
 			Subcommands: []cli.Command{
 				{
-					Name:  "propagate, p",
-					Usage: "propagate configuration data to all salves",
+					Name:    "propagate",
+					Aliases: []string{"p"},
+					Usage:   "propagate configuration data to all salves",
 					Flags: []cli.Flag{
 						cli.StringFlag{
 							Name:  "node, N",
