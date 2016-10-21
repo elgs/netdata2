@@ -264,7 +264,10 @@ func (this *MasterData) AddQuery(query *Query) error {
 				}
 			}
 			this.Apps[iApp].Queries = append(this.Apps[iApp].Queries, *query)
-			query.Reload()
+			err := query.Reload()
+			if err != nil {
+				return err
+			}
 			this.Version++
 			return propagateMasterData()
 		}
@@ -292,7 +295,10 @@ func (this *MasterData) UpdateQuery(query *Query) error {
 				if vQuery.Id == query.Id && vQuery.AppId == query.AppId {
 					this.Apps[iApp].Queries = append(this.Apps[iApp].Queries[:iQuery], *query)
 					this.Apps[iApp].Queries = append(this.Apps[iApp].Queries, this.Apps[iApp].Queries[iQuery+1:]...)
-					query.Reload()
+					err := query.Reload()
+					if err != nil {
+						return err
+					}
 					this.Version++
 					return propagateMasterData()
 				}
@@ -314,7 +320,6 @@ func (this *MasterData) AddJob(job *Job) error {
 				job.Start()
 			}
 			this.Apps[iApp].Jobs = append(this.Apps[iApp].Jobs, *job)
-			job.Reload()
 			this.Version++
 			return propagateMasterData()
 		}
@@ -348,7 +353,6 @@ func (this *MasterData) UpdateJob(job *Job) error {
 					}
 					this.Apps[iApp].Jobs = append(this.Apps[iApp].Jobs[:iJob], *job)
 					this.Apps[iApp].Jobs = append(this.Apps[iApp].Jobs, this.Apps[iApp].Jobs[iJob+1:]...)
-					job.Reload()
 					this.Version++
 					return propagateMasterData()
 				}

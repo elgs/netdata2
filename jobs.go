@@ -109,12 +109,11 @@ func StartJobs() {
 	for _, app := range masterData.Apps {
 		for _, job := range app.Jobs {
 			if job.AutoStart {
-				h, err := Sched.AddFunc(job.Cron, job.Action("sql"))
+				err := job.Start()
 				if err != nil {
 					log.Println(err)
 					continue
 				}
-				jobStatus[job.Id] = h
 			}
 		}
 	}
@@ -124,6 +123,10 @@ func StartJobs() {
 func (this *Job) Start() error {
 	if _, ok := jobStatus[this.Id]; ok {
 		return errors.New("Job already started: " + this.Id)
+	}
+	err := this.Reload()
+	if err != nil {
+		return err
 	}
 	jobRuntimeId, err := Sched.AddFunc(this.Cron, this.Action("sql"))
 	if err != nil {
