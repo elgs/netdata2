@@ -67,9 +67,6 @@ func main() {
 	app.Name = "netdata"
 	app.Usage = "An SQL backend for the web."
 	app.Version = "0.0.1"
-	app.Action = func(c *cli.Context) error {
-		return nil
-	}
 
 	app.Commands = []cli.Command{
 		{
@@ -1762,7 +1759,7 @@ func main() {
 			Usage: "master commands",
 			Subcommands: []cli.Command{
 				{
-					Name:  "propagate",
+					Name:  "propagate, p",
 					Usage: "propagate configuration data to all salves",
 					Flags: []cli.Flag{
 						cli.StringFlag{
