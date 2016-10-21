@@ -645,7 +645,7 @@ func main() {
 						},
 						cli.StringFlag{
 							Name:  "script, s",
-							Usage: "script of the query",
+							Usage: "script path of the query",
 						},
 						cli.StringFlag{
 							Name:  "note, t",
@@ -656,11 +656,11 @@ func main() {
 						node := c.String("node")
 						id := strings.Replace(uuid.NewV4().String(), "-", "", -1)
 						query := &Query{
-							Id:     id,
-							Name:   c.String("name"),
-							AppId:  c.String("app"),
-							Script: c.String("script"),
-							Note:   c.String("note"),
+							Id:         id,
+							Name:       c.String("name"),
+							AppId:      c.String("app"),
+							ScriptPath: c.String("script"),
+							Note:       c.String("note"),
 						}
 						queryJSONBytes, err := json.Marshal(query)
 						if err != nil {
@@ -706,7 +706,7 @@ func main() {
 						},
 						cli.StringFlag{
 							Name:  "script, s",
-							Usage: "script of the query",
+							Usage: "script path of the query",
 						},
 						cli.StringFlag{
 							Name:  "note, t",
@@ -716,11 +716,11 @@ func main() {
 					Action: func(c *cli.Context) error {
 						node := c.String("node")
 						query := &Query{
-							Id:     c.String("id"),
-							Name:   c.String("name"),
-							AppId:  c.String("app"),
-							Script: c.String("script"),
-							Note:   c.String("note"),
+							Id:         c.String("id"),
+							Name:       c.String("name"),
+							AppId:      c.String("app"),
+							ScriptPath: c.String("script"),
+							Note:       c.String("note"),
 						}
 						queryJSONBytes, err := json.Marshal(query)
 						if err != nil {
@@ -1744,6 +1744,39 @@ func main() {
 							Type: "CLI_SHOW_API_NODES",
 						}
 						response, err := sendCliCommand(node, cliShowApiNodesCommand)
+						if err != nil {
+							fmt.Println(err)
+							return err
+						}
+						output := string(response)
+						if output != "" {
+							fmt.Println(strings.TrimSpace(output))
+						}
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "master",
+			Usage: "master commands",
+			Subcommands: []cli.Command{
+				{
+					Name:  "propagate",
+					Usage: "propagate configuration data to all salves",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "node, N",
+							Value: "127.0.0.1:2015",
+							Usage: "node url, format: host:port. 127.0.0.1:2015 if empty",
+						},
+					},
+					Action: func(c *cli.Context) error {
+						node := c.String("node")
+						cliShowMasterCommand := &Command{
+							Type: "CLI_PROPAGATE",
+						}
+						response, err := sendCliCommand(node, cliShowMasterCommand)
 						if err != nil {
 							fmt.Println(err)
 							return err

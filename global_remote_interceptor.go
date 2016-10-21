@@ -29,7 +29,7 @@ func (this *GlobalRemoteInterceptor) executeRemoteInterceptor(tx *sql.Tx, db *sq
 	}
 	clientData := string(res)
 
-	sqlScript, err := loadQuery(appId, ri.Callback)
+	sqlScript, err := getQueryText(appId, ri.Callback)
 	if err != nil {
 		return err
 	}

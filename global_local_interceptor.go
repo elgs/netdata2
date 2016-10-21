@@ -18,7 +18,7 @@ type GlobalLocalInterceptor struct {
 }
 
 func (this *GlobalLocalInterceptor) executeLocalInterceptor(tx *sql.Tx, db *sql.DB, context map[string]interface{}, queryParams []string, data [][]interface{}, appId string, resourceId string, li *LocalInterceptor) error {
-	sqlScript, err := loadQuery(appId, li.Callback)
+	sqlScript, err := getQueryText(appId, li.Callback)
 	if err != nil {
 		return err
 	}

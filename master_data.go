@@ -5,6 +5,9 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"strings"
 )
 
 type Command struct {
@@ -44,12 +47,13 @@ type App struct {
 	RemoteInterceptors []RemoteInterceptor
 }
 type Query struct {
-	Id     string
-	Name   string
-	Script string
-	AppId  string
-	Note   string
-	Status string
+	Id         string
+	Name       string
+	ScriptPath string
+	ScriptText string
+	AppId      string
+	Note       string
+	Status     string
 }
 type Job struct {
 	Id         string
@@ -259,6 +263,7 @@ func (this *MasterData) AddQuery(query *Query) error {
 				}
 			}
 			this.Apps[iApp].Queries = append(this.Apps[iApp].Queries, *query)
+			loadQueryFromFile(query)
 			this.Version++
 			return propagateMasterData()
 		}
@@ -286,6 +291,7 @@ func (this *MasterData) UpdateQuery(query *Query) error {
 				if vQuery.Id == query.Id && vQuery.AppId == query.AppId {
 					this.Apps[iApp].Queries = append(this.Apps[iApp].Queries[:iQuery], *query)
 					this.Apps[iApp].Queries = append(this.Apps[iApp].Queries, this.Apps[iApp].Queries[iQuery+1:]...)
+					loadQueryFromFile(query)
 					this.Version++
 					return propagateMasterData()
 				}
@@ -530,4 +536,41 @@ func RemoveApiNode(remoteAddr string) error {
 	}
 	apiNodes = append(apiNodes[:index], apiNodes[index+1:]...)
 	return nil
+}
+
+func loadQueryFromFile(q *Query) error {
+	var app *App = nil
+	for _, vApp := range masterData.Apps {
+		if q.AppId == vApp.Id {
+			app = &vApp
+			break
+		}
+	}
+
+	if app == nil {
+		return errors.New("App not found: " + q.AppId)
+	}
+	if strings.TrimSpace(q.ScriptPath) == "" {
+		qFileName := ".netdata/" + app.Name + "/" + q.Name
+		if _, err := os.Stat(homeDir + "/" + qFileName); os.IsExist(err) {
+			qFileName = homeDir + "/" + qFileName
+		}
+		if _, err := os.Stat(pwd + "/" + qFileName); os.IsExist(err) {
+			qFileName = pwd + "/" + qFileName
+		}
+
+		content, err := ioutil.ReadFile(qFileName)
+		if err != nil {
+			return errors.New("Failed to open query file not found: " + qFileName)
+		}
+		q.ScriptText = string(content)
+		return nil
+	} else {
+		content, err := ioutil.ReadFile(q.ScriptPath)
+		if err != nil {
+			return errors.New("File not found: " + q.ScriptPath)
+		}
+		q.ScriptText = string(content)
+		return nil
+	}
 }

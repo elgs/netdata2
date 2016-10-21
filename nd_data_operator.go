@@ -4,8 +4,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"os"
 	"strings"
 
 	"github.com/elgs/gorest2"
@@ -27,7 +25,7 @@ func NewDbo(ds, dbType string) gorest2.DataOperator {
 	}
 }
 
-func loadQuery(projectId, queryName string) (string, error) {
+func getQueryText(projectId, queryName string) (string, error) {
 	var app *App = nil
 	for _, vApp := range masterData.Apps {
 		if projectId == vApp.Id {
@@ -43,29 +41,7 @@ func loadQuery(projectId, queryName string) (string, error) {
 	for iQuery, vQuery := range app.Queries {
 		if vQuery.Name == queryName {
 			q := app.Queries[iQuery]
-			if strings.HasPrefix(q.Script, "./") || strings.HasPrefix(q.Script, "/") {
-				content, err := ioutil.ReadFile(q.Script)
-				if err != nil {
-					return "", errors.New("File not found: " + q.Script)
-				}
-				return string(content), nil
-			} else if strings.TrimSpace(q.Script) == "" {
-				qFileName := ".netdata/" + app.Name + "/" + q.Name
-				if _, err := os.Stat(homeDir + "/" + qFileName); os.IsExist(err) {
-					qFileName = homeDir + "/" + qFileName
-				}
-				if _, err := os.Stat(pwd + "/" + qFileName); os.IsExist(err) {
-					qFileName = pwd + "/" + qFileName
-				}
-
-				content, err := ioutil.ReadFile(qFileName)
-				if err != nil {
-					return "", errors.New("Failed to open query file not found: " + qFileName)
-				}
-				return string(content), nil
-			} else {
-				return q.Script, nil
-			}
+			return q.ScriptText, nil
 		}
 	}
 	return "", errors.New("Query not found: " + queryName)
@@ -73,7 +49,7 @@ func loadQuery(projectId, queryName string) (string, error) {
 
 func (this *NdDataOperator) QueryMap(tableId string, params []interface{}, queryParams []string, context map[string]interface{}) ([]map[string]string, error) {
 	projectId := context["app_id"].(string)
-	sqlScript, err := loadQuery(projectId, tableId)
+	sqlScript, err := getQueryText(projectId, tableId)
 	if err != nil {
 		return nil, err
 	}
@@ -156,7 +132,7 @@ func (this *NdDataOperator) QueryMap(tableId string, params []interface{}, query
 }
 func (this *NdDataOperator) QueryArray(tableId string, params []interface{}, queryParams []string, context map[string]interface{}) ([]string, [][]string, error) {
 	projectId := context["app_id"].(string)
-	sqlScript, err := loadQuery(projectId, tableId)
+	sqlScript, err := getQueryText(projectId, tableId)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -237,7 +213,7 @@ func (this *NdDataOperator) QueryArray(tableId string, params []interface{}, que
 func (this *NdDataOperator) Exec(tableId string, params [][]interface{}, queryParams []string, context map[string]interface{}) ([][]int64, error) {
 	projectId := context["app_id"].(string)
 
-	sqlScript, err := loadQuery(projectId, tableId)
+	sqlScript, err := getQueryText(projectId, tableId)
 	if err != nil {
 		return nil, err
 	}

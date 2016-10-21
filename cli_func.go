@@ -255,6 +255,12 @@ func processCliCommand(message []byte) (string, error) {
 			return "", err
 		}
 		return string(apiNodesBytes), nil
+	case "CLI_PROPAGATE":
+		err := propagateMasterData()
+		if err != nil {
+			return "", err
+		}
+		return "", nil
 	}
 	return "", nil
 }
