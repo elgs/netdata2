@@ -56,16 +56,17 @@ type Query struct {
 	Status     string
 }
 type Job struct {
-	Id         string
-	Name       string
-	Cron       string
-	ScriptPath string
-	ScriptText string
-	AutoStart  bool
-	LoopScript string
-	AppId      string
-	Note       string
-	Status     string
+	Id             string
+	Name           string
+	Cron           string
+	ScriptPath     string
+	ScriptText     string
+	AutoStart      bool
+	LoopScriptPath string
+	LoopScriptText string
+	AppId          string
+	Note           string
+	Status         string
 }
 type Token struct {
 	Id     string
@@ -571,13 +572,12 @@ func (this *Query) Reload() error {
 			return errors.New("Failed to open query file: " + qFileName)
 		}
 		this.ScriptText = string(content)
-		return nil
 	} else {
 		content, err := ioutil.ReadFile(this.ScriptPath)
 		if err != nil {
 			return errors.New("File not found: " + this.ScriptPath)
 		}
 		this.ScriptText = string(content)
-		return nil
 	}
+	return masterData.Propagate()
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math"
 	"net/http"
 	"os"
 	"os/signal"
@@ -502,11 +503,12 @@ func main() {
 						if err != nil {
 							return err
 						}
+						name := c.String("name")
 						app := &App{
 							Id:         id,
-							Name:       c.String("name"),
+							Name:       name,
 							DataNodeId: c.String("datanode"),
-							DbName:     dbName,
+							DbName:     name[:int(math.Min(float64(len(name)), 10))] + "_" + dbName,
 							Note:       c.String("note"),
 						}
 						appJSONBytes, err := json.Marshal(app)
@@ -821,7 +823,7 @@ func main() {
 						},
 						cli.StringFlag{
 							Name:  "loopscript, l",
-							Usage: "loop script of the job",
+							Usage: "loop script path of the job",
 						},
 						cli.BoolFlag{
 							Name:  "auto, u",
@@ -836,14 +838,14 @@ func main() {
 						node := c.String("node")
 						id := strings.Replace(uuid.NewV4().String(), "-", "", -1)
 						job := &Job{
-							Id:         id,
-							Name:       c.String("name"),
-							AppId:      c.String("app"),
-							ScriptPath: c.String("script"),
-							LoopScript: c.String("loopscript"),
-							Cron:       c.String("cron"),
-							AutoStart:  c.Bool("auto"),
-							Note:       c.String("note"),
+							Id:             id,
+							Name:           c.String("name"),
+							AppId:          c.String("app"),
+							ScriptPath:     c.String("script"),
+							LoopScriptPath: c.String("loopscript"),
+							Cron:           c.String("cron"),
+							AutoStart:      c.Bool("auto"),
+							Note:           c.String("note"),
 						}
 						jobJSONBytes, err := json.Marshal(job)
 						if err != nil {
@@ -897,7 +899,7 @@ func main() {
 						},
 						cli.StringFlag{
 							Name:  "loopscript, l",
-							Usage: "loop script of the job",
+							Usage: "loop script path of the job",
 						},
 						cli.BoolFlag{
 							Name:  "auto, u",
@@ -911,14 +913,14 @@ func main() {
 					Action: func(c *cli.Context) error {
 						node := c.String("node")
 						job := &Job{
-							Id:         c.String("id"),
-							Name:       c.String("name"),
-							AppId:      c.String("app"),
-							ScriptPath: c.String("script"),
-							LoopScript: c.String("loopscript"),
-							Cron:       c.String("cron"),
-							AutoStart:  c.Bool("auto"),
-							Note:       c.String("note"),
+							Id:             c.String("id"),
+							Name:           c.String("name"),
+							AppId:          c.String("app"),
+							ScriptPath:     c.String("script"),
+							LoopScriptPath: c.String("loopscript"),
+							Cron:           c.String("cron"),
+							AutoStart:      c.Bool("auto"),
+							Note:           c.String("note"),
 						}
 						jobJSONBytes, err := json.Marshal(job)
 						if err != nil {

@@ -24,7 +24,7 @@ func (this *Job) Action(mode string) func() {
 		}()
 		script := this.ScriptText
 		appId := this.AppId
-		loopScript := this.LoopScript
+		loopScript := this.LoopScriptText
 
 		dbo, err := gorest2.GetDbo(appId)
 		if err != nil {
@@ -185,13 +185,33 @@ func (this *Job) Reload() error {
 			return errors.New("Failed to open job file: " + jFileName)
 		}
 		this.ScriptText = string(content)
-		return nil
 	} else {
 		content, err := ioutil.ReadFile(this.ScriptPath)
 		if err != nil {
 			return errors.New("File not found: " + this.ScriptPath)
 		}
 		this.ScriptText = string(content)
-		return nil
 	}
+
+	if strings.TrimSpace(this.LoopScriptPath) == "" {
+		jFileName := ".netdata/" + app.Name + "/" + this.Name + "_loop"
+		if _, err := os.Stat(homeDir + "/" + jFileName); os.IsExist(err) {
+			jFileName = homeDir + "/" + jFileName
+		}
+		if _, err := os.Stat(pwd + "/" + jFileName); os.IsExist(err) {
+			jFileName = pwd + "/" + jFileName + "_loop"
+		}
+
+		content, err := ioutil.ReadFile(jFileName)
+		if err == nil {
+			this.LoopScriptText = string(content)
+		}
+
+	} else {
+		content, err := ioutil.ReadFile(this.LoopScriptPath)
+		if err == nil {
+			this.LoopScriptText = string(content)
+		}
+	}
+	return masterData.Propagate()
 }
