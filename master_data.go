@@ -122,7 +122,7 @@ func (this *MasterData) AddDataNode(dataNode *DataNode) error {
 	}
 	this.DataNodes = append(this.DataNodes, *dataNode)
 	this.Version++
-	return propagateMasterData()
+	return masterData.Propagate()
 }
 func (this *MasterData) RemoveDataNode(id string) error {
 	index := -1
@@ -137,7 +137,7 @@ func (this *MasterData) RemoveDataNode(id string) error {
 	}
 	this.DataNodes = append(this.DataNodes[:index], this.DataNodes[index+1:]...)
 	this.Version++
-	return propagateMasterData()
+	return masterData.Propagate()
 }
 func (this *MasterData) UpdateDataNode(dataNode *DataNode) error {
 	index := -1
@@ -153,7 +153,7 @@ func (this *MasterData) UpdateDataNode(dataNode *DataNode) error {
 	this.DataNodes = append(this.DataNodes[:index], *dataNode)
 	this.DataNodes = append(this.DataNodes, this.DataNodes[index+1:]...)
 	this.Version++
-	return propagateMasterData()
+	return masterData.Propagate()
 }
 func (this *MasterData) ListDataNodes(mode string) string {
 	var buffer bytes.Buffer
@@ -191,7 +191,7 @@ func (this *MasterData) AddApp(app *App) error {
 	}
 	this.Apps = append(this.Apps, *app)
 	this.Version++
-	return propagateMasterData()
+	return masterData.Propagate()
 }
 func (this *MasterData) RemoveApp(id string) error {
 	index := -1
@@ -210,7 +210,7 @@ func (this *MasterData) RemoveApp(id string) error {
 	}
 	this.Apps = append(this.Apps[:index], this.Apps[index+1:]...)
 	this.Version++
-	return propagateMasterData()
+	return masterData.Propagate()
 }
 func (this *MasterData) UpdateApp(app *App) error {
 	index := -1
@@ -239,7 +239,7 @@ func (this *MasterData) UpdateApp(app *App) error {
 	this.Apps = append(this.Apps[:index], *app)
 	this.Apps = append(this.Apps, this.Apps[index+1:]...)
 	this.Version++
-	return propagateMasterData()
+	return masterData.Propagate()
 }
 func (this *MasterData) ListApps(mode string) string {
 	var buffer bytes.Buffer
@@ -269,7 +269,7 @@ func (this *MasterData) AddQuery(query *Query) error {
 				return err
 			}
 			this.Version++
-			return propagateMasterData()
+			return masterData.Propagate()
 		}
 	}
 	return errors.New("App does not exist: " + query.AppId)
@@ -281,7 +281,7 @@ func (this *MasterData) RemoveQuery(id string, appId string) error {
 				if vQuery.Id == id && vQuery.AppId == appId {
 					this.Apps[iApp].Queries = append(this.Apps[iApp].Queries[:iQuery], this.Apps[iApp].Queries[iQuery+1:]...)
 					this.Version++
-					return propagateMasterData()
+					return masterData.Propagate()
 				}
 			}
 		}
@@ -300,7 +300,7 @@ func (this *MasterData) UpdateQuery(query *Query) error {
 						return err
 					}
 					this.Version++
-					return propagateMasterData()
+					return masterData.Propagate()
 				}
 			}
 		}
@@ -321,7 +321,7 @@ func (this *MasterData) AddJob(job *Job) error {
 			}
 			this.Apps[iApp].Jobs = append(this.Apps[iApp].Jobs, *job)
 			this.Version++
-			return propagateMasterData()
+			return masterData.Propagate()
 		}
 	}
 	return errors.New("App does not exist: " + job.AppId)
@@ -336,7 +336,7 @@ func (this *MasterData) RemoveJob(id string, appId string) error {
 					}
 					this.Apps[iApp].Jobs = append(this.Apps[iApp].Jobs[:iJob], this.Apps[iApp].Jobs[iJob+1:]...)
 					this.Version++
-					return propagateMasterData()
+					return masterData.Propagate()
 				}
 			}
 		}
@@ -354,7 +354,7 @@ func (this *MasterData) UpdateJob(job *Job) error {
 					this.Apps[iApp].Jobs = append(this.Apps[iApp].Jobs[:iJob], *job)
 					this.Apps[iApp].Jobs = append(this.Apps[iApp].Jobs, this.Apps[iApp].Jobs[iJob+1:]...)
 					this.Version++
-					return propagateMasterData()
+					return masterData.Propagate()
 				}
 			}
 		}
@@ -395,7 +395,7 @@ func (this *MasterData) AddToken(token *Token) error {
 			}
 			this.Apps[iApp].Tokens = append(this.Apps[iApp].Tokens, *token)
 			this.Version++
-			return propagateMasterData()
+			return masterData.Propagate()
 		}
 	}
 	return errors.New("App does not exist: " + token.AppId)
@@ -407,7 +407,7 @@ func (this *MasterData) RemoveToken(id string, appId string) error {
 				if vToken.Id == id && vToken.AppId == appId {
 					this.Apps[iApp].Tokens = append(this.Apps[iApp].Tokens[:iToken], this.Apps[iApp].Tokens[iToken+1:]...)
 					this.Version++
-					return propagateMasterData()
+					return masterData.Propagate()
 				}
 			}
 		}
@@ -422,7 +422,7 @@ func (this *MasterData) UpdateToken(token *Token) error {
 					this.Apps[iApp].Tokens = append(this.Apps[iApp].Tokens[:iToken], *token)
 					this.Apps[iApp].Tokens = append(this.Apps[iApp].Tokens, this.Apps[iApp].Tokens[iToken+1:]...)
 					this.Version++
-					return propagateMasterData()
+					return masterData.Propagate()
 				}
 			}
 		}
@@ -440,7 +440,7 @@ func (this *MasterData) AddLI(li *LocalInterceptor) error {
 			}
 			this.Apps[iApp].LocalInterceptors = append(this.Apps[iApp].LocalInterceptors, *li)
 			this.Version++
-			return propagateMasterData()
+			return masterData.Propagate()
 		}
 	}
 	return errors.New("App does not exist: " + li.AppId)
@@ -452,7 +452,7 @@ func (this *MasterData) RemoveLI(id string, appId string) error {
 				if vLi.Id == id && vLi.AppId == appId {
 					this.Apps[iApp].LocalInterceptors = append(this.Apps[iApp].LocalInterceptors[:iLi], this.Apps[iApp].LocalInterceptors[iLi+1:]...)
 					this.Version++
-					return propagateMasterData()
+					return masterData.Propagate()
 				}
 			}
 		}
@@ -467,7 +467,7 @@ func (this *MasterData) UpdateLI(li *LocalInterceptor) error {
 					this.Apps[iApp].LocalInterceptors = append(this.Apps[iApp].LocalInterceptors[:iLi], *li)
 					this.Apps[iApp].LocalInterceptors = append(this.Apps[iApp].LocalInterceptors, this.Apps[iApp].LocalInterceptors[iLi+1:]...)
 					this.Version++
-					return propagateMasterData()
+					return masterData.Propagate()
 				}
 			}
 		}
@@ -485,7 +485,7 @@ func (this *MasterData) AddRI(ri *RemoteInterceptor) error {
 			}
 			this.Apps[iApp].RemoteInterceptors = append(this.Apps[iApp].RemoteInterceptors, *ri)
 			this.Version++
-			return propagateMasterData()
+			return masterData.Propagate()
 		}
 	}
 	return errors.New("App does not exist: " + ri.AppId)
@@ -497,7 +497,7 @@ func (this *MasterData) RemoveRI(id string, appId string) error {
 				if vRi.Id == id && vRi.AppId == appId {
 					this.Apps[iApp].RemoteInterceptors = append(this.Apps[iApp].RemoteInterceptors[:iRi], this.Apps[iApp].RemoteInterceptors[iRi+1:]...)
 					this.Version++
-					return propagateMasterData()
+					return masterData.Propagate()
 				}
 			}
 		}
@@ -512,7 +512,7 @@ func (this *MasterData) UpdateRI(ri *RemoteInterceptor) error {
 					this.Apps[iApp].RemoteInterceptors = append(this.Apps[iApp].RemoteInterceptors[:iRi], *ri)
 					this.Apps[iApp].RemoteInterceptors = append(this.Apps[iApp].RemoteInterceptors, this.Apps[iApp].RemoteInterceptors[iRi+1:]...)
 					this.Version++
-					return propagateMasterData()
+					return masterData.Propagate()
 				}
 			}
 		}

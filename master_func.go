@@ -39,10 +39,10 @@ func processWsCommandMaster(conn *websocket.Conn, message []byte) error {
 
 var masterDataMutex = &sync.Mutex{}
 
-func propagateMasterData() error {
+func (this *MasterData) Propagate() error {
 	masterDataMutex.Lock()
 	var err error
-	masterDataBytes, err := json.Marshal(masterData)
+	masterDataBytes, err := json.Marshal(this)
 	if err != nil {
 		return err
 	}
