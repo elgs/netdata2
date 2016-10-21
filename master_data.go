@@ -314,6 +314,7 @@ func (this *MasterData) AddJob(job *Job) error {
 				job.Start()
 			}
 			this.Apps[iApp].Jobs = append(this.Apps[iApp].Jobs, *job)
+			job.Reload()
 			this.Version++
 			return propagateMasterData()
 		}
@@ -347,6 +348,7 @@ func (this *MasterData) UpdateJob(job *Job) error {
 					}
 					this.Apps[iApp].Jobs = append(this.Apps[iApp].Jobs[:iJob], *job)
 					this.Apps[iApp].Jobs = append(this.Apps[iApp].Jobs, this.Apps[iApp].Jobs[iJob+1:]...)
+					job.Reload()
 					this.Version++
 					return propagateMasterData()
 				}
