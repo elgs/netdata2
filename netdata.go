@@ -1162,11 +1162,12 @@ func main() {
 					},
 					Action: func(c *cli.Context) error {
 						node := c.String("node")
-						id := strings.Replace(uuid.NewV4().String(), "-", "", -1)
+						appId := c.String("app")
+						id := appId + strings.Replace(uuid.NewV4().String(), "-", "", -1)
 						token := &Token{
 							Id:     id,
 							Name:   c.String("name"),
-							AppId:  c.String("app"),
+							AppId:  appId,
 							Mode:   c.String("mode"),
 							Target: c.String("target"),
 							Note:   c.String("note"),
