@@ -182,6 +182,7 @@ func main() {
 						// serve
 						serve(service)
 						<-done
+						fmt.Println("Bye!")
 						return nil
 					},
 				},
