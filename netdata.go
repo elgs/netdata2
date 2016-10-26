@@ -498,17 +498,21 @@ func main() {
 					},
 					Action: func(c *cli.Context) error {
 						node := c.String("node")
+
+						name := c.String("name")
+						namePrefix := name[:int(math.Min(float64(len(name)), 8))]
+
 						id := strings.Replace(uuid.NewV4().String(), "-", "", -1)
-						dbName, err := gostrgen.RandGen(16, gostrgen.LowerDigit, "", "")
+						dbName, err := gostrgen.RandGen(16-len(namePrefix), gostrgen.LowerDigit, "", "")
 						if err != nil {
 							return err
 						}
-						name := c.String("name")
+
 						app := &App{
 							Id:         id,
 							Name:       name,
 							DataNodeId: c.String("datanode"),
-							DbName:     name[:int(math.Min(float64(len(name)), 10))] + "_" + dbName,
+							DbName:     namePrefix + dbName,
 							Note:       c.String("note"),
 						}
 						appJSONBytes, err := json.Marshal(app)
