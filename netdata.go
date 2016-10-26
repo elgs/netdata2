@@ -1153,7 +1153,7 @@ func main() {
 						},
 						cli.StringFlag{
 							Name:  "mode, o",
-							Usage: "script of the token",
+							Usage: "mode of the token",
 						},
 						cli.StringFlag{
 							Name:  "target, g",
@@ -1220,7 +1220,7 @@ func main() {
 						},
 						cli.StringFlag{
 							Name:  "mode, o",
-							Usage: "script of the token",
+							Usage: "mode of the token",
 						},
 						cli.StringFlag{
 							Name:  "target, g",
