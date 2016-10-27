@@ -13,12 +13,12 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/codegangsta/cli"
 	"github.com/elgs/gorest2"
 	"github.com/elgs/gostrgen"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/websocket"
 	"github.com/satori/go.uuid"
+	"github.com/urfave/cli"
 )
 
 var slaveConn *websocket.Conn

@@ -4,9 +4,9 @@ package main
 import (
 	"strings"
 
-	"github.com/codegangsta/cli"
 	"github.com/elgs/gojq"
 	"github.com/satori/go.uuid"
+	"github.com/urfave/cli"
 )
 
 type CliService struct {
