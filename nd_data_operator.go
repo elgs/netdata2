@@ -41,7 +41,9 @@ func getQueryText(projectId, queryName string) (string, error) {
 	for iQuery, vQuery := range app.Queries {
 		if vQuery.Name == queryName {
 			q := &app.Queries[iQuery]
-			q.Reload()
+			if strings.TrimSpace(q.ScriptText) == "" {
+				q.Reload()
+			}
 			return q.ScriptText, nil
 		}
 	}
