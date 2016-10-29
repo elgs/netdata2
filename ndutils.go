@@ -51,7 +51,6 @@ func httpRequest(url string, method string, data string, maxReadLimit int64) ([]
 }
 
 func batchExecuteTx(tx *sql.Tx, db *sql.DB, script *string, scriptParams []string, params [][]interface{}, replaceContext map[string]string) ([][]int64, error) {
-
 	rowsAffectedArray := [][]int64{}
 
 	innerTrans := false
@@ -116,7 +115,6 @@ func batchExecuteTx(tx *sql.Tx, db *sql.DB, script *string, scriptParams []strin
 	if innerTrans {
 		tx.Commit()
 	}
-
 	return rowsAffectedArray, nil
 }
 

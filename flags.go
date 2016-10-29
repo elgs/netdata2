@@ -76,7 +76,7 @@ func (this *CliService) Flags() []cli.Flag {
 		},
 		cli.StringFlag{
 			Name:        "data_file, d",
-			Value:       pwd + "/.netdata/netdata_master.json",
+			Value:       homeDir + "/.netdata/netdata_master.json",
 			Usage:       "master data file path, ignored by slave nodes, search path: ~/.netdata/netdata_master.json",
 			Destination: &this.DataFile,
 		},

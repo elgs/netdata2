@@ -40,7 +40,8 @@ func getQueryText(projectId, queryName string) (string, error) {
 
 	for iQuery, vQuery := range app.Queries {
 		if vQuery.Name == queryName {
-			q := app.Queries[iQuery]
+			q := &app.Queries[iQuery]
+			q.Reload()
 			return q.ScriptText, nil
 		}
 	}
@@ -212,7 +213,6 @@ func (this *NdDataOperator) QueryArray(tableId string, params []interface{}, que
 }
 func (this *NdDataOperator) Exec(tableId string, params [][]interface{}, queryParams []string, context map[string]interface{}) ([][]int64, error) {
 	projectId := context["app_id"].(string)
-
 	sqlScript, err := getQueryText(projectId, tableId)
 	if err != nil {
 		return nil, err

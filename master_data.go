@@ -560,17 +560,17 @@ func (this *Query) Reload() error {
 	}
 	if strings.TrimSpace(this.ScriptPath) == "" {
 		qFileName := ".netdata/" + app.Name + "/" + this.Name
-		if _, err := os.Stat(homeDir + "/" + qFileName); os.IsExist(err) {
+		if _, err := os.Stat(homeDir + "/" + qFileName); !os.IsNotExist(err) {
 			qFileName = homeDir + "/" + qFileName
 		}
-		if _, err := os.Stat(pwd + "/" + qFileName); os.IsExist(err) {
+		if _, err := os.Stat(pwd + "/" + qFileName); !os.IsNotExist(err) {
 			qFileName = pwd + "/" + qFileName
 		}
-
 		content, err := ioutil.ReadFile(qFileName)
 		if err != nil {
 			return errors.New("Failed to open query file: " + qFileName)
 		}
+		this.ScriptPath = qFileName
 		this.ScriptText = string(content)
 	} else {
 		content, err := ioutil.ReadFile(this.ScriptPath)
