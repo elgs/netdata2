@@ -172,18 +172,33 @@ func (this *Job) Reload() error {
 		return errors.New("App not found: " + this.AppId)
 	}
 	if strings.TrimSpace(this.ScriptPath) == "" {
+		jFileFound := false
 		jFileName := ".netdata/" + app.Name + "/" + this.Name
 		if _, err := os.Stat(homeDir + "/" + jFileName); os.IsExist(err) {
 			jFileName = homeDir + "/" + jFileName
+			jFileFound = true
 		}
 		if _, err := os.Stat(pwd + "/" + jFileName); os.IsExist(err) {
 			jFileName = pwd + "/" + jFileName
+			jFileFound = true
+		}
+		if !jFileFound {
+			jFileName += ".sql"
+			if _, err := os.Stat(homeDir + "/" + jFileName); os.IsExist(err) {
+				jFileName = homeDir + "/" + jFileName
+				jFileFound = true
+			}
+			if _, err := os.Stat(pwd + "/" + jFileName); os.IsExist(err) {
+				jFileName = pwd + "/" + jFileName
+				jFileFound = true
+			}
 		}
 
 		content, err := ioutil.ReadFile(jFileName)
 		if err != nil {
 			return errors.New("Failed to open job file: " + jFileName)
 		}
+		this.ScriptPath = jFileName
 		this.ScriptText = string(content)
 	} else {
 		content, err := ioutil.ReadFile(this.ScriptPath)
@@ -194,16 +209,31 @@ func (this *Job) Reload() error {
 	}
 
 	if strings.TrimSpace(this.LoopScriptPath) == "" {
+		jFileFound := false
 		jFileName := ".netdata/" + app.Name + "/" + this.Name + "_loop"
 		if _, err := os.Stat(homeDir + "/" + jFileName); os.IsExist(err) {
 			jFileName = homeDir + "/" + jFileName
+			jFileFound = true
 		}
 		if _, err := os.Stat(pwd + "/" + jFileName); os.IsExist(err) {
 			jFileName = pwd + "/" + jFileName + "_loop"
+			jFileFound = true
+		}
+		if !jFileFound {
+			jFileName += ".sql"
+			if _, err := os.Stat(homeDir + "/" + jFileName); os.IsExist(err) {
+				jFileName = homeDir + "/" + jFileName
+				jFileFound = true
+			}
+			if _, err := os.Stat(pwd + "/" + jFileName); os.IsExist(err) {
+				jFileName = pwd + "/" + jFileName + "_loop"
+				jFileFound = true
+			}
 		}
 
 		content, err := ioutil.ReadFile(jFileName)
 		if err == nil {
+			this.LoopScriptPath = jFileName
 			this.LoopScriptText = string(content)
 		}
 
