@@ -559,13 +559,29 @@ func (this *Query) Reload() error {
 		return errors.New("App not found: " + this.AppId)
 	}
 	if strings.TrimSpace(this.ScriptPath) == "" {
+		qFileFound := false
 		qFileName := ".netdata/" + app.Name + "/" + this.Name
 		if _, err := os.Stat(homeDir + "/" + qFileName); !os.IsNotExist(err) {
 			qFileName = homeDir + "/" + qFileName
+			qFileFound = true
 		}
 		if _, err := os.Stat(pwd + "/" + qFileName); !os.IsNotExist(err) {
 			qFileName = pwd + "/" + qFileName
+			qFileFound = true
 		}
+
+		if !qFileFound {
+			qFileName += ".sql"
+			if _, err := os.Stat(homeDir + "/" + qFileName); !os.IsNotExist(err) {
+				qFileName = homeDir + "/" + qFileName
+				qFileFound = true
+			}
+			if _, err := os.Stat(pwd + "/" + qFileName); !os.IsNotExist(err) {
+				qFileName = pwd + "/" + qFileName
+				qFileFound = true
+			}
+		}
+
 		content, err := ioutil.ReadFile(qFileName)
 		if err != nil {
 			return errors.New("Failed to open query file: " + qFileName)

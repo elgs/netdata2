@@ -21,7 +21,6 @@ func NewDbo(ds, dbType string) gorest2.DataOperator {
 			Ds:     ds,
 			DbType: dbType,
 		},
-		//		QueryRegistry: make(map[string]map[string]string),
 	}
 }
 
