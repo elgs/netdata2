@@ -58,7 +58,7 @@ func (this *GlobalRemoteInterceptor) commonBefore(tx *sql.Tx, db *sql.DB, resour
 			if err != nil {
 				return false, err
 			}
-			err = this.executeRemoteInterceptor(tx, db, context, payload, app.Id, resourceId, &ri)
+			err = this.executeRemoteInterceptor(tx, db, context, payload, app.Id, resourceId, ri)
 			if err != nil {
 				return false, err
 			}
@@ -77,7 +77,7 @@ func (this *GlobalRemoteInterceptor) commonAfter(tx *sql.Tx, db *sql.DB, resourc
 			if err != nil {
 				return err
 			}
-			err = this.executeRemoteInterceptor(tx, db, context, payload, app.Id, resourceId, &ri)
+			err = this.executeRemoteInterceptor(tx, db, context, payload, app.Id, resourceId, ri)
 			if err != nil {
 				return err
 			}

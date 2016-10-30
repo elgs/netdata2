@@ -759,8 +759,8 @@ func main() {
 							Usage: "node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
 						cli.StringFlag{
-							Name:  "id, id",
-							Usage: "id of the app",
+							Name:  "id, i",
+							Usage: "id of the query",
 						},
 						cli.StringFlag{
 							Name:  "app, a",

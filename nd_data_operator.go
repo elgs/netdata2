@@ -26,9 +26,9 @@ func NewDbo(ds, dbType string) gorest2.DataOperator {
 
 func getQueryText(projectId, queryName string) (string, error) {
 	var app *App = nil
-	for _, vApp := range masterData.Apps {
+	for iApp, vApp := range masterData.Apps {
 		if projectId == vApp.Id {
-			app = &vApp
+			app = masterData.Apps[iApp]
 			break
 		}
 	}
@@ -37,13 +37,9 @@ func getQueryText(projectId, queryName string) (string, error) {
 		return "", errors.New("App not found: " + projectId)
 	}
 
-	for iQuery, vQuery := range app.Queries {
+	for _, vQuery := range app.Queries {
 		if vQuery.Name == queryName {
-			q := &app.Queries[iQuery]
-			if strings.TrimSpace(q.ScriptText) == "" {
-				q.Reload()
-			}
-			return q.ScriptText, nil
+			return vQuery.ScriptText, nil
 		}
 	}
 	return "", errors.New("Query not found: " + queryName)
@@ -292,7 +288,7 @@ func MakeGetDbo(dbType string, masterData *MasterData) func(id string) (gorest2.
 		var app *App = nil
 		for _, a := range masterData.Apps {
 			if a.Id == id {
-				app = &a
+				app = a
 				break
 			}
 		}
@@ -303,7 +299,7 @@ func MakeGetDbo(dbType string, masterData *MasterData) func(id string) (gorest2.
 		var dn *DataNode = nil
 		for _, vDn := range masterData.DataNodes {
 			if app.DataNodeId == vDn.Id {
-				dn = &vDn
+				dn = vDn
 				break
 			}
 		}

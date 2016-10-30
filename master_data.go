@@ -18,8 +18,8 @@ type Command struct {
 
 type MasterData struct {
 	Version   int64
-	DataNodes []DataNode
-	Apps      []App
+	DataNodes []*DataNode
+	Apps      []*App
 }
 
 type DataNode struct {
@@ -40,11 +40,11 @@ type App struct {
 	DataNodeId         string
 	Note               string
 	Status             string
-	Queries            []Query
-	Jobs               []Job
-	Tokens             []Token
-	LocalInterceptors  []LocalInterceptor
-	RemoteInterceptors []RemoteInterceptor
+	Queries            []*Query
+	Jobs               []*Job
+	Tokens             []*Token
+	LocalInterceptors  []*LocalInterceptor
+	RemoteInterceptors []*RemoteInterceptor
 }
 type Query struct {
 	Id         string
@@ -121,7 +121,7 @@ func (this *MasterData) AddDataNode(dataNode *DataNode) error {
 			return errors.New("Data node existed: " + dataNode.Name)
 		}
 	}
-	this.DataNodes = append(this.DataNodes, *dataNode)
+	this.DataNodes = append(this.DataNodes, dataNode)
 	this.Version++
 	return masterData.Propagate()
 }
@@ -151,7 +151,7 @@ func (this *MasterData) UpdateDataNode(dataNode *DataNode) error {
 	if index == -1 {
 		return errors.New("Data node not found: " + dataNode.Name)
 	}
-	this.DataNodes = append(this.DataNodes[:index], *dataNode)
+	this.DataNodes = append(this.DataNodes[:index], dataNode)
 	this.DataNodes = append(this.DataNodes, this.DataNodes[index+1:]...)
 	this.Version++
 	return masterData.Propagate()
@@ -190,7 +190,7 @@ func (this *MasterData) AddApp(app *App) error {
 	if err != nil {
 		return err
 	}
-	this.Apps = append(this.Apps, *app)
+	this.Apps = append(this.Apps, app)
 	this.Version++
 	return masterData.Propagate()
 }
@@ -237,7 +237,7 @@ func (this *MasterData) UpdateApp(app *App) error {
 	}
 
 	app.OnAppCreateOrUpdate()
-	this.Apps = append(this.Apps[:index], *app)
+	this.Apps = append(this.Apps[:index], app)
 	this.Apps = append(this.Apps, this.Apps[index+1:]...)
 	this.Version++
 	return masterData.Propagate()
@@ -259,12 +259,12 @@ func (this *MasterData) ListApps(mode string) string {
 func (this *MasterData) AddQuery(query *Query) error {
 	for iApp, vApp := range this.Apps {
 		if vApp.Id == query.AppId {
-			for _, vQuery := range vApp.Queries {
+			for _, vQuery := range this.Apps[iApp].Queries {
 				if vQuery.Name == query.Name && vQuery.AppId == query.AppId {
 					return errors.New("Query existed: " + query.Name)
 				}
 			}
-			this.Apps[iApp].Queries = append(this.Apps[iApp].Queries, *query)
+			this.Apps[iApp].Queries = append(this.Apps[iApp].Queries, query)
 			err := query.Reload()
 			if err != nil {
 				return err
@@ -294,7 +294,7 @@ func (this *MasterData) UpdateQuery(query *Query) error {
 		if vApp.Id == query.AppId {
 			for iQuery, vQuery := range this.Apps[iApp].Queries {
 				if vQuery.Id == query.Id && vQuery.AppId == query.AppId {
-					this.Apps[iApp].Queries = append(this.Apps[iApp].Queries[:iQuery], *query)
+					this.Apps[iApp].Queries = append(this.Apps[iApp].Queries[:iQuery], query)
 					this.Apps[iApp].Queries = append(this.Apps[iApp].Queries, this.Apps[iApp].Queries[iQuery+1:]...)
 					err := query.Reload()
 					if err != nil {
@@ -312,7 +312,7 @@ func (this *MasterData) UpdateQuery(query *Query) error {
 func (this *MasterData) AddJob(job *Job) error {
 	for iApp, vApp := range this.Apps {
 		if vApp.Id == job.AppId {
-			for _, vJob := range vApp.Jobs {
+			for _, vJob := range this.Apps[iApp].Jobs {
 				if vJob.Name == job.Name && vJob.AppId == job.AppId {
 					return errors.New("Job existed: " + job.Name)
 				}
@@ -320,7 +320,7 @@ func (this *MasterData) AddJob(job *Job) error {
 			if job.AutoStart {
 				job.Start()
 			}
-			this.Apps[iApp].Jobs = append(this.Apps[iApp].Jobs, *job)
+			this.Apps[iApp].Jobs = append(this.Apps[iApp].Jobs, job)
 			this.Version++
 			return masterData.Propagate()
 		}
@@ -352,7 +352,7 @@ func (this *MasterData) UpdateJob(job *Job) error {
 					if job.Started() {
 						job.Restart()
 					}
-					this.Apps[iApp].Jobs = append(this.Apps[iApp].Jobs[:iJob], *job)
+					this.Apps[iApp].Jobs = append(this.Apps[iApp].Jobs[:iJob], job)
 					this.Apps[iApp].Jobs = append(this.Apps[iApp].Jobs, this.Apps[iApp].Jobs[iJob+1:]...)
 					this.Version++
 					return masterData.Propagate()
@@ -394,7 +394,7 @@ func (this *MasterData) AddToken(token *Token) error {
 					return errors.New("Token existed: " + token.Name)
 				}
 			}
-			this.Apps[iApp].Tokens = append(this.Apps[iApp].Tokens, *token)
+			this.Apps[iApp].Tokens = append(this.Apps[iApp].Tokens, token)
 			this.Version++
 			return masterData.Propagate()
 		}
@@ -420,7 +420,7 @@ func (this *MasterData) UpdateToken(token *Token) error {
 		if vApp.Id == token.AppId {
 			for iToken, vToken := range this.Apps[iApp].Tokens {
 				if vToken.Id == token.Id && vToken.AppId == token.AppId {
-					this.Apps[iApp].Tokens = append(this.Apps[iApp].Tokens[:iToken], *token)
+					this.Apps[iApp].Tokens = append(this.Apps[iApp].Tokens[:iToken], token)
 					this.Apps[iApp].Tokens = append(this.Apps[iApp].Tokens, this.Apps[iApp].Tokens[iToken+1:]...)
 					this.Version++
 					return masterData.Propagate()
@@ -439,7 +439,7 @@ func (this *MasterData) AddLI(li *LocalInterceptor) error {
 					return errors.New("Local interceptor existed: " + li.Name)
 				}
 			}
-			this.Apps[iApp].LocalInterceptors = append(this.Apps[iApp].LocalInterceptors, *li)
+			this.Apps[iApp].LocalInterceptors = append(this.Apps[iApp].LocalInterceptors, li)
 			this.Version++
 			return masterData.Propagate()
 		}
@@ -465,7 +465,7 @@ func (this *MasterData) UpdateLI(li *LocalInterceptor) error {
 		if vApp.Id == li.AppId {
 			for iLi, vLi := range this.Apps[iApp].LocalInterceptors {
 				if vLi.Id == li.Id && vLi.AppId == li.AppId {
-					this.Apps[iApp].LocalInterceptors = append(this.Apps[iApp].LocalInterceptors[:iLi], *li)
+					this.Apps[iApp].LocalInterceptors = append(this.Apps[iApp].LocalInterceptors[:iLi], li)
 					this.Apps[iApp].LocalInterceptors = append(this.Apps[iApp].LocalInterceptors, this.Apps[iApp].LocalInterceptors[iLi+1:]...)
 					this.Version++
 					return masterData.Propagate()
@@ -484,7 +484,7 @@ func (this *MasterData) AddRI(ri *RemoteInterceptor) error {
 					return errors.New("Remote interceptor existed: " + ri.Name)
 				}
 			}
-			this.Apps[iApp].RemoteInterceptors = append(this.Apps[iApp].RemoteInterceptors, *ri)
+			this.Apps[iApp].RemoteInterceptors = append(this.Apps[iApp].RemoteInterceptors, ri)
 			this.Version++
 			return masterData.Propagate()
 		}
@@ -510,7 +510,7 @@ func (this *MasterData) UpdateRI(ri *RemoteInterceptor) error {
 		if vApp.Id == ri.AppId {
 			for iRi, vRi := range this.Apps[iApp].RemoteInterceptors {
 				if vRi.Id == ri.Id && vRi.AppId == ri.AppId {
-					this.Apps[iApp].RemoteInterceptors = append(this.Apps[iApp].RemoteInterceptors[:iRi], *ri)
+					this.Apps[iApp].RemoteInterceptors = append(this.Apps[iApp].RemoteInterceptors[:iRi], ri)
 					this.Apps[iApp].RemoteInterceptors = append(this.Apps[iApp].RemoteInterceptors, this.Apps[iApp].RemoteInterceptors[iRi+1:]...)
 					this.Version++
 					return masterData.Propagate()
@@ -548,9 +548,9 @@ func RemoveApiNode(remoteAddr string) error {
 
 func (this *Query) Reload() error {
 	var app *App = nil
-	for _, vApp := range masterData.Apps {
+	for iApp, vApp := range masterData.Apps {
 		if this.AppId == vApp.Id {
-			app = &vApp
+			app = masterData.Apps[iApp]
 			break
 		}
 	}

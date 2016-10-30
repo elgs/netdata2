@@ -161,9 +161,9 @@ func (this *Job) Started() bool {
 
 func (this *Job) Reload() error {
 	var app *App = nil
-	for _, vApp := range masterData.Apps {
+	for iApp, vApp := range masterData.Apps {
 		if this.AppId == vApp.Id {
-			app = &vApp
+			app = masterData.Apps[iApp]
 			break
 		}
 	}
@@ -174,21 +174,21 @@ func (this *Job) Reload() error {
 	if strings.TrimSpace(this.ScriptPath) == "" {
 		jFileFound := false
 		jFileName := ".netdata/" + app.Name + "/" + this.Name
-		if _, err := os.Stat(homeDir + "/" + jFileName); os.IsExist(err) {
+		if _, err := os.Stat(homeDir + "/" + jFileName); !os.IsNotExist(err) {
 			jFileName = homeDir + "/" + jFileName
 			jFileFound = true
 		}
-		if _, err := os.Stat(pwd + "/" + jFileName); os.IsExist(err) {
+		if _, err := os.Stat(pwd + "/" + jFileName); !os.IsNotExist(err) {
 			jFileName = pwd + "/" + jFileName
 			jFileFound = true
 		}
 		if !jFileFound {
 			jFileName += ".sql"
-			if _, err := os.Stat(homeDir + "/" + jFileName); os.IsExist(err) {
+			if _, err := os.Stat(homeDir + "/" + jFileName); !os.IsNotExist(err) {
 				jFileName = homeDir + "/" + jFileName
 				jFileFound = true
 			}
-			if _, err := os.Stat(pwd + "/" + jFileName); os.IsExist(err) {
+			if _, err := os.Stat(pwd + "/" + jFileName); !os.IsNotExist(err) {
 				jFileName = pwd + "/" + jFileName
 				jFileFound = true
 			}
@@ -211,21 +211,21 @@ func (this *Job) Reload() error {
 	if strings.TrimSpace(this.LoopScriptPath) == "" {
 		jFileFound := false
 		jFileName := ".netdata/" + app.Name + "/" + this.Name + "_loop"
-		if _, err := os.Stat(homeDir + "/" + jFileName); os.IsExist(err) {
+		if _, err := os.Stat(homeDir + "/" + jFileName); !os.IsNotExist(err) {
 			jFileName = homeDir + "/" + jFileName
 			jFileFound = true
 		}
-		if _, err := os.Stat(pwd + "/" + jFileName); os.IsExist(err) {
+		if _, err := os.Stat(pwd + "/" + jFileName); !os.IsNotExist(err) {
 			jFileName = pwd + "/" + jFileName + "_loop"
 			jFileFound = true
 		}
 		if !jFileFound {
 			jFileName += ".sql"
-			if _, err := os.Stat(homeDir + "/" + jFileName); os.IsExist(err) {
+			if _, err := os.Stat(homeDir + "/" + jFileName); !os.IsNotExist(err) {
 				jFileName = homeDir + "/" + jFileName
 				jFileFound = true
 			}
-			if _, err := os.Stat(pwd + "/" + jFileName); os.IsExist(err) {
+			if _, err := os.Stat(pwd + "/" + jFileName); !os.IsNotExist(err) {
 				jFileName = pwd + "/" + jFileName + "_loop"
 				jFileFound = true
 			}

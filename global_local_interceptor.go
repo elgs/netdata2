@@ -38,7 +38,7 @@ func (this *GlobalLocalInterceptor) commonBefore(tx *sql.Tx, db *sql.DB, resourc
 	app := context["app"].(*App)
 	for _, li := range app.LocalInterceptors {
 		if li.Type == "before" && li.Target == resourceId && li.AppId == app.Id {
-			err := this.executeLocalInterceptor(tx, db, context, queryParams, data, app.Id, resourceId, &li)
+			err := this.executeLocalInterceptor(tx, db, context, queryParams, data, app.Id, resourceId, li)
 			if err != nil {
 				return false, err
 			}
@@ -53,7 +53,7 @@ func (this *GlobalLocalInterceptor) commonAfter(tx *sql.Tx, db *sql.DB, resource
 	app := context["app"].(*App)
 	for _, li := range app.LocalInterceptors {
 		if li.Type == "after" && li.Target == resourceId && li.AppId == app.Id {
-			err := this.executeLocalInterceptor(tx, db, context, queryParams, data, app.Id, resourceId, &li)
+			err := this.executeLocalInterceptor(tx, db, context, queryParams, data, app.Id, resourceId, li)
 			if err != nil {
 				return err
 			}
