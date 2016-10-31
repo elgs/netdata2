@@ -51,7 +51,7 @@ func checkProjectToken(context map[string]interface{}, tableId string, op string
 		appId := context["app_id"].(string)
 		for _, a := range masterData.Apps {
 			if a.Id == appId {
-				context["app"] = &a
+				context["app"] = a
 				break
 			}
 		}
