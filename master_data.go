@@ -530,7 +530,22 @@ func (this *MasterData) UpdateLI(li *LocalInterceptor) error {
 		if vApp.Id == li.AppId {
 			for iLi, vLi := range this.Apps[iApp].LocalInterceptors {
 				if vLi.Id == li.Id && vLi.AppId == li.AppId {
-					this.Apps[iApp].LocalInterceptors = append(this.Apps[iApp].LocalInterceptors[:iLi], li)
+					if li.Name != "__not_set__" {
+						vLi.Name = li.Name
+					}
+					if li.Target != "__not_set__" {
+						vLi.Target = li.Target
+					}
+					if li.Callback != "__not_set__" {
+						vLi.Callback = li.Callback
+					}
+					if li.Type != "__not_set__" {
+						vLi.Type = li.Type
+					}
+					if li.Note != "__not_set__" {
+						vLi.Note = li.Note
+					}
+					this.Apps[iApp].LocalInterceptors = append(this.Apps[iApp].LocalInterceptors[:iLi], vLi)
 					this.Apps[iApp].LocalInterceptors = append(this.Apps[iApp].LocalInterceptors, this.Apps[iApp].LocalInterceptors[iLi+1:]...)
 					this.Version++
 					return masterData.Propagate()
@@ -575,7 +590,31 @@ func (this *MasterData) UpdateRI(ri *RemoteInterceptor) error {
 		if vApp.Id == ri.AppId {
 			for iRi, vRi := range this.Apps[iApp].RemoteInterceptors {
 				if vRi.Id == ri.Id && vRi.AppId == ri.AppId {
-					this.Apps[iApp].RemoteInterceptors = append(this.Apps[iApp].RemoteInterceptors[:iRi], ri)
+					if ri.Name != "__not_set__" {
+						vRi.Name = ri.Name
+					}
+					if ri.Target != "__not_set__" {
+						vRi.Target = ri.Target
+					}
+					if ri.Method != "__not_set__" {
+						vRi.Method = ri.Method
+					}
+					if ri.Url != "__not_set__" {
+						vRi.Url = ri.Url
+					}
+					if ri.ActionType != "__not_set__" {
+						vRi.ActionType = ri.ActionType
+					}
+					if ri.Callback != "__not_set__" {
+						vRi.Callback = ri.Callback
+					}
+					if ri.Type != "__not_set__" {
+						vRi.Type = ri.Type
+					}
+					if ri.Note != "__not_set__" {
+						vRi.Note = ri.Note
+					}
+					this.Apps[iApp].RemoteInterceptors = append(this.Apps[iApp].RemoteInterceptors[:iRi], vRi)
 					this.Apps[iApp].RemoteInterceptors = append(this.Apps[iApp].RemoteInterceptors, this.Apps[iApp].RemoteInterceptors[iRi+1:]...)
 					this.Version++
 					return masterData.Propagate()

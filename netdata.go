@@ -1492,6 +1492,21 @@ func main() {
 							Type:     c.String("type"),
 							Note:     c.String("note"),
 						}
+						if !c.IsSet("name") {
+							li.Name = "__not_set__"
+						}
+						if !c.IsSet("target") {
+							li.Target = "__not_set__"
+						}
+						if !c.IsSet("callback") {
+							li.Callback = "__not_set__"
+						}
+						if !c.IsSet("type") {
+							li.Type = "__not_set__"
+						}
+						if !c.IsSet("note") {
+							li.Note = "__not_set__"
+						}
 						liJSONBytes, err := json.Marshal(li)
 						if err != nil {
 							return err
@@ -1705,6 +1720,30 @@ func main() {
 							Type:       c.String("type"),
 							ActionType: c.String("action"),
 							Note:       c.String("note"),
+						}
+						if !c.IsSet("name") {
+							ri.Name = "__not_set__"
+						}
+						if !c.IsSet("target") {
+							ri.Target = "__not_set__"
+						}
+						if !c.IsSet("method") {
+							ri.Method = "__not_set__"
+						}
+						if !c.IsSet("url") {
+							ri.Url = "__not_set__"
+						}
+						if !c.IsSet("action") {
+							ri.ActionType = "__not_set__"
+						}
+						if !c.IsSet("callback") {
+							ri.Callback = "__not_set__"
+						}
+						if !c.IsSet("type") {
+							ri.Type = "__not_set__"
+						}
+						if !c.IsSet("note") {
+							ri.Note = "__not_set__"
 						}
 						riJSONBytes, err := json.Marshal(ri)
 						if err != nil {
