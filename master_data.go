@@ -227,14 +227,16 @@ func (this *MasterData) RemoveApp(id string) error {
 	return masterData.Propagate()
 }
 func (this *MasterData) UpdateApp(app *App) error {
-	index := -1
+	iApp := -1
+	var vApp *App
 	for i, v := range this.Apps {
 		if v.Id == app.Id {
-			index = i
+			iApp = i
+			vApp = v
 			break
 		}
 	}
-	if index == -1 {
+	if iApp == -1 {
 		return errors.New("App not found: " + app.Name)
 	}
 
@@ -249,9 +251,18 @@ func (this *MasterData) UpdateApp(app *App) error {
 		return errors.New("Data node does not exist: " + app.DataNodeId)
 	}
 
-	app.OnAppCreateOrUpdate()
-	this.Apps = append(this.Apps[:index], app)
-	this.Apps = append(this.Apps, this.Apps[index+1:]...)
+	if app.Name != "__not_set__" {
+		vApp.Name = app.Name
+	}
+	if app.DataNodeId != "__not_set__" {
+		vApp.DataNodeId = app.DataNodeId
+	}
+	if app.Note != "__not_set__" {
+		vApp.Note = app.Note
+	}
+	vApp.OnAppCreateOrUpdate()
+	this.Apps = append(this.Apps[:iApp], vApp)
+	this.Apps = append(this.Apps, this.Apps[iApp+1:]...)
 	this.Version++
 	return masterData.Propagate()
 }

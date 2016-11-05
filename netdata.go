@@ -589,6 +589,15 @@ func main() {
 							DataNodeId: c.String("datanode"),
 							Note:       c.String("note"),
 						}
+						if !c.IsSet("name") {
+							app.Name = "__not_set__"
+						}
+						if !c.IsSet("datanode") {
+							app.DataNodeId = "__not_set__"
+						}
+						if !c.IsSet("note") {
+							app.Note = "__not_set__"
+						}
 						appJSONBytes, err := json.Marshal(app)
 						if err != nil {
 							fmt.Println(err)
