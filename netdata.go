@@ -866,9 +866,9 @@ func main() {
 							Name:  "loopscript, l",
 							Usage: "loop script path of the job",
 						},
-						cli.BoolFlag{
+						cli.IntFlag{
 							Name:  "auto, u",
-							Usage: "auto start the job?",
+							Usage: "auto start the job?  0: no, 1: yes",
 						},
 						cli.StringFlag{
 							Name:  "note, t",
@@ -885,7 +885,7 @@ func main() {
 							ScriptPath:     c.String("script"),
 							LoopScriptPath: c.String("loopscript"),
 							Cron:           c.String("cron"),
-							AutoStart:      c.Bool("auto"),
+							AutoStart:      c.Int("auto"),
 							Note:           c.String("note"),
 						}
 						jobJSONBytes, err := json.Marshal(job)
@@ -942,9 +942,9 @@ func main() {
 							Name:  "loopscript, l",
 							Usage: "loop script path of the job",
 						},
-						cli.BoolFlag{
+						cli.IntFlag{
 							Name:  "auto, u",
-							Usage: "auto start the job?",
+							Usage: "auto start the job?  0: no, 1: yes",
 						},
 						cli.StringFlag{
 							Name:  "note, t",
@@ -960,8 +960,26 @@ func main() {
 							ScriptPath:     c.String("script"),
 							LoopScriptPath: c.String("loopscript"),
 							Cron:           c.String("cron"),
-							AutoStart:      c.Bool("auto"),
+							AutoStart:      c.Int("auto"),
 							Note:           c.String("note"),
+						}
+						if !c.IsSet("name") {
+							job.Name = "__not_set__"
+						}
+						if !c.IsSet("script") {
+							job.ScriptPath = "__not_set__"
+						}
+						if !c.IsSet("loopscript") {
+							job.LoopScriptPath = "__not_set__"
+						}
+						if !c.IsSet("cron") {
+							job.Cron = "__not_set__"
+						}
+						if !c.IsSet("auto") {
+							job.AutoStart = -1
+						}
+						if !c.IsSet("note") {
+							job.Note = "__not_set__"
 						}
 						jobJSONBytes, err := json.Marshal(job)
 						if err != nil {

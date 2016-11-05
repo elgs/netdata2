@@ -108,7 +108,7 @@ func StartJobs() {
 	Sched = cron.New()
 	for _, app := range masterData.Apps {
 		for _, job := range app.Jobs {
-			if job.AutoStart {
+			if job.AutoStart == 1 {
 				err := job.Start()
 				if err != nil {
 					log.Println(err)

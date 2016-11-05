@@ -61,7 +61,7 @@ type Job struct {
 	Cron           string
 	ScriptPath     string
 	ScriptText     string
-	AutoStart      bool
+	AutoStart      int
 	LoopScriptPath string
 	LoopScriptText string
 	AppId          string
@@ -350,7 +350,7 @@ func (this *MasterData) AddJob(job *Job) error {
 					return errors.New("Job existed: " + job.Name)
 				}
 			}
-			if job.AutoStart {
+			if job.AutoStart == 1 {
 				job.Start()
 			}
 			this.Apps[iApp].Jobs = append(this.Apps[iApp].Jobs, job)
@@ -382,10 +382,29 @@ func (this *MasterData) UpdateJob(job *Job) error {
 		if vApp.Id == job.AppId {
 			for iJob, vJob := range this.Apps[iApp].Jobs {
 				if vJob.Id == job.Id && vJob.AppId == job.AppId {
-					if job.Started() {
+					if job.Name != "__not_set__" {
+						vJob.Name = job.Name
+					}
+					if job.ScriptPath != "__not_set__" {
+						vJob.ScriptPath = job.ScriptPath
+					}
+					if job.LoopScriptPath != "__not_set__" {
+						vJob.LoopScriptPath = job.LoopScriptPath
+					}
+					if job.Cron != "__not_set__" {
+						vJob.Cron = job.Cron
+					}
+					if job.AutoStart != -1 {
+						vJob.AutoStart = job.AutoStart
+					}
+					if job.Note != "__not_set__" {
+						vJob.Note = job.Note
+					}
+
+					if vJob.Started() {
 						job.Restart()
 					}
-					this.Apps[iApp].Jobs = append(this.Apps[iApp].Jobs[:iJob], job)
+					this.Apps[iApp].Jobs = append(this.Apps[iApp].Jobs[:iJob], vJob)
 					this.Apps[iApp].Jobs = append(this.Apps[iApp].Jobs, this.Apps[iApp].Jobs[iJob+1:]...)
 					this.Version++
 					return masterData.Propagate()
