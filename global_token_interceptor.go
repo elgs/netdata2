@@ -26,10 +26,6 @@ func checkAccessPermission(targets, tableId, mode, op string) bool {
 		ts := strings.Split(strings.Replace(tableId, "`", "", -1), ".")
 		tableName := ts[len(ts)-1]
 
-		if strings.HasPrefix(tableName, "__") {
-			return true
-		}
-
 		targetsArray := strings.Split(targets, ",")
 		for _, target := range targetsArray {
 			if target == tableName {
