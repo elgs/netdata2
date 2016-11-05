@@ -294,9 +294,18 @@ func (this *MasterData) UpdateQuery(query *Query) error {
 		if vApp.Id == query.AppId {
 			for iQuery, vQuery := range this.Apps[iApp].Queries {
 				if vQuery.Id == query.Id && vQuery.AppId == query.AppId {
-					this.Apps[iApp].Queries = append(this.Apps[iApp].Queries[:iQuery], query)
+					if query.Name != "__not_set__" {
+						vQuery.Name = query.Name
+					}
+					if query.ScriptPath != "__not_set__" {
+						vQuery.ScriptPath = query.ScriptPath
+					}
+					if query.Note != "__not_set__" {
+						vQuery.Note = query.Note
+					}
+					this.Apps[iApp].Queries = append(this.Apps[iApp].Queries[:iQuery], vQuery)
 					this.Apps[iApp].Queries = append(this.Apps[iApp].Queries, this.Apps[iApp].Queries[iQuery+1:]...)
-					err := query.Reload()
+					err := vQuery.Reload()
 					if err != nil {
 						return err
 					}

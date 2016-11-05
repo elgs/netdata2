@@ -728,6 +728,15 @@ func main() {
 							ScriptPath: c.String("script"),
 							Note:       c.String("note"),
 						}
+						if !c.IsSet("name") {
+							query.Name = "__not_set__"
+						}
+						if !c.IsSet("script") {
+							query.ScriptPath = "__not_set__"
+						}
+						if !c.IsSet("note") {
+							query.Note = "__not_set__"
+						}
 						queryJSONBytes, err := json.Marshal(query)
 						if err != nil {
 							fmt.Println(err)
