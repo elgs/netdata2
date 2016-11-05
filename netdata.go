@@ -1296,6 +1296,18 @@ func main() {
 							Target: c.String("target"),
 							Note:   c.String("note"),
 						}
+						if !c.IsSet("name") {
+							token.Name = "__not_set__"
+						}
+						if !c.IsSet("mode") {
+							token.Mode = "__not_set__"
+						}
+						if !c.IsSet("target") {
+							token.Target = "__not_set__"
+						}
+						if !c.IsSet("note") {
+							token.Note = "__not_set__"
+						}
 						tokenJSONBytes, err := json.Marshal(token)
 						if err != nil {
 							fmt.Println(err)

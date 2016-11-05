@@ -472,7 +472,20 @@ func (this *MasterData) UpdateToken(token *Token) error {
 		if vApp.Id == token.AppId {
 			for iToken, vToken := range this.Apps[iApp].Tokens {
 				if vToken.Id == token.Id && vToken.AppId == token.AppId {
-					this.Apps[iApp].Tokens = append(this.Apps[iApp].Tokens[:iToken], token)
+					if token.Name != "__not_set__" {
+						vToken.Name = token.Name
+					}
+					if token.Mode != "__not_set__" {
+						vToken.Mode = token.Mode
+					}
+					if token.Target != "__not_set__" {
+						vToken.Target = token.Target
+					}
+					if token.Note != "__not_set__" {
+						vToken.Note = token.Note
+					}
+
+					this.Apps[iApp].Tokens = append(this.Apps[iApp].Tokens[:iToken], vToken)
 					this.Apps[iApp].Tokens = append(this.Apps[iApp].Tokens, this.Apps[iApp].Tokens[iToken+1:]...)
 					this.Version++
 					return masterData.Propagate()
