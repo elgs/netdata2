@@ -141,20 +141,33 @@ func (this *MasterData) RemoveDataNode(id string) error {
 	return masterData.Propagate()
 }
 func (this *MasterData) UpdateDataNode(dataNode *DataNode) error {
-	index := -1
 	for i, v := range this.DataNodes {
 		if v.Id == dataNode.Id {
-			index = i
-			break
+			if v.Name != "__not_set__" {
+				v.Name = dataNode.Name
+			}
+			if v.Host != "__not_set__" {
+				v.Host = dataNode.Host
+			}
+			if v.Port != -1 {
+				v.Port = dataNode.Port
+			}
+			if v.Username != "__not_set__" {
+				v.Username = dataNode.Username
+			}
+			if v.Password != "__not_set__" {
+				v.Password = dataNode.Password
+			}
+			if v.Note != "__not_set__" {
+				v.Note = dataNode.Note
+			}
+			this.DataNodes = append(this.DataNodes[:i], v)
+			this.DataNodes = append(this.DataNodes, this.DataNodes[i+1:]...)
+			this.Version++
+			return masterData.Propagate()
 		}
 	}
-	if index == -1 {
-		return errors.New("Data node not found: " + dataNode.Name)
-	}
-	this.DataNodes = append(this.DataNodes[:index], dataNode)
-	this.DataNodes = append(this.DataNodes, this.DataNodes[index+1:]...)
-	this.Version++
-	return masterData.Propagate()
+	return errors.New("Data node not found: " + dataNode.Name)
 }
 func (this *MasterData) ListDataNodes(mode string) string {
 	var buffer bytes.Buffer

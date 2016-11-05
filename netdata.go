@@ -371,6 +371,24 @@ func main() {
 							Password: c.String("pass"),
 							Note:     c.String("note"),
 						}
+						if !c.IsSet("name") {
+							dataNode.Name = "__not_set__"
+						}
+						if !c.IsSet("host") {
+							dataNode.Host = "__not_set__"
+						}
+						if !c.IsSet("port") {
+							dataNode.Port = -1
+						}
+						if !c.IsSet("user") {
+							dataNode.Username = "__not_set__"
+						}
+						if !c.IsSet("pass") {
+							dataNode.Password = "__not_set__"
+						}
+						if !c.IsSet("note") {
+							dataNode.Note = "__not_set__"
+						}
 						dataNodeJSONBytes, err := json.Marshal(dataNode)
 						if err != nil {
 							fmt.Println(err)
