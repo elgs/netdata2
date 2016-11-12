@@ -146,6 +146,7 @@ func (this *GlobalTokenInterceptor) BeforeQueryMap(resourceId string, script str
 	return checkProjectToken(context, resourceId, "rx")
 }
 func (this *GlobalTokenInterceptor) AfterQueryMap(resourceId string, script string, params *[]interface{}, queryParams []string, db *sql.DB, context map[string]interface{}, data *[]map[string]string) error {
+	// if the query name is login, encrypt the query result into a jwt token.
 	return nil
 }
 func (this *GlobalTokenInterceptor) BeforeQueryArray(resourceId string, script string, params *[]interface{}, queryParams []string, db *sql.DB, context map[string]interface{}) (bool, error) {
