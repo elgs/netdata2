@@ -4,11 +4,8 @@ package main
 import (
 	"errors"
 	"fmt"
-	"strings"
 
 	"github.com/elgs/gorest2"
-	"github.com/elgs/gosplitargs"
-	"github.com/elgs/gosqljson"
 )
 
 type NdDataOperator struct {
@@ -45,170 +42,7 @@ func getQueryText(projectId, queryName string) (string, error) {
 	return "", errors.New("Query not found: " + queryName)
 }
 
-func (this *NdDataOperator) QueryMap(tableId string, params []interface{}, queryParams []string, context map[string]interface{}) ([]map[string]string, error) {
-	projectId := context["app_id"].(string)
-	sqlScript, err := getQueryText(projectId, tableId)
-	if err != nil {
-		return nil, err
-	}
-
-	ret := make([]map[string]string, 0)
-
-	script := sqlScript
-
-	count, err := gosplitargs.CountSeparators(script, "\\?")
-	if err != nil {
-		return ret, err
-	}
-	if count > len(params) {
-		return nil, errors.New(fmt.Sprintln("Incorrect param count. Expected: ", count, " actual: ", len(params)))
-	}
-
-	for i, v := range queryParams {
-		script = strings.Replace(script, fmt.Sprint("$", i), v, -1)
-	}
-
-	db, err := this.GetConn()
-	if err != nil {
-		return ret, err
-	}
-
-	globalDataInterceptors, globalSortedKeys := gorest2.GetGlobalDataInterceptors()
-	for _, k := range globalSortedKeys {
-		globalDataInterceptor := globalDataInterceptors[k]
-		ctn, err := globalDataInterceptor.BeforeQueryMap(tableId, script, &params, queryParams, db, context)
-		if !ctn {
-			return ret, err
-		}
-	}
-	dataInterceptors, sortedKeys := gorest2.GetDataInterceptors(tableId)
-	for _, k := range sortedKeys {
-		dataInterceptor := dataInterceptors[k]
-		if dataInterceptor != nil {
-			ctn, err := dataInterceptor.BeforeQueryMap(tableId, script, &params, queryParams, db, context)
-			if !ctn {
-				return ret, err
-			}
-		}
-	}
-
-	if clientIp, ok := context["client_ip"].(string); ok {
-		script = strings.Replace(script, "__ip__", clientIp, -1)
-	}
-	if tokenUserId, ok := context["token_user_id"].(string); ok {
-		script = strings.Replace(script, "__token_user_id__", tokenUserId, -1)
-	}
-	if tokenUserCode, ok := context["token_user_code"].(string); ok {
-		script = strings.Replace(script, "__token_user_code__", tokenUserCode, -1)
-	}
-	if loginUserId, ok := context["user_id"].(string); ok {
-		script = strings.Replace(script, "__login_user_id__", loginUserId, -1)
-	}
-	if loginUserCode, ok := context["email"].(string); ok {
-		script = strings.Replace(script, "__login_user_code__", loginUserCode, -1)
-	}
-
-	c := context["case"].(string)
-	m, err := gosqljson.QueryDbToMap(db, c, script, params[:count]...)
-	if err != nil {
-		fmt.Println(err)
-		return ret, err
-	}
-
-	for _, k := range sortedKeys {
-		dataInterceptor := dataInterceptors[k]
-		if dataInterceptor != nil {
-			dataInterceptor.AfterQueryMap(tableId, script, &params, queryParams, db, context, &m)
-		}
-	}
-	for _, k := range globalSortedKeys {
-		globalDataInterceptor := globalDataInterceptors[k]
-		globalDataInterceptor.AfterQueryMap(tableId, script, &params, queryParams, db, context, &m)
-	}
-
-	return m, err
-}
-func (this *NdDataOperator) QueryArray(tableId string, params []interface{}, queryParams []string, context map[string]interface{}) ([]string, [][]string, error) {
-	projectId := context["app_id"].(string)
-	sqlScript, err := getQueryText(projectId, tableId)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	script := sqlScript
-	count, err := gosplitargs.CountSeparators(script, "\\?")
-	if err != nil {
-		return nil, nil, err
-	}
-	if count > len(params) {
-		return nil, nil, errors.New(fmt.Sprintln("Incorrect param count. Expected: ", count, " actual: ", len(params)))
-	}
-
-	for i, v := range queryParams {
-		script = strings.Replace(script, fmt.Sprint("$", i), v, -1)
-	}
-
-	db, err := this.GetConn()
-	if err != nil {
-		return nil, nil, err
-	}
-
-	globalDataInterceptors, globalSortedKeys := gorest2.GetGlobalDataInterceptors()
-	for _, k := range globalSortedKeys {
-		globalDataInterceptor := globalDataInterceptors[k]
-		ctn, err := globalDataInterceptor.BeforeQueryArray(tableId, script, &params, queryParams, db, context)
-		if !ctn {
-			return nil, nil, err
-		}
-	}
-	dataInterceptors, sortedKeys := gorest2.GetDataInterceptors(tableId)
-	for _, k := range sortedKeys {
-		dataInterceptor := dataInterceptors[k]
-		if dataInterceptor != nil {
-			ctn, err := dataInterceptor.BeforeQueryArray(tableId, script, &params, queryParams, db, context)
-			if !ctn {
-				return nil, nil, err
-			}
-		}
-	}
-
-	if clientIp, ok := context["client_ip"].(string); ok {
-		script = strings.Replace(script, "__ip__", clientIp, -1)
-	}
-	if tokenUserId, ok := context["token_user_id"].(string); ok {
-		script = strings.Replace(script, "__token_user_id__", tokenUserId, -1)
-	}
-	if tokenUserCode, ok := context["token_user_code"].(string); ok {
-		script = strings.Replace(script, "__token_user_code__", tokenUserCode, -1)
-	}
-	if loginUserId, ok := context["user_id"].(string); ok {
-		script = strings.Replace(script, "__login_user_id__", loginUserId, -1)
-	}
-	if loginUserCode, ok := context["email"].(string); ok {
-		script = strings.Replace(script, "__login_user_code__", loginUserCode, -1)
-	}
-
-	c := context["case"].(string)
-	h, a, err := gosqljson.QueryDbToArray(db, c, script, params[:count]...)
-	if err != nil {
-		fmt.Println(err)
-		return nil, nil, err
-	}
-
-	for _, k := range sortedKeys {
-		dataInterceptor := dataInterceptors[k]
-		if dataInterceptor != nil {
-			dataInterceptor.AfterQueryArray(tableId, script, &params, queryParams, db, context, &h, &a)
-		}
-	}
-	for _, k := range globalSortedKeys {
-		globalDataInterceptor := globalDataInterceptors[k]
-		globalDataInterceptor.AfterQueryArray(tableId, script, &params, queryParams, db, context, &h, &a)
-	}
-
-	return h, a, err
-}
-func (this *NdDataOperator) Exec(tableId string, params [][]interface{}, queryParams []string, context map[string]interface{}) ([][]int64, error) {
+func (this *NdDataOperator) Exec(tableId string, params [][]interface{}, queryParams map[string]string, array bool, context map[string]interface{}) ([][]interface{}, error) {
 	projectId := context["app_id"].(string)
 	sqlScript, err := getQueryText(projectId, tableId)
 	if err != nil {
@@ -228,9 +62,8 @@ func (this *NdDataOperator) Exec(tableId string, params [][]interface{}, queryPa
 	globalDataInterceptors, globalSortedKeys := gorest2.GetGlobalDataInterceptors()
 	for _, k := range globalSortedKeys {
 		globalDataInterceptor := globalDataInterceptors[k]
-		ctn, err := globalDataInterceptor.BeforeExec(tableId, scripts, &params, queryParams, tx, context)
+		ctn, err := globalDataInterceptor.BeforeExec(tableId, scripts, &params, queryParams, array, db, context)
 		if !ctn {
-			tx.Rollback()
 			return nil, err
 		}
 	}
@@ -238,16 +71,15 @@ func (this *NdDataOperator) Exec(tableId string, params [][]interface{}, queryPa
 	for _, k := range sortedKeys {
 		dataInterceptor := dataInterceptors[k]
 		if dataInterceptor != nil {
-			ctn, err := dataInterceptor.BeforeExec(tableId, scripts, &params, queryParams, tx, context)
+			ctn, err := dataInterceptor.BeforeExec(tableId, scripts, &params, queryParams, array, db, context)
 			if !ctn {
-				tx.Rollback()
 				return nil, err
 			}
 		}
 	}
 
 	replaceContext := buildReplaceContext(context)
-	rowsAffectedArray, err := batchExecuteTx(tx, nil, &scripts, queryParams, params, replaceContext)
+	rowsAffectedArray, err := batchExecuteTx(tx, nil, &scripts, queryParams, params, array, replaceContext)
 
 	if err != nil {
 		tx.Rollback()
@@ -257,26 +89,177 @@ func (this *NdDataOperator) Exec(tableId string, params [][]interface{}, queryPa
 	for _, k := range sortedKeys {
 		dataInterceptor := dataInterceptors[k]
 		if dataInterceptor != nil {
-			err := dataInterceptor.AfterExec(tableId, scripts, &params, queryParams, tx, context, rowsAffectedArray)
-			if err != nil {
-				tx.Rollback()
-				return nil, err
-			}
+			dataInterceptor.AfterExec(tableId, scripts, &params, queryParams, array, db, context, &rowsAffectedArray)
 		}
 	}
 	for _, k := range globalSortedKeys {
 		globalDataInterceptor := globalDataInterceptors[k]
-		err := globalDataInterceptor.AfterExec(tableId, scripts, &params, queryParams, tx, context, rowsAffectedArray)
-		if err != nil {
-			tx.Rollback()
-			return nil, err
-		}
+		globalDataInterceptor.AfterExec(tableId, scripts, &params, queryParams, array, db, context, &rowsAffectedArray)
 	}
 
 	tx.Commit()
 
 	return rowsAffectedArray, err
+
+	//	c := context["case"].(string)
+	//	m, err := gosqljson.QueryDbToMap(db, c, script, params[:count]...)
+	//	if err != nil {
+	//		fmt.Println(err)
+	//		return ret, err
+	//	}
+
+	//	return m, err
 }
+
+//func (this *NdDataOperator) ExecArray(tableId string, params [][]interface{}, queryParams map[string]string, context map[string]interface{}) ([][][]string, error) {
+//	projectId := context["app_id"].(string)
+//	sqlScript, err := getQueryText(projectId, tableId)
+//	if err != nil {
+//		return nil, nil, err
+//	}
+
+//	script := sqlScript
+//	count, err := gosplitargs.CountSeparators(script, "\\?")
+//	if err != nil {
+//		return nil, nil, err
+//	}
+//	if count > len(params) {
+//		return nil, nil, errors.New(fmt.Sprintln("Incorrect param count. Expected: ", count, " actual: ", len(params)))
+//	}
+
+//	for i, v := range queryParams {
+//		script = strings.Replace(script, fmt.Sprint("$", i), v, -1)
+//	}
+
+//	db, err := this.GetConn()
+//	if err != nil {
+//		return nil, nil, err
+//	}
+
+//	globalDataInterceptors, globalSortedKeys := gorest2.GetGlobalDataInterceptors()
+//	for _, k := range globalSortedKeys {
+//		globalDataInterceptor := globalDataInterceptors[k]
+//		ctn, err := globalDataInterceptor.BeforeQueryArray(tableId, script, &params, queryParams, db, context)
+//		if !ctn {
+//			return nil, nil, err
+//		}
+//	}
+//	dataInterceptors, sortedKeys := gorest2.GetDataInterceptors(tableId)
+//	for _, k := range sortedKeys {
+//		dataInterceptor := dataInterceptors[k]
+//		if dataInterceptor != nil {
+//			ctn, err := dataInterceptor.BeforeQueryArray(tableId, script, &params, queryParams, db, context)
+//			if !ctn {
+//				return nil, nil, err
+//			}
+//		}
+//	}
+
+//	if clientIp, ok := context["client_ip"].(string); ok {
+//		script = strings.Replace(script, "__ip__", clientIp, -1)
+//	}
+//	if tokenUserId, ok := context["token_user_id"].(string); ok {
+//		script = strings.Replace(script, "__token_user_id__", tokenUserId, -1)
+//	}
+//	if tokenUserCode, ok := context["token_user_code"].(string); ok {
+//		script = strings.Replace(script, "__token_user_code__", tokenUserCode, -1)
+//	}
+//	if loginUserId, ok := context["user_id"].(string); ok {
+//		script = strings.Replace(script, "__login_user_id__", loginUserId, -1)
+//	}
+//	if loginUserCode, ok := context["email"].(string); ok {
+//		script = strings.Replace(script, "__login_user_code__", loginUserCode, -1)
+//	}
+
+//	c := context["case"].(string)
+//	h, a, err := gosqljson.QueryDbToArray(db, c, script, params[:count]...)
+//	if err != nil {
+//		fmt.Println(err)
+//		return nil, nil, err
+//	}
+
+//	for _, k := range sortedKeys {
+//		dataInterceptor := dataInterceptors[k]
+//		if dataInterceptor != nil {
+//			dataInterceptor.AfterQueryArray(tableId, script, &params, queryParams, db, context, &h, &a)
+//		}
+//	}
+//	for _, k := range globalSortedKeys {
+//		globalDataInterceptor := globalDataInterceptors[k]
+//		globalDataInterceptor.AfterQueryArray(tableId, script, &params, queryParams, db, context, &h, &a)
+//	}
+
+//	return h, a, err
+//}
+//func (this *NdDataOperator) Exec1(tableId string, params [][]interface{}, queryParams []string, context map[string]interface{}) ([][]int64, error) {
+//	projectId := context["app_id"].(string)
+//	sqlScript, err := getQueryText(projectId, tableId)
+//	if err != nil {
+//		return nil, err
+//	}
+//	scripts := sqlScript
+
+//	db, err := this.GetConn()
+//	if err != nil {
+//		return nil, err
+//	}
+//	tx, err := db.Begin()
+//	if err != nil {
+//		return nil, err
+//	}
+
+//	globalDataInterceptors, globalSortedKeys := gorest2.GetGlobalDataInterceptors()
+//	for _, k := range globalSortedKeys {
+//		globalDataInterceptor := globalDataInterceptors[k]
+//		ctn, err := globalDataInterceptor.BeforeExec(tableId, scripts, &params, queryParams, tx, context)
+//		if !ctn {
+//			tx.Rollback()
+//			return nil, err
+//		}
+//	}
+//	dataInterceptors, sortedKeys := gorest2.GetDataInterceptors(tableId)
+//	for _, k := range sortedKeys {
+//		dataInterceptor := dataInterceptors[k]
+//		if dataInterceptor != nil {
+//			ctn, err := dataInterceptor.BeforeExec(tableId, scripts, &params, queryParams, tx, context)
+//			if !ctn {
+//				tx.Rollback()
+//				return nil, err
+//			}
+//		}
+//	}
+
+//	replaceContext := buildReplaceContext(context)
+//	rowsAffectedArray, err := batchExecuteTx(tx, nil, &scripts, queryParams, params, replaceContext)
+
+//	if err != nil {
+//		tx.Rollback()
+//		return nil, err
+//	}
+
+//	for _, k := range sortedKeys {
+//		dataInterceptor := dataInterceptors[k]
+//		if dataInterceptor != nil {
+//			err := dataInterceptor.AfterExec(tableId, scripts, &params, queryParams, tx, context, rowsAffectedArray)
+//			if err != nil {
+//				tx.Rollback()
+//				return nil, err
+//			}
+//		}
+//	}
+//	for _, k := range globalSortedKeys {
+//		globalDataInterceptor := globalDataInterceptors[k]
+//		err := globalDataInterceptor.AfterExec(tableId, scripts, &params, queryParams, tx, context, rowsAffectedArray)
+//		if err != nil {
+//			tx.Rollback()
+//			return nil, err
+//		}
+//	}
+
+//	tx.Commit()
+
+//	return rowsAffectedArray, err
+//}
 
 func MakeGetDbo(dbType string, masterData *MasterData) func(id string) (gorest2.DataOperator, error) {
 	return func(id string) (gorest2.DataOperator, error) {

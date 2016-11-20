@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -142,22 +143,13 @@ func (this *GlobalTokenInterceptor) BeforeListArray(resourceId string, db *sql.D
 func (this *GlobalTokenInterceptor) AfterListArray(resourceId string, db *sql.DB, fields string, context map[string]interface{}, headers *[]string, data *[][]string, total int64) error {
 	return nil
 }
-func (this *GlobalTokenInterceptor) BeforeQueryMap(resourceId string, script string, params *[]interface{}, queryParams []string, db *sql.DB, context map[string]interface{}) (bool, error) {
+func (this *GlobalTokenInterceptor) BeforeExec(resourceId string, script string, params *[][]interface{}, queryParams map[string]string, array bool, db *sql.DB, context map[string]interface{}) (bool, error) {
 	return checkProjectToken(context, resourceId, "rx")
 }
-func (this *GlobalTokenInterceptor) AfterQueryMap(resourceId string, script string, params *[]interface{}, queryParams []string, db *sql.DB, context map[string]interface{}, data *[]map[string]string) error {
+func (this *GlobalTokenInterceptor) AfterExec(resourceId string, script string, params *[][]interface{}, queryParams map[string]string, array bool, db *sql.DB, context map[string]interface{}, data *[][]interface{}) error {
 	// if the query name is login, encrypt the query result into a jwt token.
-	return nil
-}
-func (this *GlobalTokenInterceptor) BeforeQueryArray(resourceId string, script string, params *[]interface{}, queryParams []string, db *sql.DB, context map[string]interface{}) (bool, error) {
-	return checkProjectToken(context, resourceId, "rx")
-}
-func (this *GlobalTokenInterceptor) AfterQueryArray(resourceId string, script string, params *[]interface{}, queryParams []string, db *sql.DB, context map[string]interface{}, headers *[]string, data *[][]string) error {
-	return nil
-}
-func (this *GlobalTokenInterceptor) BeforeExec(resourceId string, scripts string, params *[][]interface{}, queryParams []string, tx *sql.Tx, context map[string]interface{}) (bool, error) {
-	return checkProjectToken(context, resourceId, "wx")
-}
-func (this *GlobalTokenInterceptor) AfterExec(resourceId string, scripts string, params *[][]interface{}, queryParams []string, tx *sql.Tx, context map[string]interface{}, rowsAffectedArray [][]int64) error {
+	if resourceId == "login" {
+		fmt.Println(data)
+	}
 	return nil
 }

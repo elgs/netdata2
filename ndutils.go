@@ -50,8 +50,8 @@ func httpRequest(url string, method string, data string, maxReadLimit int64) ([]
 	return result, res.StatusCode, err
 }
 
-func batchExecuteTx(tx *sql.Tx, db *sql.DB, script *string, scriptParams []string, params [][]interface{}, replaceContext map[string]string) ([][]int64, error) {
-	rowsAffectedArray := [][]int64{}
+func batchExecuteTx(tx *sql.Tx, db *sql.DB, script *string, scriptParams map[string]string, params [][]interface{}, array bool, replaceContext map[string]string) ([][]interface{}, error) {
+	rowsAffectedArray := [][]interface{}{}
 
 	innerTrans := false
 	if tx == nil {
@@ -80,7 +80,7 @@ func batchExecuteTx(tx *sql.Tx, db *sql.DB, script *string, scriptParams []strin
 	}
 	for _, params1 := range params {
 		totalCount := 0
-		rowsAffectedArray1 := []int64{}
+		rowsAffectedArray1 := []interface{}{}
 		for _, s := range scriptsArray {
 			sqlNormalize(&s)
 			if len(s) == 0 {
@@ -138,17 +138,17 @@ func buildReplaceContext(context map[string]interface{}) map[string]string {
 	return replaceContext
 }
 
-func buildParams(clientData string) ([]string, [][]interface{}, error) {
+func buildParams(clientData string) (map[string]string, [][]interface{}, error) {
 	// assume the clientData is a json object with two arrays: query_params and params
 	parser, err := gojq.NewStringQuery(clientData)
 	if err != nil {
 		return nil, nil, err
 	}
-	qp, err := parser.QueryToArray("query_params")
+	qp, err := parser.QueryToMap("query_params")
 	if err != nil {
 		return nil, nil, err
 	}
-	queryParams, err := convertInterfaceArrayToStringArray(qp)
+	queryParams, err := convertMapOfInterfacesToMapOfStrings(qp)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -175,6 +175,20 @@ func convertInterfaceArrayToStringArray(arrayOfInterfaces []interface{}) ([]stri
 		} else {
 			return nil, errors.New("Failed to convert.")
 		}
+	}
+	return ret, nil
+}
+
+var convertMapOfInterfacesToMapOfStrings = func(data map[string]interface{}) (map[string]string, error) {
+	if data == nil {
+		return nil, errors.New("Cannot convert nil.")
+	}
+	ret := map[string]string{}
+	for k, v := range data {
+		if v == nil {
+			return nil, errors.New("Data contains nil.")
+		}
+		ret[k] = v.(string)
 	}
 	return ret, nil
 }
