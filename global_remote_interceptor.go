@@ -41,7 +41,7 @@ func (this *GlobalRemoteInterceptor) executeRemoteInterceptor(tx *sql.Tx, db *sq
 	if err != nil {
 		return err
 	}
-	_, err = batchExecuteTx(tx, db, &scripts, queryParams, params, false, replaceContext)
+	_, err = batchExecuteTx(tx, db, &scripts, queryParams, params, false, "", replaceContext)
 	if err != nil {
 		return err
 	}

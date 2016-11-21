@@ -25,7 +25,7 @@ func (this *GlobalLocalInterceptor) executeLocalInterceptor(tx *sql.Tx, db *sql.
 	scripts := sqlScript
 	replaceContext := buildReplaceContext(context)
 
-	_, err = batchExecuteTx(tx, db, &scripts, queryParams, data, false, replaceContext)
+	_, err = batchExecuteTx(tx, db, &scripts, queryParams, data, false, "", replaceContext)
 	if err != nil {
 		return err
 	}

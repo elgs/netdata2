@@ -44,6 +44,7 @@ func getQueryText(projectId, queryName string) (string, error) {
 
 func (this *NdDataOperator) Exec(tableId string, params [][]interface{}, queryParams map[string]string, array bool, context map[string]interface{}) ([][]interface{}, error) {
 	projectId := context["app_id"].(string)
+	theCase := context["case"].(string)
 	sqlScript, err := getQueryText(projectId, tableId)
 	if err != nil {
 		return nil, err
@@ -79,7 +80,7 @@ func (this *NdDataOperator) Exec(tableId string, params [][]interface{}, queryPa
 	}
 
 	replaceContext := buildReplaceContext(context)
-	rowsAffectedArray, err := batchExecuteTx(tx, nil, &scripts, queryParams, params, array, replaceContext)
+	rowsAffectedArray, err := batchExecuteTx(tx, nil, &scripts, queryParams, params, array, theCase, replaceContext)
 
 	if err != nil {
 		tx.Rollback()

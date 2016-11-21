@@ -50,8 +50,8 @@ func httpRequest(url string, method string, data string, maxReadLimit int64) ([]
 	return result, res.StatusCode, err
 }
 
-func batchExecuteTx(tx *sql.Tx, db *sql.DB, script *string, scriptParams map[string]string, params [][]interface{}, array bool, replaceContext map[string]string) ([][]interface{}, error) {
-	rowsAffectedArray := [][]interface{}{}
+func batchExecuteTx(tx *sql.Tx, db *sql.DB, script *string, scriptParams map[string]string, params [][]interface{}, array bool, theCase string, replaceContext map[string]string) ([][]interface{}, error) {
+	ret := [][]interface{}{}
 
 	innerTrans := false
 	if tx == nil {
@@ -59,12 +59,12 @@ func batchExecuteTx(tx *sql.Tx, db *sql.DB, script *string, scriptParams map[str
 		tx, err = db.Begin()
 		innerTrans = true
 		if err != nil {
-			return rowsAffectedArray, err
+			return ret, err
 		}
 	}
 
-	for i, v := range scriptParams {
-		*script = strings.Replace(*script, fmt.Sprint("$", i), v, -1)
+	for k, v := range scriptParams {
+		*script = strings.Replace(*script, k, v, -1)
 	}
 
 	for k, v := range replaceContext {
@@ -76,11 +76,11 @@ func batchExecuteTx(tx *sql.Tx, db *sql.DB, script *string, scriptParams map[str
 		if innerTrans {
 			tx.Rollback()
 		}
-		return rowsAffectedArray, err
+		return ret, err
 	}
 	for _, params1 := range params {
 		totalCount := 0
-		rowsAffectedArray1 := []interface{}{}
+		result := []interface{}{}
 		for _, s := range scriptsArray {
 			sqlNormalize(&s)
 			if len(s) == 0 {
@@ -99,23 +99,37 @@ func batchExecuteTx(tx *sql.Tx, db *sql.DB, script *string, scriptParams map[str
 				}
 				return nil, errors.New(fmt.Sprintln("Incorrect param count. Expected: ", totalCount+count, " actual: ", len(params1)))
 			}
-			rowsAffected, err := gosqljson.ExecTx(tx, s, params1[totalCount:totalCount+count]...)
-			if err != nil {
-				if innerTrans {
-					tx.Rollback()
+			isQ := isQuery(s)
+			if isQ {
+				header, data, err := gosqljson.QueryTxToArray(tx, theCase, s, params1[totalCount:totalCount+count]...)
+				data = append([][]string{header}, data...)
+				if err != nil {
+					if innerTrans {
+						tx.Rollback()
+					}
+					return nil, err
 				}
-				return nil, err
+				result = append(result, data)
+			} else {
+				rowsAffected, err := gosqljson.ExecTx(tx, s, params1[totalCount:totalCount+count]...)
+				if err != nil {
+					if innerTrans {
+						tx.Rollback()
+					}
+					return nil, err
+				}
+				result = append(result, rowsAffected)
 			}
-			rowsAffectedArray1 = append(rowsAffectedArray1, rowsAffected)
+
 			totalCount += count
 		}
-		rowsAffectedArray = append(rowsAffectedArray, rowsAffectedArray1)
+		ret = append(ret, result)
 	}
 
 	if innerTrans {
 		tx.Commit()
 	}
-	return rowsAffectedArray, nil
+	return ret, nil
 }
 
 func buildReplaceContext(context map[string]interface{}) map[string]string {
