@@ -101,15 +101,26 @@ func batchExecuteTx(tx *sql.Tx, db *sql.DB, script *string, scriptParams map[str
 			}
 			isQ := isQuery(s)
 			if isQ {
-				header, data, err := gosqljson.QueryTxToArray(tx, theCase, s, params1[totalCount:totalCount+count]...)
-				data = append([][]string{header}, data...)
-				if err != nil {
-					if innerTrans {
-						tx.Rollback()
+				if array {
+					header, data, err := gosqljson.QueryTxToArray(tx, theCase, s, params1[totalCount:totalCount+count]...)
+					data = append([][]string{header}, data...)
+					if err != nil {
+						if innerTrans {
+							tx.Rollback()
+						}
+						return nil, err
 					}
-					return nil, err
+					result = append(result, data)
+				} else {
+					data, err := gosqljson.QueryTxToMap(tx, theCase, s, params1[totalCount:totalCount+count]...)
+					if err != nil {
+						if innerTrans {
+							tx.Rollback()
+						}
+						return nil, err
+					}
+					result = append(result, data)
 				}
-				result = append(result, data)
 			} else {
 				rowsAffected, err := gosqljson.ExecTx(tx, s, params1[totalCount:totalCount+count]...)
 				if err != nil {
