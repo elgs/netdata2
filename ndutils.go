@@ -131,7 +131,6 @@ func batchExecuteTx(tx *sql.Tx, db *sql.DB, script *string, scriptParams map[str
 				}
 				result = append(result, rowsAffected)
 			}
-
 			totalCount += count
 		}
 		ret = append(ret, result)
