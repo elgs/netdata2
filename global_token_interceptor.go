@@ -149,7 +149,12 @@ func (this *GlobalTokenInterceptor) BeforeExec(resourceId string, script string,
 func (this *GlobalTokenInterceptor) AfterExec(resourceId string, script string, params *[][]interface{}, queryParams map[string]string, array bool, db *sql.DB, context map[string]interface{}, data *[][]interface{}) error {
 	// if the query name is login, encrypt the query result into a jwt token.
 	if resourceId == "login" {
-		fmt.Println((*data)[0][0])
+		tokenData := (*data)[0][0]
+		s, err := createJwtToken(tokenData.([]map[string]string)[0])
+		if err != nil {
+			return err
+		}
+		fmt.Println(s)
 	}
 	return nil
 }

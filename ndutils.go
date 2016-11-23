@@ -9,7 +9,9 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/elgs/gojq"
 	"github.com/elgs/gosplitargs"
 	"github.com/elgs/gosqljson"
@@ -239,4 +241,13 @@ func isQuery(sql string) bool {
 		return true
 	}
 	return false
+}
+
+func createJwtToken(m map[string]string) (string, error) {
+	token := jwt.New(jwt.SigningMethodHS256)
+	for k, v := range m {
+		token.Claims[k] = v
+	}
+	token.Claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
+	return token.SignedString([]byte("netdata.io"))
 }
