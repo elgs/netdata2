@@ -47,7 +47,7 @@ func checkAccessPermission(targets, tableId, mode, op string) bool {
 
 func checkProjectToken(context map[string]interface{}, tableId string, op string) (bool, error) {
 
-	token := context["token"].(string)
+	token := context["api_token"].(string)
 	if _, ok := context["app"]; !ok {
 		appId := context["app_id"].(string)
 		for _, a := range masterData.Apps {
