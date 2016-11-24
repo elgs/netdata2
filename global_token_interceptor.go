@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 
@@ -150,11 +149,13 @@ func (this *GlobalTokenInterceptor) AfterExec(resourceId string, script string, 
 	// if the query name is login, encrypt the query result into a jwt token.
 	if resourceId == "login" {
 		tokenData := (*data)[0][0]
-		s, err := createJwtToken(tokenData.([]map[string]string)[0])
-		if err != nil {
-			return err
+		if v, ok := tokenData.([]map[string]string); ok && len(v) > 0 {
+			s, err := createJwtToken(v[0])
+			if err != nil {
+				return err
+			}
+			(*data)[0][0] = s
 		}
-		fmt.Println(s)
 	}
 	return nil
 }
