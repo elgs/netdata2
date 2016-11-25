@@ -9,9 +9,9 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
-	"time"
+	//	"time"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/dvsekhvalnov/jose2go"
 	"github.com/elgs/gojq"
 	"github.com/elgs/gosplitargs"
 	"github.com/elgs/gosqljson"
@@ -237,11 +237,14 @@ func isQuery(sql string) bool {
 	return false
 }
 
-func createJwtToken(m map[string]string) (string, error) {
-	token := jwt.New(jwt.SigningMethodHS256)
-	for k, v := range m {
-		token.Claims[k] = v
-	}
-	token.Claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
-	return token.SignedString([]byte("netdata.io"))
+func createJwtToken(payload string) (string, error) {
+	key := []byte("netdata.io")
+	token, err := jose.Sign(payload, jose.HS256, key)
+	return token, err
+	//	token := jwt.New(jwt.SigningMethodHS256)
+	//	for k, v := range m {
+	//		token.Claims[k] = v
+	//	}
+	//	token.Claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
+	//	return token.SignedString([]byte("netdata.io"))
 }

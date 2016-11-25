@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"strings"
 	"time"
@@ -143,7 +144,11 @@ func (this *GlobalTokenInterceptor) AfterExec(resourceId string, script string, 
 	if resourceId == "login" {
 		tokenData := (*data)[0][0]
 		if v, ok := tokenData.([]map[string]string); ok && len(v) > 0 {
-			s, err := createJwtToken(v[0])
+			tokenPayload, err := json.Marshal(v[0])
+			if err != nil {
+				return err
+			}
+			s, err := createJwtToken(string(tokenPayload))
 			if err != nil {
 				return err
 			}
