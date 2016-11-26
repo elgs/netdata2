@@ -80,9 +80,13 @@ func (this *GlobalTokenInterceptor) BeforeCreate(resourceId string, db *sql.DB, 
 		for _, data1 := range data {
 			data1["CREATED_AT"] = time.Now().UTC()
 			data1["UPDATED_AT"] = time.Now().UTC()
-			if userId, found := context["user_id"]; found {
+			if userId, found := context["user_email"]; found {
 				data1["CREATED_BY"] = userId
 				data1["UPDATED_BY"] = userId
+			}
+			if clientIp, found := context["client_ip"]; found {
+				data1["CREATED_FROM"] = clientIp
+				data1["UPDATED_FROM"] = clientIp
 			}
 		}
 	}
@@ -102,8 +106,11 @@ func (this *GlobalTokenInterceptor) BeforeUpdate(resourceId string, db *sql.DB, 
 	if ctn && err == nil {
 		for _, data1 := range data {
 			data1["UPDATED_AT"] = time.Now().UTC()
-			if userId, found := context["user_id"]; found {
+			if userId, found := context["user_email"]; found {
 				data1["UPDATED_BY"] = userId
+			}
+			if clientIp, found := context["client_ip"]; found {
+				data1["UPDATED_FROM"] = clientIp
 			}
 		}
 	}

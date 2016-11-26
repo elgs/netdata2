@@ -149,9 +149,6 @@ func buildReplaceContext(context map[string]interface{}) map[string]string {
 	if clientIp, ok := context["client_ip"].(string); ok {
 		replaceContext["__ip__"] = clientIp
 	}
-	if loginUserId, ok := context["user_id"].(string); ok {
-		replaceContext["__user_id__"] = loginUserId
-	}
 	if tokenUserCode, ok := context["user_email"].(string); ok {
 		replaceContext["__user_email__"] = tokenUserCode
 	}
