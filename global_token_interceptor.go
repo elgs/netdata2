@@ -144,7 +144,12 @@ func (this *GlobalTokenInterceptor) AfterExec(resourceId string, script string, 
 	if resourceId == "login" {
 		tokenData := (*data)[0][0]
 		if v, ok := tokenData.([]map[string]string); ok && len(v) > 0 {
-			tokenPayload, err := json.Marshal(v[0])
+			t, err := convertMapOfStringsToMapOfInterfaces(v[0])
+			if err != nil {
+				return err
+			}
+			t["exp"] = time.Now().Add(time.Hour * 72).Unix()
+			tokenPayload, err := json.Marshal(t)
 			if err != nil {
 				return err
 			}

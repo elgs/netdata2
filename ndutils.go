@@ -213,6 +213,17 @@ var convertMapOfInterfacesToMapOfStrings = func(data map[string]interface{}) (ma
 	return ret, nil
 }
 
+var convertMapOfStringsToMapOfInterfaces = func(data map[string]string) (map[string]interface{}, error) {
+	if data == nil {
+		return nil, errors.New("Cannot convert nil.")
+	}
+	ret := map[string]interface{}{}
+	for k, v := range data {
+		ret[k] = v
+	}
+	return ret, nil
+}
+
 func sqlNormalize(sql *string) {
 	*sql = strings.TrimSpace(*sql)
 	var ret string
@@ -241,10 +252,4 @@ func createJwtToken(payload string) (string, error) {
 	key := []byte("netdata.io")
 	token, err := jose.Sign(payload, jose.HS256, key)
 	return token, err
-	//	token := jwt.New(jwt.SigningMethodHS256)
-	//	for k, v := range m {
-	//		token.Claims[k] = v
-	//	}
-	//	token.Claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
-	//	return token.SignedString([]byte("netdata.io"))
 }
