@@ -32,7 +32,7 @@ func (this *GlobalLocalInterceptor) executeLocalInterceptor(tx *sql.Tx, db *sql.
 	return nil
 }
 
-func (this *GlobalLocalInterceptor) commonBefore(tx *sql.Tx, db *sql.DB, resourceId string, context map[string]interface{}, action string, queryParams map[string]string, data [][]interface{}) (bool, error) {
+func (this *GlobalLocalInterceptor) commonBefore(tx *sql.Tx, db *sql.DB, resourceId string, context map[string]interface{}, action string, queryParams map[string]string, data [][]interface{}) error {
 	rts := strings.Split(strings.Replace(resourceId, "`", "", -1), ".")
 	resourceId = rts[len(rts)-1]
 	app := context["app"].(*App)
@@ -40,11 +40,11 @@ func (this *GlobalLocalInterceptor) commonBefore(tx *sql.Tx, db *sql.DB, resourc
 		if li.Type == "before" && li.Target == resourceId && li.AppId == app.Id {
 			err := this.executeLocalInterceptor(tx, db, context, queryParams, data, app.Id, resourceId, li)
 			if err != nil {
-				return false, err
+				return err
 			}
 		}
 	}
-	return true, nil
+	return nil
 }
 
 func (this *GlobalLocalInterceptor) commonAfter(tx *sql.Tx, db *sql.DB, resourceId string, context map[string]interface{}, action string, queryParams map[string]string, data [][]interface{}) error {
@@ -62,7 +62,7 @@ func (this *GlobalLocalInterceptor) commonAfter(tx *sql.Tx, db *sql.DB, resource
 	return nil
 }
 
-func (this *GlobalLocalInterceptor) BeforeExec(resourceId string, script string, params *[][]interface{}, queryParams map[string]string, array bool, db *sql.DB, context map[string]interface{}) (bool, error) {
+func (this *GlobalLocalInterceptor) BeforeExec(resourceId string, script string, params *[][]interface{}, queryParams map[string]string, array bool, db *sql.DB, context map[string]interface{}) error {
 	return this.commonBefore(nil, db, resourceId, context, "query_map", queryParams, *params)
 }
 func (this *GlobalLocalInterceptor) AfterExec(resourceId string, script string, params *[][]interface{}, queryParams map[string]string, array bool, db *sql.DB, context map[string]interface{}, data *[][]interface{}) error {

@@ -63,8 +63,8 @@ func (this *NdDataOperator) Exec(tableId string, params [][]interface{}, queryPa
 	globalDataInterceptors, globalSortedKeys := gorest2.GetGlobalDataInterceptors()
 	for _, k := range globalSortedKeys {
 		globalDataInterceptor := globalDataInterceptors[k]
-		ctn, err := globalDataInterceptor.BeforeExec(tableId, scripts, &params, queryParams, array, db, context)
-		if !ctn {
+		err := globalDataInterceptor.BeforeExec(tableId, scripts, &params, queryParams, array, db, context)
+		if err != nil {
 			return nil, err
 		}
 	}
@@ -72,8 +72,8 @@ func (this *NdDataOperator) Exec(tableId string, params [][]interface{}, queryPa
 	for _, k := range sortedKeys {
 		dataInterceptor := dataInterceptors[k]
 		if dataInterceptor != nil {
-			ctn, err := dataInterceptor.BeforeExec(tableId, scripts, &params, queryParams, array, db, context)
-			if !ctn {
+			err := dataInterceptor.BeforeExec(tableId, scripts, &params, queryParams, array, db, context)
+			if err != nil {
 				return nil, err
 			}
 		}

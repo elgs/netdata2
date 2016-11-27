@@ -32,17 +32,17 @@ func serve(service *CliService) {
 			return
 		}
 		for _, globalHandlerInterceptor := range gorest2.GlobalHandlerInterceptorRegistry {
-			ctn, err := globalHandlerInterceptor.BeforeHandle(w, r)
-			if !ctn || err != nil {
-				fmt.Fprint(w, err.Error())
+			err := globalHandlerInterceptor.BeforeHandle(w, r)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 		}
 		handlerInterceptor := gorest2.HandlerInterceptorRegistry[urlPath]
 		if handlerInterceptor != nil {
-			ctn, err := handlerInterceptor.BeforeHandle(w, r)
-			if !ctn || err != nil {
-				fmt.Fprint(w, err.Error())
+			err := handlerInterceptor.BeforeHandle(w, r)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 		}

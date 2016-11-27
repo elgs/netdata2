@@ -48,7 +48,7 @@ func (this *GlobalRemoteInterceptor) executeRemoteInterceptor(tx *sql.Tx, db *sq
 	return nil
 }
 
-func (this *GlobalRemoteInterceptor) commonBefore(tx *sql.Tx, db *sql.DB, resourceId string, context map[string]interface{}, action string, data interface{}) (bool, error) {
+func (this *GlobalRemoteInterceptor) commonBefore(tx *sql.Tx, db *sql.DB, resourceId string, context map[string]interface{}, action string, data interface{}) error {
 	rts := strings.Split(strings.Replace(resourceId, "`", "", -1), ".")
 	resourceId = rts[len(rts)-1]
 	app := context["app"].(*App)
@@ -56,15 +56,15 @@ func (this *GlobalRemoteInterceptor) commonBefore(tx *sql.Tx, db *sql.DB, resour
 		if ri.Type == "before" && ri.ActionType == action && ri.Target == resourceId && ri.AppId == app.Id {
 			payload, err := this.createPayload(resourceId, "before_"+action, data)
 			if err != nil {
-				return false, err
+				return err
 			}
 			err = this.executeRemoteInterceptor(tx, db, context, payload, app.Id, resourceId, ri)
 			if err != nil {
-				return false, err
+				return err
 			}
 		}
 	}
-	return true, nil
+	return nil
 }
 
 func (this *GlobalRemoteInterceptor) commonAfter(tx *sql.Tx, db *sql.DB, resourceId string, context map[string]interface{}, action string, data interface{}) error {
@@ -101,7 +101,7 @@ func (this *GlobalRemoteInterceptor) createPayload(target string, action string,
 	return string(jsonData), nil
 }
 
-func (this *GlobalRemoteInterceptor) BeforeExec(resourceId string, script string, params *[][]interface{}, queryParams map[string]string, array bool, db *sql.DB, context map[string]interface{}) (bool, error) {
+func (this *GlobalRemoteInterceptor) BeforeExec(resourceId string, script string, params *[][]interface{}, queryParams map[string]string, array bool, db *sql.DB, context map[string]interface{}) error {
 	return this.commonBefore(nil, db, resourceId, context, "exec", map[string]interface{}{"params": *params})
 }
 func (this *GlobalRemoteInterceptor) AfterExec(resourceId string, script string, params *[][]interface{}, queryParams map[string]string, array bool, db *sql.DB, context map[string]interface{}, data *[][]interface{}) error {
