@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dvsekhvalnov/jose2go"
 	"github.com/elgs/gorest2"
 )
 
@@ -72,6 +73,27 @@ func checkProjectToken(context map[string]interface{}, tableId string, op string
 		}
 	}
 	return errors.New("Authentication failed.")
+}
+
+func checkUserToken(context map[string]interface{}) error {
+	if userToken, ok := context["user_token"]; ok {
+		if v, ok := userToken.(string); ok {
+			sharedKey := []byte("netdata.io")
+
+			payload, _, err := jose.Decode(v, sharedKey)
+			if err != nil {
+				return err
+			}
+			userInfo := map[string]interface{}{}
+			json.Unmarshal([]byte(payload), &userInfo)
+
+			context["user_email"] = userInfo["email"]
+			return nil
+		} else {
+			return errors.New("Failed to parse user token: " + v)
+		}
+	}
+	return errors.New("No user token.")
 }
 
 func (this *GlobalTokenInterceptor) BeforeCreate(resourceId string, db *sql.DB, context map[string]interface{}, data []map[string]interface{}) error {
