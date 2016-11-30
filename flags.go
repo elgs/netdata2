@@ -82,7 +82,7 @@ func (this *CliService) Flags() []cli.Flag {
 			Destination: &this.DataFile,
 		},
 		cli.StringFlag{
-			Name:        "secret, s",
+			Name:        "secret, z",
 			Usage:       "secret password for server client communication.",
 			Destination: &this.Secret,
 		},
@@ -97,6 +97,13 @@ func (this *CliService) LoadConfigs(c *cli.Context) {
 	if strings.TrimSpace(this.Id) == "" {
 		this.Id = strings.Replace(uuid.NewV4().String(), "-", "", -1)
 	}
+}
+
+func (this *CliService) LoadSecrets(c *cli.Context) {
+	this.LoadSecret("/etc/netdata/netdata.json", c)
+	this.LoadSecret(homeDir+"/.netdata/netdata.json", c)
+	this.LoadSecret(pwd+"/netdata.json", c)
+	this.LoadSecret(this.ConfFile, c)
 }
 
 func (this *CliService) LoadConfig(file string, c *cli.Context) {
@@ -170,6 +177,20 @@ func (this *CliService) LoadConfig(file string, c *cli.Context) {
 		if err == nil {
 			this.DataFile = v
 		}
+	}
+	if !c.IsSet("secret") {
+		v, err := jqConf.QueryToString("secret")
+		if err == nil {
+			this.Secret = v
+		}
+	}
+}
+
+func (this *CliService) LoadSecret(file string, c *cli.Context) {
+	jqConf, err := gojq.NewFileQuery(file)
+	if err != nil {
+		//ignore
+		return
 	}
 	if !c.IsSet("secret") {
 		v, err := jqConf.QueryToString("secret")

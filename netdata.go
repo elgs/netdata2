@@ -100,7 +100,7 @@ func main() {
 						if len(strings.TrimSpace(service.Master)) > 0 {
 							// load data from master if slave
 							if RegisterToMaster(wsDrop) != nil {
-								return nil
+								return err
 							}
 						} else {
 							// load data from data file if master
@@ -228,8 +228,15 @@ func main() {
 						cli.BoolTFlag{
 							Name:  "compact, c",
 							Usage: "show a compact list of data nodes",
-						}},
+						},
+						cli.StringFlag{
+							Name:        "secret, z",
+							Usage:       "secret password for server client communication.",
+							Destination: &service.Secret,
+						},
+					},
 					Action: func(c *cli.Context) error {
+						service.LoadSecrets(c)
 						node := c.String("node")
 						full := c.IsSet("full")
 						compact := c.IsSet("compact")
@@ -289,8 +296,14 @@ func main() {
 							Name:  "note, t",
 							Usage: "a note for the data node",
 						},
+						cli.StringFlag{
+							Name:        "secret, z",
+							Usage:       "secret password for server client communication.",
+							Destination: &service.Secret,
+						},
 					},
 					Action: func(c *cli.Context) error {
+						service.LoadSecrets(c)
 						node := c.String("node")
 						id := strings.Replace(uuid.NewV4().String(), "-", "", -1)
 						dataNode := &DataNode{
@@ -361,8 +374,14 @@ func main() {
 							Name:  "note, t",
 							Usage: "a note for the data node",
 						},
+						cli.StringFlag{
+							Name:        "secret, z",
+							Usage:       "secret password for server client communication.",
+							Destination: &service.Secret,
+						},
 					},
 					Action: func(c *cli.Context) error {
+						service.LoadSecrets(c)
 						node := c.String("node")
 						dataNode := &DataNode{
 							Id:       c.String("id"),
@@ -425,8 +444,14 @@ func main() {
 							Name:  "id, i",
 							Usage: "id of the data node",
 						},
+						cli.StringFlag{
+							Name:        "secret, z",
+							Usage:       "secret password for server client communication.",
+							Destination: &service.Secret,
+						},
 					},
 					Action: func(c *cli.Context) error {
+						service.LoadSecrets(c)
 						node := c.String("node")
 						id := c.String("id")
 						cliDnRemoveCommand := &Command{
@@ -468,8 +493,15 @@ func main() {
 						cli.BoolTFlag{
 							Name:  "compact, c",
 							Usage: "show a compact list of apps",
-						}},
+						},
+						cli.StringFlag{
+							Name:        "secret, z",
+							Usage:       "secret password for server client communication.",
+							Destination: &service.Secret,
+						},
+					},
 					Action: func(c *cli.Context) error {
+						service.LoadSecrets(c)
 						node := c.String("node")
 						full := c.IsSet("full")
 						compact := c.IsSet("compact")
@@ -516,8 +548,14 @@ func main() {
 							Name:  "note, t",
 							Usage: "a note for the app",
 						},
+						cli.StringFlag{
+							Name:        "secret, z",
+							Usage:       "secret password for server client communication.",
+							Destination: &service.Secret,
+						},
 					},
 					Action: func(c *cli.Context) error {
+						service.LoadSecrets(c)
 						node := c.String("node")
 
 						name := c.String("name")
@@ -582,8 +620,14 @@ func main() {
 							Name:  "note, t",
 							Usage: "a note for the app",
 						},
+						cli.StringFlag{
+							Name:        "secret, z",
+							Usage:       "secret password for server client communication.",
+							Destination: &service.Secret,
+						},
 					},
 					Action: func(c *cli.Context) error {
+						service.LoadSecrets(c)
 						node := c.String("node")
 						app := &App{
 							Id:         c.String("id"),
@@ -634,8 +678,14 @@ func main() {
 							Name:  "id, i",
 							Usage: "id of the app",
 						},
+						cli.StringFlag{
+							Name:        "secret, z",
+							Usage:       "secret password for server client communication.",
+							Destination: &service.Secret,
+						},
 					},
 					Action: func(c *cli.Context) error {
+						service.LoadSecrets(c)
 						node := c.String("node")
 						id := c.String("id")
 						cliAppRemoveCommand := &Command{
@@ -686,8 +736,14 @@ func main() {
 							Name:  "note, t",
 							Usage: "a note for the query",
 						},
+						cli.StringFlag{
+							Name:        "secret, z",
+							Usage:       "secret password for server client communication.",
+							Destination: &service.Secret,
+						},
 					},
 					Action: func(c *cli.Context) error {
+						service.LoadSecrets(c)
 						node := c.String("node")
 						id := strings.Replace(uuid.NewV4().String(), "-", "", -1)
 						query := &Query{
@@ -747,8 +803,14 @@ func main() {
 							Name:  "note, t",
 							Usage: "a note for the query",
 						},
+						cli.StringFlag{
+							Name:        "secret, z",
+							Usage:       "secret password for server client communication.",
+							Destination: &service.Secret,
+						},
 					},
 					Action: func(c *cli.Context) error {
+						service.LoadSecrets(c)
 						node := c.String("node")
 						query := &Query{
 							Id:         c.String("id"),
@@ -804,8 +866,14 @@ func main() {
 							Name:  "app, a",
 							Usage: "app id",
 						},
+						cli.StringFlag{
+							Name:        "secret, z",
+							Usage:       "secret password for server client communication.",
+							Destination: &service.Secret,
+						},
 					},
 					Action: func(c *cli.Context) error {
+						service.LoadSecrets(c)
 						node := c.String("node")
 						query := &Query{
 							Id:    c.String("id"),
@@ -876,8 +944,14 @@ func main() {
 							Name:  "note, t",
 							Usage: "a note for the job",
 						},
+						cli.StringFlag{
+							Name:        "secret, z",
+							Usage:       "secret password for server client communication.",
+							Destination: &service.Secret,
+						},
 					},
 					Action: func(c *cli.Context) error {
+						service.LoadSecrets(c)
 						node := c.String("node")
 						id := strings.Replace(uuid.NewV4().String(), "-", "", -1)
 						job := &Job{
@@ -952,8 +1026,14 @@ func main() {
 							Name:  "note, t",
 							Usage: "a note for the job",
 						},
+						cli.StringFlag{
+							Name:        "secret, z",
+							Usage:       "secret password for server client communication.",
+							Destination: &service.Secret,
+						},
 					},
 					Action: func(c *cli.Context) error {
+						service.LoadSecrets(c)
 						node := c.String("node")
 						job := &Job{
 							Id:             c.String("id"),
@@ -1021,8 +1101,14 @@ func main() {
 							Name:  "app, a",
 							Usage: "app id",
 						},
+						cli.StringFlag{
+							Name:        "secret, z",
+							Usage:       "secret password for server client communication.",
+							Destination: &service.Secret,
+						},
 					},
 					Action: func(c *cli.Context) error {
+						service.LoadSecrets(c)
 						node := c.String("node")
 						job := &Job{
 							Id:    c.String("id"),
@@ -1066,8 +1152,14 @@ func main() {
 							Name:  "app, a",
 							Usage: "app id",
 						},
+						cli.StringFlag{
+							Name:        "secret, z",
+							Usage:       "secret password for server client communication.",
+							Destination: &service.Secret,
+						},
 					},
 					Action: func(c *cli.Context) error {
+						service.LoadSecrets(c)
 						node := c.String("node")
 						job := &Job{
 							Id:    c.String("id"),
@@ -1111,8 +1203,14 @@ func main() {
 							Name:  "app, a",
 							Usage: "app id",
 						},
+						cli.StringFlag{
+							Name:        "secret, z",
+							Usage:       "secret password for server client communication.",
+							Destination: &service.Secret,
+						},
 					},
 					Action: func(c *cli.Context) error {
+						service.LoadSecrets(c)
 						node := c.String("node")
 						job := &Job{
 							Id:    c.String("id"),
@@ -1156,8 +1254,14 @@ func main() {
 							Name:  "app, a",
 							Usage: "app id",
 						},
+						cli.StringFlag{
+							Name:        "secret, z",
+							Usage:       "secret password for server client communication.",
+							Destination: &service.Secret,
+						},
 					},
 					Action: func(c *cli.Context) error {
+						service.LoadSecrets(c)
 						node := c.String("node")
 						job := &Job{
 							Id:    c.String("id"),
@@ -1220,8 +1324,14 @@ func main() {
 							Name:  "note, t",
 							Usage: "note for the token",
 						},
+						cli.StringFlag{
+							Name:        "secret, z",
+							Usage:       "secret password for server client communication.",
+							Destination: &service.Secret,
+						},
 					},
 					Action: func(c *cli.Context) error {
+						service.LoadSecrets(c)
 						node := c.String("node")
 						appId := c.String("app")
 						id := appId + strings.Replace(uuid.NewV4().String(), "-", "", -1)
@@ -1287,8 +1397,14 @@ func main() {
 							Name:  "note, t",
 							Usage: "a note for the token",
 						},
+						cli.StringFlag{
+							Name:        "secret, z",
+							Usage:       "secret password for server client communication.",
+							Destination: &service.Secret,
+						},
 					},
 					Action: func(c *cli.Context) error {
+						service.LoadSecrets(c)
 						node := c.String("node")
 						token := &Token{
 							Id:     c.String("id"),
@@ -1348,8 +1464,14 @@ func main() {
 							Name:  "app, a",
 							Usage: "app id",
 						},
+						cli.StringFlag{
+							Name:        "secret, z",
+							Usage:       "secret password for server client communication.",
+							Destination: &service.Secret,
+						},
 					},
 					Action: func(c *cli.Context) error {
+						service.LoadSecrets(c)
 						node := c.String("node")
 						token := &Token{
 							Id:    c.String("id"),
@@ -1413,8 +1535,14 @@ func main() {
 							Name:  "note, t",
 							Usage: "note for the local interceptor",
 						},
+						cli.StringFlag{
+							Name:        "secret, z",
+							Usage:       "secret password for server client communication.",
+							Destination: &service.Secret,
+						},
 					},
 					Action: func(c *cli.Context) error {
+						service.LoadSecrets(c)
 						node := c.String("node")
 						id := strings.Replace(uuid.NewV4().String(), "-", "", -1)
 						li := &LocalInterceptor{
@@ -1482,8 +1610,14 @@ func main() {
 							Name:  "note, t",
 							Usage: "note for the local interceptor",
 						},
+						cli.StringFlag{
+							Name:        "secret, z",
+							Usage:       "secret password for server client communication.",
+							Destination: &service.Secret,
+						},
 					},
 					Action: func(c *cli.Context) error {
+						service.LoadSecrets(c)
 						node := c.String("node")
 						li := &LocalInterceptor{
 							Id:       c.String("id"),
@@ -1545,8 +1679,14 @@ func main() {
 							Name:  "app, a",
 							Usage: "app name",
 						},
+						cli.StringFlag{
+							Name:        "secret, z",
+							Usage:       "secret password for server client communication.",
+							Destination: &service.Secret,
+						},
 					},
 					Action: func(c *cli.Context) error {
+						service.LoadSecrets(c)
 						node := c.String("node")
 						li := &LocalInterceptor{
 							Id:    c.String("id"),
@@ -1623,8 +1763,14 @@ func main() {
 							Name:  "note, t",
 							Usage: "note for the remote interceptor",
 						},
+						cli.StringFlag{
+							Name:        "secret, z",
+							Usage:       "secret password for server client communication.",
+							Destination: &service.Secret,
+						},
 					},
 					Action: func(c *cli.Context) error {
+						service.LoadSecrets(c)
 						node := c.String("node")
 						id := strings.Replace(uuid.NewV4().String(), "-", "", -1)
 						ri := &RemoteInterceptor{
@@ -1708,8 +1854,14 @@ func main() {
 							Name:  "note, t",
 							Usage: "note for the remote interceptor",
 						},
+						cli.StringFlag{
+							Name:        "secret, z",
+							Usage:       "secret password for server client communication.",
+							Destination: &service.Secret,
+						},
 					},
 					Action: func(c *cli.Context) error {
+						service.LoadSecrets(c)
 						node := c.String("node")
 						ri := &RemoteInterceptor{
 							Id:         c.String("id"),
@@ -1783,8 +1935,14 @@ func main() {
 							Name:  "app, a",
 							Usage: "app id",
 						},
+						cli.StringFlag{
+							Name:        "secret, z",
+							Usage:       "secret password for server client communication.",
+							Destination: &service.Secret,
+						},
 					},
 					Action: func(c *cli.Context) error {
+						service.LoadSecrets(c)
 						node := c.String("node")
 						ri := &RemoteInterceptor{
 							Id:    c.String("id"),
@@ -1824,8 +1982,14 @@ func main() {
 							Value: "127.0.0.1:2015",
 							Usage: "node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
+						cli.StringFlag{
+							Name:        "secret, z",
+							Usage:       "secret password for server client communication.",
+							Destination: &service.Secret,
+						},
 					},
 					Action: func(c *cli.Context) error {
+						service.LoadSecrets(c)
 						node := c.String("node")
 						cliShowMasterCommand := &Command{
 							Type: "CLI_SHOW_MASTER",
@@ -1851,8 +2015,14 @@ func main() {
 							Value: "127.0.0.1:2015",
 							Usage: "node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
+						cli.StringFlag{
+							Name:        "secret, z",
+							Usage:       "secret password for server client communication.",
+							Destination: &service.Secret,
+						},
 					},
 					Action: func(c *cli.Context) error {
+						service.LoadSecrets(c)
 						node := c.String("node")
 						cliShowApiNodesCommand := &Command{
 							Type: "CLI_SHOW_API_NODES",
@@ -1885,8 +2055,14 @@ func main() {
 							Value: "127.0.0.1:2015",
 							Usage: "node url, format: host:port. 127.0.0.1:2015 if empty",
 						},
+						cli.StringFlag{
+							Name:        "secret, z",
+							Usage:       "secret password for server client communication.",
+							Destination: &service.Secret,
+						},
 					},
 					Action: func(c *cli.Context) error {
+						service.LoadSecrets(c)
 						node := c.String("node")
 						cliShowMasterCommand := &Command{
 							Type: "CLI_PROPAGATE",
