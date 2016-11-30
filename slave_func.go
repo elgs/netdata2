@@ -4,6 +4,7 @@ package main
 import (
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -13,7 +14,10 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func sendCliCommand(node string, command *Command) ([]byte, error) {
+func sendCliCommand(node string, command *Command, attachSecret bool) ([]byte, error) {
+	if attachSecret {
+		command.Secret = service.Secret
+	}
 	message, err := json.Marshal(command)
 	if err != nil {
 		return nil, err
@@ -46,24 +50,6 @@ func RegisterToMaster(wsDrop chan bool) error {
 		wsDrop <- true
 		return err
 	}
-	slaveConn = c
-	go func() {
-		defer c.Close()
-		defer func() { wsDrop <- true }()
-		for {
-			_, message, err := c.ReadMessage()
-			if err != nil {
-				log.Println("Connection dropped. Reconnecting in 5 seconds...", err)
-				time.Sleep(time.Second * 5)
-				// Reconnect
-				return
-			}
-			err = processWsCommandSlave(c, message)
-			if err != nil {
-				log.Println(err)
-			}
-		}
-	}()
 
 	serviceBytes, err := json.Marshal(service)
 	if err != nil {
@@ -84,6 +70,32 @@ func RegisterToMaster(wsDrop chan bool) error {
 		wsDrop <- true
 		return err
 	}
+	var regResult string
+	c.ReadJSON(&regResult)
+	if regResult != "OK" {
+		log.Println(regResult)
+		return errors.New(regResult)
+	}
+
+	slaveConn = c
+	go func() {
+		defer c.Close()
+		defer func() { wsDrop <- true }()
+		for {
+			_, message, err := c.ReadMessage()
+			if err != nil {
+				log.Println("Connection dropped. Reconnecting in 5 seconds...", err)
+				time.Sleep(time.Second * 5)
+				// Reconnect
+				return
+			}
+			err = processWsCommandSlave(c, message)
+			if err != nil {
+				log.Println(err)
+			}
+		}
+	}()
+
 	log.Println("Connected to master:", service.Master)
 	return nil
 }

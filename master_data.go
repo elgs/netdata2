@@ -11,9 +11,10 @@ import (
 )
 
 type Command struct {
-	Type string
-	Data string
-	Meta map[string]interface{}
+	Type   string
+	Data   string
+	Secret string
+	Meta   map[string]interface{}
 }
 
 type MasterData struct {

@@ -3,6 +3,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"log"
 	"sync"
@@ -15,14 +16,20 @@ func processWsCommandMaster(conn *websocket.Conn, message []byte) error {
 	json.Unmarshal(message, wsCommand)
 	switch wsCommand.Type {
 	case "WS_REGISTER":
-		service := &CliService{}
-		err := json.Unmarshal([]byte(wsCommand.Data), service)
+		slaveService := &CliService{}
+		err := json.Unmarshal([]byte(wsCommand.Data), slaveService)
 		if err != nil {
+			conn.Close()
 			return err
 		}
 
+		if slaveService.Secret != service.Secret {
+			conn.WriteJSON("Failed to valid client secret.")
+			return errors.New("Failed to valid client secret.")
+		}
+
 		apiNode := &ApiNode{
-			Id:   service.Id,
+			Id:   slaveService.Id,
 			Name: conn.RemoteAddr().String(),
 		}
 		err = AddApiNode(apiNode)
@@ -31,7 +38,8 @@ func processWsCommandMaster(conn *websocket.Conn, message []byte) error {
 			return err
 		}
 
-		wsConns[service.Id] = conn
+		wsConns[slaveService.Id] = conn
+		conn.WriteJSON("OK")
 		log.Println(conn.RemoteAddr(), "connected.")
 	}
 	return nil

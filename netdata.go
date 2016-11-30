@@ -99,7 +99,9 @@ func main() {
 
 						if len(strings.TrimSpace(service.Master)) > 0 {
 							// load data from master if slave
-							RegisterToMaster(wsDrop)
+							if RegisterToMaster(wsDrop) != nil {
+								return nil
+							}
 						} else {
 							// load data from data file if master
 							StartJobs()
@@ -167,7 +169,7 @@ func main() {
 								cliCommand := &Command{}
 								json.Unmarshal(res, cliCommand)
 								// Slave to forward cli command to master.
-								response, err := sendCliCommand(service.Master, cliCommand)
+								response, err := sendCliCommand(service.Master, cliCommand, false)
 								if err != nil {
 									fmt.Fprint(w, err.Error())
 									return
@@ -241,7 +243,7 @@ func main() {
 							Type: "CLI_DN_LIST",
 							Data: mode,
 						}
-						response, err := sendCliCommand(node, cliDnListCommand)
+						response, err := sendCliCommand(node, cliDnListCommand, true)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -309,7 +311,7 @@ func main() {
 							Type: "CLI_DN_ADD",
 							Data: string(dataNodeJSONBytes),
 						}
-						response, err := sendCliCommand(node, cliDnAddCommand)
+						response, err := sendCliCommand(node, cliDnAddCommand, true)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -398,7 +400,7 @@ func main() {
 							Type: "CLI_DN_UPDATE",
 							Data: string(dataNodeJSONBytes),
 						}
-						response, err := sendCliCommand(node, cliDnUpdateCommand)
+						response, err := sendCliCommand(node, cliDnUpdateCommand, true)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -431,7 +433,7 @@ func main() {
 							Type: "CLI_DN_REMOVE",
 							Data: id,
 						}
-						response, err := sendCliCommand(node, cliDnRemoveCommand)
+						response, err := sendCliCommand(node, cliDnRemoveCommand, true)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -481,7 +483,7 @@ func main() {
 							Type: "CLI_APP_LIST",
 							Data: mode,
 						}
-						response, err := sendCliCommand(node, cliAppListCommand)
+						response, err := sendCliCommand(node, cliAppListCommand, true)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -543,7 +545,7 @@ func main() {
 							Type: "CLI_APP_ADD",
 							Data: string(appJSONBytes),
 						}
-						response, err := sendCliCommand(node, cliAppAddCommand)
+						response, err := sendCliCommand(node, cliAppAddCommand, true)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -607,7 +609,7 @@ func main() {
 							Type: "CLI_APP_UPDATE",
 							Data: string(appJSONBytes),
 						}
-						response, err := sendCliCommand(node, cliAppUpdateCommand)
+						response, err := sendCliCommand(node, cliAppUpdateCommand, true)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -640,7 +642,7 @@ func main() {
 							Type: "CLI_APP_REMOVE",
 							Data: id,
 						}
-						response, err := sendCliCommand(node, cliAppRemoveCommand)
+						response, err := sendCliCommand(node, cliAppRemoveCommand, true)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -704,7 +706,7 @@ func main() {
 							Type: "CLI_QUERY_ADD",
 							Data: string(queryJSONBytes),
 						}
-						response, err := sendCliCommand(node, cliQueryAddCommand)
+						response, err := sendCliCommand(node, cliQueryAddCommand, true)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -773,7 +775,7 @@ func main() {
 							Type: "CLI_QUERY_UPDATE",
 							Data: string(queryJSONBytes),
 						}
-						response, err := sendCliCommand(node, cliQueryUpdateCommand)
+						response, err := sendCliCommand(node, cliQueryUpdateCommand, true)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -818,7 +820,7 @@ func main() {
 							Type: "CLI_QUERY_REMOVE",
 							Data: string(queryJSONBytes),
 						}
-						response, err := sendCliCommand(node, cliQueryRemoveCommand)
+						response, err := sendCliCommand(node, cliQueryRemoveCommand, true)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -897,7 +899,7 @@ func main() {
 							Type: "CLI_JOB_ADD",
 							Data: string(jobJSONBytes),
 						}
-						response, err := sendCliCommand(node, cliJobAddCommand)
+						response, err := sendCliCommand(node, cliJobAddCommand, true)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -990,7 +992,7 @@ func main() {
 							Type: "CLI_JOB_UPDATE",
 							Data: string(jobJSONBytes),
 						}
-						response, err := sendCliCommand(node, cliJobUpdateCommand)
+						response, err := sendCliCommand(node, cliJobUpdateCommand, true)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -1035,7 +1037,7 @@ func main() {
 							Type: "CLI_JOB_REMOVE",
 							Data: string(jobJSONBytes),
 						}
-						response, err := sendCliCommand(node, cliJobRemoveCommand)
+						response, err := sendCliCommand(node, cliJobRemoveCommand, true)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -1080,7 +1082,7 @@ func main() {
 							Type: "CLI_JOB_START",
 							Data: string(jobJSONBytes),
 						}
-						response, err := sendCliCommand(node, cliJobStartCommand)
+						response, err := sendCliCommand(node, cliJobStartCommand, true)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -1125,7 +1127,7 @@ func main() {
 							Type: "CLI_JOB_RESTART",
 							Data: string(jobJSONBytes),
 						}
-						response, err := sendCliCommand(node, cliJobRestartCommand)
+						response, err := sendCliCommand(node, cliJobRestartCommand, true)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -1170,7 +1172,7 @@ func main() {
 							Type: "CLI_JOB_STOP",
 							Data: string(jobJSONBytes),
 						}
-						response, err := sendCliCommand(node, cliJobStopCommand)
+						response, err := sendCliCommand(node, cliJobStopCommand, true)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -1240,7 +1242,7 @@ func main() {
 							Type: "CLI_TOKEN_ADD",
 							Data: string(tokenJSONBytes),
 						}
-						response, err := sendCliCommand(node, cliTokenAddCommand)
+						response, err := sendCliCommand(node, cliTokenAddCommand, true)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -1317,7 +1319,7 @@ func main() {
 							Type: "CLI_TOKEN_ADD",
 							Data: string(tokenJSONBytes),
 						}
-						response, err := sendCliCommand(node, cliTokenAddCommand)
+						response, err := sendCliCommand(node, cliTokenAddCommand, true)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -1361,7 +1363,7 @@ func main() {
 							Type: "CLI_TOKEN_REMOVE",
 							Data: string(jobJSONBytes),
 						}
-						response, err := sendCliCommand(node, cliTokenRemoveCommand)
+						response, err := sendCliCommand(node, cliTokenRemoveCommand, true)
 						if err != nil {
 							return err
 						}
@@ -1432,7 +1434,7 @@ func main() {
 							Type: "CLI_LI_ADD",
 							Data: string(liJSONBytes),
 						}
-						response, err := sendCliCommand(node, cliLiAddCommand)
+						response, err := sendCliCommand(node, cliLiAddCommand, true)
 						if err != nil {
 							return err
 						}
@@ -1515,7 +1517,7 @@ func main() {
 							Type: "CLI_LI_UPDATE",
 							Data: string(liJSONBytes),
 						}
-						response, err := sendCliCommand(node, cliLiUpdateCommand)
+						response, err := sendCliCommand(node, cliLiUpdateCommand, true)
 						if err != nil {
 							return err
 						}
@@ -1558,7 +1560,7 @@ func main() {
 							Type: "CLI_LI_REMOVE",
 							Data: string(liJSONBytes),
 						}
-						response, err := sendCliCommand(node, cliLiRemoveCommand)
+						response, err := sendCliCommand(node, cliLiRemoveCommand, true)
 						if err != nil {
 							return err
 						}
@@ -1645,7 +1647,7 @@ func main() {
 							Type: "CLI_RI_ADD",
 							Data: string(riJSONBytes),
 						}
-						response, err := sendCliCommand(node, cliRiAddCommand)
+						response, err := sendCliCommand(node, cliRiAddCommand, true)
 						if err != nil {
 							return err
 						}
@@ -1753,7 +1755,7 @@ func main() {
 							Type: "CLI_RI_UPDATE",
 							Data: string(riJSONBytes),
 						}
-						response, err := sendCliCommand(node, cliRiUpdateCommand)
+						response, err := sendCliCommand(node, cliRiUpdateCommand, true)
 						if err != nil {
 							return err
 						}
@@ -1796,7 +1798,7 @@ func main() {
 							Type: "CLI_RI_REMOVE",
 							Data: string(riJSONBytes),
 						}
-						response, err := sendCliCommand(node, cliRiRemoveCommand)
+						response, err := sendCliCommand(node, cliRiRemoveCommand, true)
 						if err != nil {
 							return err
 						}
@@ -1828,7 +1830,7 @@ func main() {
 						cliShowMasterCommand := &Command{
 							Type: "CLI_SHOW_MASTER",
 						}
-						response, err := sendCliCommand(node, cliShowMasterCommand)
+						response, err := sendCliCommand(node, cliShowMasterCommand, true)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -1855,7 +1857,7 @@ func main() {
 						cliShowApiNodesCommand := &Command{
 							Type: "CLI_SHOW_API_NODES",
 						}
-						response, err := sendCliCommand(node, cliShowApiNodesCommand)
+						response, err := sendCliCommand(node, cliShowApiNodesCommand, true)
 						if err != nil {
 							fmt.Println(err)
 							return err
@@ -1889,7 +1891,7 @@ func main() {
 						cliShowMasterCommand := &Command{
 							Type: "CLI_PROPAGATE",
 						}
-						response, err := sendCliCommand(node, cliShowMasterCommand)
+						response, err := sendCliCommand(node, cliShowMasterCommand, true)
 						if err != nil {
 							fmt.Println(err)
 							return err

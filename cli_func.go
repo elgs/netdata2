@@ -3,11 +3,15 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 )
 
 func processCliCommand(message []byte) (string, error) {
 	cliCommand := &Command{}
 	json.Unmarshal(message, cliCommand)
+	if service.Secret != cliCommand.Secret {
+		return "", errors.New("Failed to validate secret.")
+	}
 	switch cliCommand.Type {
 	case "CLI_DN_LIST":
 		return masterData.ListDataNodes(cliCommand.Data), nil
