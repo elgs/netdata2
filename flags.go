@@ -22,6 +22,7 @@ type CliService struct {
 	KeyFile     string
 	ConfFile    string
 	DataFile    string
+	Secret      string
 }
 
 func (this *CliService) Flags() []cli.Flag {
@@ -79,6 +80,11 @@ func (this *CliService) Flags() []cli.Flag {
 			Value:       homeDir + "/.netdata/netdata_master.json",
 			Usage:       "master data file path, ignored by slave nodes, search path: ~/.netdata/netdata_master.json",
 			Destination: &this.DataFile,
+		},
+		cli.StringFlag{
+			Name:        "secret, s",
+			Usage:       "secret password for server client communication.",
+			Destination: &this.Secret,
 		},
 	}
 }
@@ -163,6 +169,12 @@ func (this *CliService) LoadConfig(file string, c *cli.Context) {
 		v, err := jqConf.QueryToString("data_file")
 		if err == nil {
 			this.DataFile = v
+		}
+	}
+	if !c.IsSet("secret") {
+		v, err := jqConf.QueryToString("secret")
+		if err == nil {
+			this.Secret = v
 		}
 	}
 }
