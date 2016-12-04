@@ -179,25 +179,5 @@ func (this *GlobalTokenInterceptor) BeforeExec(resourceId string, script string,
 	return checkProjectToken(context, resourceId, "rx")
 }
 func (this *GlobalTokenInterceptor) AfterExec(resourceId string, script string, params *[][]interface{}, queryParams map[string]string, array bool, db *sql.DB, context map[string]interface{}, data *[][]interface{}) error {
-	// if the query name is login, encrypt the query result into a jwt token.
-	//	if resourceId == "login" {
-	//		tokenData := (*data)[0][0]
-	//		if v, ok := tokenData.([]map[string]string); ok && len(v) > 0 {
-	//			t, err := convertMapOfStringsToMapOfInterfaces(v[0])
-	//			if err != nil {
-	//				return err
-	//			}
-	//			t["exp"] = time.Now().Add(time.Hour * 72).Unix()
-	//			tokenPayload, err := json.Marshal(t)
-	//			if err != nil {
-	//				return err
-	//			}
-	//			s, err := createJwtToken(string(tokenPayload))
-	//			if err != nil {
-	//				return err
-	//			}
-	//			(*data)[0][0] = s
-	//		}
-	//	}
 	return nil
 }
