@@ -137,7 +137,10 @@ func (this *MasterData) RemoveDataNode(id string) error {
 	if index == -1 {
 		return errors.New("Data node not found: " + id)
 	}
-	this.DataNodes = append(this.DataNodes[:index], this.DataNodes[index+1:]...)
+	copy(this.DataNodes[index:], this.DataNodes[index+1:])
+	this.DataNodes[len(this.DataNodes)-1] = nil
+	this.DataNodes = this.DataNodes[:len(this.DataNodes)-1]
+	//	this.DataNodes = append(this.DataNodes[:index], this.DataNodes[index+1:]...)
 	this.Version++
 	return masterData.Propagate()
 }
@@ -222,7 +225,10 @@ func (this *MasterData) RemoveApp(id string) error {
 	if index == -1 {
 		return errors.New("App not found: " + id)
 	}
-	this.Apps = append(this.Apps[:index], this.Apps[index+1:]...)
+	copy(this.Apps[index:], this.Apps[index+1:])
+	this.Apps[len(this.Apps)-1] = nil
+	this.Apps = this.Apps[:len(this.Apps)-1]
+	//	this.Apps = append(this.Apps[:index], this.Apps[index+1:]...)
 	this.Version++
 	return masterData.Propagate()
 }
@@ -303,7 +309,10 @@ func (this *MasterData) RemoveQuery(id string, appId string) error {
 		if this.Apps[iApp].Id == appId {
 			for iQuery, vQuery := range this.Apps[iApp].Queries {
 				if vQuery.Id == id && vQuery.AppId == appId {
-					this.Apps[iApp].Queries = append(this.Apps[iApp].Queries[:iQuery], this.Apps[iApp].Queries[iQuery+1:]...)
+					copy(this.Apps[iApp].Queries[iQuery:], this.Apps[iApp].Queries[iQuery+1:])
+					this.Apps[iApp].Queries[len(this.Apps[iApp].Queries)-1] = nil
+					this.Apps[iApp].Queries = this.Apps[iApp].Queries[:len(this.Apps[iApp].Queries)-1]
+					//					this.Apps[iApp].Queries = append(this.Apps[iApp].Queries[:iQuery], this.Apps[iApp].Queries[iQuery+1:]...)
 					this.Version++
 					return masterData.Propagate()
 				}
@@ -366,7 +375,10 @@ func (this *MasterData) RemoveJob(id string, appId string) error {
 					if vJob.Started() {
 						vJob.Stop()
 					}
-					this.Apps[iApp].Jobs = append(this.Apps[iApp].Jobs[:iJob], this.Apps[iApp].Jobs[iJob+1:]...)
+					copy(this.Apps[iApp].Jobs[iJob:], this.Apps[iApp].Jobs[iJob+1:])
+					this.Apps[iApp].Jobs[len(this.Apps[iApp].Jobs)-1] = nil
+					this.Apps[iApp].Jobs = this.Apps[iApp].Jobs[:len(this.Apps[iApp].Jobs)-1]
+					//					this.Apps[iApp].Jobs = append(this.Apps[iApp].Jobs[:iJob], this.Apps[iApp].Jobs[iJob+1:]...)
 					this.Version++
 					return masterData.Propagate()
 				}
@@ -455,7 +467,10 @@ func (this *MasterData) RemoveToken(id string, appId string) error {
 		if this.Apps[iApp].Id == appId {
 			for iToken, vToken := range this.Apps[iApp].Tokens {
 				if vToken.Id == id && vToken.AppId == appId {
-					this.Apps[iApp].Tokens = append(this.Apps[iApp].Tokens[:iToken], this.Apps[iApp].Tokens[iToken+1:]...)
+					copy(this.Apps[iApp].Tokens[iToken:], this.Apps[iApp].Tokens[iToken+1:])
+					this.Apps[iApp].Tokens[len(this.Apps[iApp].Tokens)-1] = nil
+					this.Apps[iApp].Tokens = this.Apps[iApp].Tokens[:len(this.Apps[iApp].Tokens)-1]
+					//					this.Apps[iApp].Tokens = append(this.Apps[iApp].Tokens[:iToken], this.Apps[iApp].Tokens[iToken+1:]...)
 					this.Version++
 					return masterData.Propagate()
 				}
@@ -512,7 +527,10 @@ func (this *MasterData) RemoveLI(id string, appId string) error {
 		if this.Apps[iApp].Id == appId {
 			for iLi, vLi := range this.Apps[iApp].LocalInterceptors {
 				if vLi.Id == id && vLi.AppId == appId {
-					this.Apps[iApp].LocalInterceptors = append(this.Apps[iApp].LocalInterceptors[:iLi], this.Apps[iApp].LocalInterceptors[iLi+1:]...)
+					copy(this.Apps[iApp].LocalInterceptors[iLi:], this.Apps[iApp].LocalInterceptors[iLi+1:])
+					this.Apps[iApp].LocalInterceptors[len(this.Apps[iApp].LocalInterceptors)-1] = nil
+					this.Apps[iApp].LocalInterceptors = this.Apps[iApp].LocalInterceptors[:len(this.Apps[iApp].LocalInterceptors)-1]
+					//					this.Apps[iApp].LocalInterceptors = append(this.Apps[iApp].LocalInterceptors[:iLi], this.Apps[iApp].LocalInterceptors[iLi+1:]...)
 					this.Version++
 					return masterData.Propagate()
 				}
@@ -571,7 +589,10 @@ func (this *MasterData) RemoveRI(id string, appId string) error {
 		if this.Apps[iApp].Id == appId {
 			for iRi, vRi := range this.Apps[iApp].RemoteInterceptors {
 				if vRi.Id == id && vRi.AppId == appId {
-					this.Apps[iApp].RemoteInterceptors = append(this.Apps[iApp].RemoteInterceptors[:iRi], this.Apps[iApp].RemoteInterceptors[iRi+1:]...)
+					copy(this.Apps[iApp].RemoteInterceptors[iRi:], this.Apps[iApp].RemoteInterceptors[iRi+1:])
+					this.Apps[iApp].RemoteInterceptors[len(this.Apps[iApp].RemoteInterceptors)-1] = nil
+					this.Apps[iApp].RemoteInterceptors = this.Apps[iApp].RemoteInterceptors[:len(this.Apps[iApp].RemoteInterceptors)-1]
+					//					this.Apps[iApp].RemoteInterceptors = append(this.Apps[iApp].RemoteInterceptors[:iRi], this.Apps[iApp].RemoteInterceptors[iRi+1:]...)
 					this.Version++
 					return masterData.Propagate()
 				}
@@ -625,7 +646,7 @@ func AddApiNode(apiNode *ApiNode) error {
 			return errors.New("API node existed: " + apiNode.Name)
 		}
 	}
-	apiNodes = append(apiNodes, *apiNode)
+	apiNodes = append(apiNodes, apiNode)
 	return nil
 }
 
@@ -640,7 +661,10 @@ func RemoveApiNode(remoteAddr string) error {
 	if index == -1 {
 		return errors.New("API node not found: " + remoteAddr)
 	}
-	apiNodes = append(apiNodes[:index], apiNodes[index+1:]...)
+	copy(apiNodes[index:], apiNodes[index+1:])
+	apiNodes[len(apiNodes)-1] = nil
+	apiNodes = apiNodes[:len(apiNodes)-1]
+	//	apiNodes = append(apiNodes[:index], apiNodes[index+1:]...)
 	return nil
 }
 

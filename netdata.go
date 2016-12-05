@@ -25,7 +25,7 @@ var slaveConn *websocket.Conn
 
 var wsConns = make(map[string]*websocket.Conn)
 var masterData MasterData
-var apiNodes []ApiNode
+var apiNodes []*ApiNode
 var pwd string
 var homeDir string
 
