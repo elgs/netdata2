@@ -162,8 +162,7 @@ func (this *MasterData) UpdateDataNode(dataNode *DataNode) error {
 			if v.Note != "__not_set__" {
 				v.Note = dataNode.Note
 			}
-			this.DataNodes = append(this.DataNodes[:i], v)
-			this.DataNodes = append(this.DataNodes, this.DataNodes[i+1:]...)
+			this.DataNodes[i] = v
 			this.Version++
 			return masterData.Propagate()
 		}
@@ -262,8 +261,7 @@ func (this *MasterData) UpdateApp(app *App) error {
 		vApp.Note = app.Note
 	}
 	vApp.OnAppCreateOrUpdate()
-	this.Apps = append(this.Apps[:iApp], vApp)
-	this.Apps = append(this.Apps, this.Apps[iApp+1:]...)
+	this.Apps[iApp] = vApp
 	this.Version++
 	return masterData.Propagate()
 }
@@ -328,8 +326,7 @@ func (this *MasterData) UpdateQuery(query *Query) error {
 					if query.Note != "__not_set__" {
 						vQuery.Note = query.Note
 					}
-					this.Apps[iApp].Queries = append(this.Apps[iApp].Queries[:iQuery], vQuery)
-					this.Apps[iApp].Queries = append(this.Apps[iApp].Queries, this.Apps[iApp].Queries[iQuery+1:]...)
+					this.Apps[iApp].Queries[iQuery] = vQuery
 					err := vQuery.Reload()
 					if err != nil {
 						return err
@@ -405,8 +402,7 @@ func (this *MasterData) UpdateJob(job *Job) error {
 					if vJob.Started() {
 						job.Restart()
 					}
-					this.Apps[iApp].Jobs = append(this.Apps[iApp].Jobs[:iJob], vJob)
-					this.Apps[iApp].Jobs = append(this.Apps[iApp].Jobs, this.Apps[iApp].Jobs[iJob+1:]...)
+					this.Apps[iApp].Jobs[iJob] = vJob
 					this.Version++
 					return masterData.Propagate()
 				}
@@ -486,8 +482,7 @@ func (this *MasterData) UpdateToken(token *Token) error {
 						vToken.Note = token.Note
 					}
 
-					this.Apps[iApp].Tokens = append(this.Apps[iApp].Tokens[:iToken], vToken)
-					this.Apps[iApp].Tokens = append(this.Apps[iApp].Tokens, this.Apps[iApp].Tokens[iToken+1:]...)
+					this.Apps[iApp].Tokens[iToken] = vToken
 					this.Version++
 					return masterData.Propagate()
 				}
@@ -546,8 +541,7 @@ func (this *MasterData) UpdateLI(li *LocalInterceptor) error {
 					if li.Note != "__not_set__" {
 						vLi.Note = li.Note
 					}
-					this.Apps[iApp].LocalInterceptors = append(this.Apps[iApp].LocalInterceptors[:iLi], vLi)
-					this.Apps[iApp].LocalInterceptors = append(this.Apps[iApp].LocalInterceptors, this.Apps[iApp].LocalInterceptors[iLi+1:]...)
+					this.Apps[iApp].LocalInterceptors[iLi] = vLi
 					this.Version++
 					return masterData.Propagate()
 				}
@@ -615,8 +609,7 @@ func (this *MasterData) UpdateRI(ri *RemoteInterceptor) error {
 					if ri.Note != "__not_set__" {
 						vRi.Note = ri.Note
 					}
-					this.Apps[iApp].RemoteInterceptors = append(this.Apps[iApp].RemoteInterceptors[:iRi], vRi)
-					this.Apps[iApp].RemoteInterceptors = append(this.Apps[iApp].RemoteInterceptors, this.Apps[iApp].RemoteInterceptors[iRi+1:]...)
+					this.Apps[iApp].RemoteInterceptors[iRi] = vRi
 					this.Version++
 					return masterData.Propagate()
 				}
@@ -700,5 +693,5 @@ func (this *Query) Reload() error {
 		}
 		this.ScriptText = string(content)
 	}
-	return masterData.Propagate()
+	return nil
 }

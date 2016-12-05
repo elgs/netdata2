@@ -63,8 +63,8 @@ func (this *GlobalLocalInterceptor) commonAfter(tx *sql.Tx, db *sql.DB, resource
 }
 
 func (this *GlobalLocalInterceptor) BeforeExec(resourceId string, script string, params *[][]interface{}, queryParams map[string]string, array bool, db *sql.DB, context map[string]interface{}) error {
-	return this.commonBefore(nil, db, resourceId, context, "query_map", queryParams, *params)
+	return this.commonBefore(nil, db, resourceId, context, "exec", queryParams, *params)
 }
 func (this *GlobalLocalInterceptor) AfterExec(resourceId string, script string, params *[][]interface{}, queryParams map[string]string, array bool, db *sql.DB, context map[string]interface{}, data *[][]interface{}) error {
-	return this.commonAfter(nil, db, resourceId, context, "query_map", queryParams, *params)
+	return this.commonAfter(nil, db, resourceId, context, "exec", queryParams, *params)
 }

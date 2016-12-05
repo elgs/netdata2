@@ -243,5 +243,5 @@ func (this *Job) Reload() error {
 			this.LoopScriptText = string(content)
 		}
 	}
-	return masterData.Propagate()
+	return nil
 }
