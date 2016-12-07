@@ -31,7 +31,7 @@ var homeDir string
 
 var service = &CliService{
 	EnableHttp: true,
-	HostHttp:   "127.0.0.1",
+	HttpHost:   "127.0.0.1",
 }
 
 func main() {
@@ -838,6 +838,45 @@ func main() {
 							Data: string(queryJSONBytes),
 						}
 						response, err := sendCliCommand(node, cliQueryUpdateCommand, true)
+						if err != nil {
+							fmt.Println(err)
+							return err
+						}
+						output := string(response)
+						if output != "" {
+							fmt.Println(strings.TrimSpace(output))
+						}
+						return nil
+					},
+				},
+				{
+					Name:  "reload",
+					Usage: "reload all queries",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "node, N",
+							Value: "127.0.0.1:2015",
+							Usage: "node url, format: host:port. 127.0.0.1:2015 if empty",
+						},
+						cli.StringFlag{
+							Name:  "app, a",
+							Usage: "app id",
+						},
+						cli.StringFlag{
+							Name:        "secret, z",
+							Usage:       "secret password for server client communication.",
+							Destination: &service.Secret,
+						},
+					},
+					Action: func(c *cli.Context) error {
+						service.LoadSecrets(c)
+						node := c.String("node")
+						appId := c.String("app")
+						cliQueryReloadAllCommand := &Command{
+							Type: "CLI_QUERY_RELOAD_ALL",
+							Data: appId,
+						}
+						response, err := sendCliCommand(node, cliQueryReloadAllCommand, true)
 						if err != nil {
 							fmt.Println(err)
 							return err

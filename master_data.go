@@ -348,6 +348,24 @@ func (this *MasterData) UpdateQuery(query *Query) error {
 	}
 	return errors.New("Query not found: " + query.Name)
 }
+func (this *MasterData) ReloadAllQueries(appId string) error {
+	for iApp, vApp := range this.Apps {
+		if vApp.Id == appId {
+			for iQuery, vQuery := range this.Apps[iApp].Queries {
+				if vQuery.AppId == appId {
+					this.Apps[iApp].Queries[iQuery] = vQuery
+					err := vQuery.Reload()
+					if err != nil {
+						return err
+					}
+				}
+			}
+			this.Version++
+			return masterData.Propagate()
+		}
+	}
+	return nil
+}
 
 func (this *MasterData) AddJob(job *Job) error {
 	for iApp, vApp := range this.Apps {

@@ -10,19 +10,23 @@ import (
 )
 
 type CliService struct {
-	Id          string
-	Master      string
-	EnableHttp  bool // true
-	PortHttp    int
-	HostHttp    string // "127.0.0.1"
-	EnableHttps bool
-	PortHttps   int
-	HostHttps   string
-	CertFile    string
-	KeyFile     string
-	ConfFile    string
-	DataFile    string
-	Secret      string
+	Id           string
+	Master       string
+	EnableHttp   bool // true
+	HttpPort     int
+	HttpHost     string // "127.0.0.1"
+	EnableHttps  bool
+	HttpsPort    int
+	HttpsHost    string
+	CertFile     string
+	KeyFile      string
+	ConfFile     string
+	DataFile     string
+	Secret       string
+	MailHost     string
+	MailPort     int
+	MailUsername string
+	MailPassword string
 }
 
 func (this *CliService) Flags() []cli.Flag {
@@ -38,10 +42,10 @@ func (this *CliService) Flags() []cli.Flag {
 			Destination: &this.Master,
 		},
 		cli.IntFlag{
-			Name:        "port_http, P",
+			Name:        "http_port, P",
 			Value:       1103,
 			Usage:       "http port",
-			Destination: &this.PortHttp,
+			Destination: &this.HttpPort,
 		},
 		cli.BoolFlag{
 			Name:        "enable_https, e",
@@ -49,16 +53,16 @@ func (this *CliService) Flags() []cli.Flag {
 			Destination: &this.EnableHttps,
 		},
 		cli.IntFlag{
-			Name:        "port_https, p",
+			Name:        "https_port, p",
 			Value:       2015,
 			Usage:       "https port",
-			Destination: &this.PortHttps,
+			Destination: &this.HttpsPort,
 		},
 		cli.StringFlag{
-			Name:        "host_https, l",
+			Name:        "https_host, l",
 			Value:       "127.0.0.1",
 			Usage:       "https host name. [::] for all",
-			Destination: &this.HostHttps,
+			Destination: &this.HttpsHost,
 		},
 		cli.StringFlag{
 			Name:        "cert_file, c",
@@ -124,10 +128,10 @@ func (this *CliService) LoadConfig(file string, c *cli.Context) {
 			this.Master = v
 		}
 	}
-	if !c.IsSet("port_http") {
-		v, err := jqConf.QueryToInt64("port_http")
+	if !c.IsSet("http_port") {
+		v, err := jqConf.QueryToInt64("http_port")
 		if err == nil {
-			this.PortHttp = int(v)
+			this.HttpPort = int(v)
 		}
 	}
 	if !c.IsSet("enable_http") {
@@ -142,16 +146,16 @@ func (this *CliService) LoadConfig(file string, c *cli.Context) {
 			this.EnableHttps = v
 		}
 	}
-	if !c.IsSet("port_https") {
-		v, err := jqConf.QueryToInt64("port_https")
+	if !c.IsSet("https_port") {
+		v, err := jqConf.QueryToInt64("https_port")
 		if err == nil {
-			this.PortHttps = int(v)
+			this.HttpsPort = int(v)
 		}
 	}
-	if !c.IsSet("host_https") {
-		v, err := jqConf.QueryToString("host_https")
+	if !c.IsSet("https_host") {
+		v, err := jqConf.QueryToString("https_host")
 		if err == nil {
-			this.HostHttps = v
+			this.HttpsHost = v
 		}
 	}
 	if !c.IsSet("cert_file") {
@@ -182,6 +186,30 @@ func (this *CliService) LoadConfig(file string, c *cli.Context) {
 		v, err := jqConf.QueryToString("secret")
 		if err == nil {
 			this.Secret = v
+		}
+	}
+	if !c.IsSet("mail_port") {
+		v, err := jqConf.QueryToInt64("mail_port")
+		if err == nil {
+			this.MailPort = int(v)
+		}
+	}
+	if !c.IsSet("mail_host") {
+		v, err := jqConf.QueryToString("mail_host")
+		if err == nil {
+			this.MailHost = v
+		}
+	}
+	if !c.IsSet("mail_username") {
+		v, err := jqConf.QueryToString("mail_username")
+		if err == nil {
+			this.MailUsername = v
+		}
+	}
+	if !c.IsSet("mail_password") {
+		v, err := jqConf.QueryToString("mail_password")
+		if err == nil {
+			this.MailPassword = v
 		}
 	}
 }

@@ -67,8 +67,8 @@ func serve(service *CliService) {
 
 	if service.EnableHttp {
 		go func() {
-			fmt.Println(fmt.Sprint("Listening on http://", service.HostHttp, ":", service.PortHttp, "/"))
-			err := http.ListenAndServe(fmt.Sprint(service.HostHttp, ":", service.PortHttp), nil)
+			fmt.Println(fmt.Sprint("Listening on http://", service.HttpHost, ":", service.HttpPort, "/"))
+			err := http.ListenAndServe(fmt.Sprint(service.HttpHost, ":", service.HttpPort), nil)
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -76,8 +76,8 @@ func serve(service *CliService) {
 	}
 	if service.EnableHttps {
 		go func() {
-			fmt.Println(fmt.Sprint("Listening on https://", service.HostHttps, ":", service.PortHttps, "/"))
-			err := http.ListenAndServeTLS(fmt.Sprint(service.HostHttps, ":", service.PortHttps), service.CertFile, service.KeyFile, nil)
+			fmt.Println(fmt.Sprint("Listening on https://", service.HttpsHost, ":", service.HttpsPort, "/"))
+			err := http.ListenAndServeTLS(fmt.Sprint(service.HttpsHost, ":", service.HttpsPort), service.CertFile, service.KeyFile, nil)
 			if err != nil {
 				fmt.Println(err)
 			}

@@ -87,6 +87,11 @@ func processCliCommand(message []byte) (string, error) {
 		if err != nil {
 			return "", err
 		}
+	case "CLI_QUERY_RELOAD_ALL":
+		err := masterData.ReloadAllQueries(cliCommand.Data)
+		if err != nil {
+			return "", err
+		}
 	case "CLI_QUERY_REMOVE":
 		query := &Query{}
 		err := json.Unmarshal([]byte(cliCommand.Data), query)
