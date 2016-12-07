@@ -37,6 +37,8 @@ func (this *LoginInterceptor) AfterExec(resourceId string, script string, params
 			return err
 		}
 		(*data)[0][0] = s
+	} else {
+		(*data)[0][0] = ""
 	}
 	return nil
 }
