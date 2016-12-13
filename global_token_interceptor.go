@@ -87,7 +87,12 @@ func checkUserToken(context map[string]interface{}) error {
 			userInfo := map[string]interface{}{}
 			json.Unmarshal([]byte(payload), &userInfo)
 
-			context["user_email"] = userInfo["email"]
+			if email, ok := userInfo["email"]; ok {
+				context["user_email"] = email
+			} else {
+				context["user_email"] = userInfo["EMAIL"]
+			}
+
 			return nil
 		} else {
 			return errors.New("Failed to parse user token: " + v)
