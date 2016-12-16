@@ -21,7 +21,7 @@ type GlobalTokenInterceptor struct {
 }
 
 func checkAccessPermission(targets, tableId, mode, op string) bool {
-	tableMatch, opMatch := false, true
+	tableMatch := false
 	if targets == "*" {
 		tableMatch = true
 	} else {
@@ -39,12 +39,12 @@ func checkAccessPermission(targets, tableId, mode, op string) bool {
 	if !tableMatch {
 		return false
 	}
-	for _, c := range op {
-		if !strings.ContainsRune(mode, c) {
-			return false
-		}
+	if mode == "*" {
+		return true
+	} else if !strings.Contains(mode, op) {
+		return false
 	}
-	return tableMatch && opMatch
+	return true
 }
 
 func checkProjectToken(context map[string]interface{}, tableId string, op string) error {
@@ -102,7 +102,7 @@ func checkUserToken(context map[string]interface{}) error {
 }
 
 func (this *GlobalTokenInterceptor) BeforeCreate(resourceId string, db *sql.DB, context map[string]interface{}, data []map[string]interface{}) error {
-	err := checkProjectToken(context, resourceId, "w")
+	err := checkProjectToken(context, resourceId, "create")
 	if err != nil {
 		return err
 	}
@@ -126,13 +126,13 @@ func (this *GlobalTokenInterceptor) AfterCreate(resourceId string, db *sql.DB, c
 }
 func (this *GlobalTokenInterceptor) BeforeLoad(resourceId string, db *sql.DB, fields string, context map[string]interface{}, id string) error {
 	checkUserToken(context)
-	return checkProjectToken(context, resourceId, "r")
+	return checkProjectToken(context, resourceId, "load")
 }
 func (this *GlobalTokenInterceptor) AfterLoad(resourceId string, db *sql.DB, fields string, context map[string]interface{}, data map[string]string) error {
 	return nil
 }
 func (this *GlobalTokenInterceptor) BeforeUpdate(resourceId string, db *sql.DB, context map[string]interface{}, data []map[string]interface{}) error {
-	err := checkProjectToken(context, resourceId, "w")
+	err := checkProjectToken(context, resourceId, "update")
 	if err != nil {
 		return err
 	}
@@ -153,35 +153,35 @@ func (this *GlobalTokenInterceptor) AfterUpdate(resourceId string, db *sql.DB, c
 }
 func (this *GlobalTokenInterceptor) BeforeDuplicate(resourceId string, db *sql.DB, context map[string]interface{}, id []string) error {
 	checkUserToken(context)
-	return checkProjectToken(context, resourceId, "w")
+	return checkProjectToken(context, resourceId, "duplicate")
 }
 func (this *GlobalTokenInterceptor) AfterDuplicate(resourceId string, db *sql.DB, context map[string]interface{}, id []string, newId []string) error {
 	return nil
 }
 func (this *GlobalTokenInterceptor) BeforeDelete(resourceId string, db *sql.DB, context map[string]interface{}, id []string) error {
 	checkUserToken(context)
-	return checkProjectToken(context, resourceId, "w")
+	return checkProjectToken(context, resourceId, "delete")
 }
 func (this *GlobalTokenInterceptor) AfterDelete(resourceId string, db *sql.DB, context map[string]interface{}, id []string) error {
 	return nil
 }
 func (this *GlobalTokenInterceptor) BeforeListMap(resourceId string, db *sql.DB, fields string, context map[string]interface{}, filter *string, sort *string, group *string, start int64, limit int64) error {
 	checkUserToken(context)
-	return checkProjectToken(context, resourceId, "r")
+	return checkProjectToken(context, resourceId, "list")
 }
 func (this *GlobalTokenInterceptor) AfterListMap(resourceId string, db *sql.DB, fields string, context map[string]interface{}, data *[]map[string]string, total int64) error {
 	return nil
 }
 func (this *GlobalTokenInterceptor) BeforeListArray(resourceId string, db *sql.DB, fields string, context map[string]interface{}, filter *string, sort *string, group *string, start int64, limit int64) error {
 	checkUserToken(context)
-	return checkProjectToken(context, resourceId, "r")
+	return checkProjectToken(context, resourceId, "list")
 }
 func (this *GlobalTokenInterceptor) AfterListArray(resourceId string, db *sql.DB, fields string, context map[string]interface{}, headers *[]string, data *[][]string, total int64) error {
 	return nil
 }
 func (this *GlobalTokenInterceptor) BeforeExec(resourceId string, script string, params *[][]interface{}, queryParams map[string]string, array bool, db *sql.DB, context map[string]interface{}) error {
 	checkUserToken(context)
-	return checkProjectToken(context, resourceId, "rx")
+	return checkProjectToken(context, resourceId, "exec")
 }
 func (this *GlobalTokenInterceptor) AfterExec(resourceId string, script string, params *[][]interface{}, queryParams map[string]string, array bool, db *sql.DB, context map[string]interface{}, data *[][]interface{}) error {
 	return nil

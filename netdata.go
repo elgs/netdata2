@@ -1471,7 +1471,7 @@ func main() {
 							return err
 						}
 						cliTokenAddCommand := &Command{
-							Type: "CLI_TOKEN_ADD",
+							Type: "CLI_TOKEN_UPDATE",
 							Data: string(tokenJSONBytes),
 						}
 						response, err := sendCliCommand(node, cliTokenAddCommand, true)
