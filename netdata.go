@@ -1470,11 +1470,11 @@ func main() {
 							fmt.Println(err)
 							return err
 						}
-						cliTokenAddCommand := &Command{
+						cliTokenUpdateCommand := &Command{
 							Type: "CLI_TOKEN_UPDATE",
 							Data: string(tokenJSONBytes),
 						}
-						response, err := sendCliCommand(node, cliTokenAddCommand, true)
+						response, err := sendCliCommand(node, cliTokenUpdateCommand, true)
 						if err != nil {
 							fmt.Println(err)
 							return err
