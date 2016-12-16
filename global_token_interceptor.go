@@ -201,7 +201,23 @@ func (this *GlobalTokenInterceptor) AfterListArray(resourceId string, db *sql.DB
 	return nil
 }
 func (this *GlobalTokenInterceptor) BeforeExec(resourceId string, script string, params *[][]interface{}, queryParams map[string]string, array bool, db *sql.DB, context map[string]interface{}) error {
-	checkUserToken(context)
+	if appId, ok := context["app_id"].(string); ok {
+		for iApp, _ := range masterData.Apps {
+			if masterData.Apps[iApp].Id == appId {
+				for _, vQuery := range masterData.Apps[iApp].Queries {
+					if vQuery.Name == resourceId && vQuery.AppId == appId {
+						if vQuery.Mode != "public" {
+							err := checkUserToken(context)
+							if err != nil {
+								return err
+							}
+						}
+						break
+					}
+				}
+			}
+		}
+	}
 	return checkProjectToken(context, resourceId, "exec")
 }
 func (this *GlobalTokenInterceptor) AfterExec(resourceId string, script string, params *[][]interface{}, queryParams map[string]string, array bool, db *sql.DB, context map[string]interface{}, data *[][]interface{}) error {
