@@ -52,6 +52,7 @@ type Query struct {
 	Name       string
 	ScriptPath string
 	ScriptText string
+	Mode       string
 	AppId      string
 	Note       string
 	Status     string
@@ -331,6 +332,9 @@ func (this *MasterData) UpdateQuery(query *Query) error {
 					}
 					if query.ScriptPath != "__not_set__" {
 						vQuery.ScriptPath = query.ScriptPath
+					}
+					if query.Mode != "__not_set__" {
+						vQuery.Mode = query.Mode
 					}
 					if query.Note != "__not_set__" {
 						vQuery.Note = query.Note

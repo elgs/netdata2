@@ -733,6 +733,10 @@ func main() {
 							Usage: "script path of the query",
 						},
 						cli.StringFlag{
+							Name:  "mode, o",
+							Usage: "query mode, public or private",
+						},
+						cli.StringFlag{
 							Name:  "note, t",
 							Usage: "a note for the query",
 						},
@@ -751,6 +755,7 @@ func main() {
 							Name:       c.String("name"),
 							AppId:      c.String("app"),
 							ScriptPath: c.String("script"),
+							Mode:       c.String("mode"),
 							Note:       c.String("note"),
 						}
 						queryJSONBytes, err := json.Marshal(query)
@@ -800,6 +805,10 @@ func main() {
 							Usage: "script path of the query",
 						},
 						cli.StringFlag{
+							Name:  "mode, o",
+							Usage: "query mode, public or private",
+						},
+						cli.StringFlag{
 							Name:  "note, t",
 							Usage: "a note for the query",
 						},
@@ -817,6 +826,7 @@ func main() {
 							Name:       c.String("name"),
 							AppId:      c.String("app"),
 							ScriptPath: c.String("script"),
+							Mode:       c.String("mode"),
 							Note:       c.String("note"),
 						}
 						if !c.IsSet("name") {
@@ -824,6 +834,9 @@ func main() {
 						}
 						if !c.IsSet("script") {
 							query.ScriptPath = "__not_set__"
+						}
+						if !c.IsSet("mode") {
+							query.Mode = "__not_set__"
 						}
 						if !c.IsSet("note") {
 							query.Note = "__not_set__"
